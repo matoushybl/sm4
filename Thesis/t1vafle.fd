@@ -1,0 +1,5 @@
+\ProvidesFile{t1vafle.fd}[VUT Vafle font definition]
+\DeclareFontFamily{T1}{Vafle}{}
+\DeclareFontShape{T1}{Vafle}{m}{n}{ <->  T1--Vafle--Regular }{}
+
+\endinput

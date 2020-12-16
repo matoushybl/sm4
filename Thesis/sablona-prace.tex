@@ -1,0 +1,240 @@
+% Soubory musí být v kódování, které je nastaveno v příkazu \usepackage[...]{inputenc}
+
+\documentclass[%        Základní nastavení
+%  draft,    				  % Testovací překlad
+  12pt,       				% Velikost základního písma je 12 bodů
+  a4paper,    				% Formát papíru je A4
+  %oneside,      			% Jednostranný tisk
+	twoside,      			% Dvoustranný tisk (kapitoly a další důležité části tedy začínají na lichých stranách)
+	unicode,						% Záložky a metainformace ve výsledném  PDF budou v kódování unicode
+]{report}				    	% Dokument třídy 'zpráva', vhodná pro sazbu závěrečných prací s kapitolami
+
+\usepackage[utf8]		  %	Kódování zdrojových souborů je UTF-8
+	{inputenc}					% Balíček pro nastavení kódování zdrojových souborů
+
+\usepackage[				% Nastavení geometrie stránky
+	bindingoffset=10mm,		% Hřbet pro vazbu
+	hmargin={25mm,25mm},	% Vnitřní a vnější okraj
+	vmargin={25mm,34mm},	% Horní a dolní okraj
+	footskip=17mm,			  % Velikost zápatí
+	nohead,					      % Bez záhlaví
+	marginparsep=2mm,		  % Vzdálenost marginálií
+	marginparwidth=18mm,	% Šířka marginálií
+]{geometry}
+
+\usepackage{sectsty}
+	%přetypuje nadpisy všech úrovní na bezpatkové, kromě \chapter, která je přenastavena zvlášť v thesis.sty
+	\allsectionsfont{\sffamily}
+
+\usepackage{graphicx} % Balíček 'graphicx' pro vkládání obrázků
+											% Nutné pro vložení logotypů školy a fakulty
+
+\usepackage[          % Balíček 'acronym' pro sazby zkratek a symbolů
+	nohyperlinks				% Nebudou tvořeny hypertextové odkazy do seznamu zkratek
+]{acronym}						
+											% Nutné pro použití prostředí 'acronym' balíčku 'thesis'
+
+\usepackage[
+	breaklinks=true,		% Hypertextové odkazy mohou obsahovat zalomení řádku
+	hypertexnames=false % Názvy hypertext. odkazů budou tvořeny nezávisle na názvech TeXu
+]{hyperref}						% Balíček 'hyperref' pro sazbu hypertextových odkazů
+											% Nutné pro použití příkazu 'pdfsettings' balíčku 'thesis'
+
+\usepackage{pdfpages} % Balíček umožňující vkládat stránky z PDF souborů
+                      % Nutné při vkládání titulních listů a zadání přímo
+                      % ve formátu PDF z informačního systému
+
+\usepackage{enumitem} % Balíček pro nastavení mezerování v odrážkách
+  \setlist{topsep=0pt,partopsep=0pt,noitemsep} % konkrétní nastavení
+
+\usepackage{cmap} 		% Balíček cmap zajišťuje, že PDF vytvořené `pdflatexem' je
+											% plně "prohledávatelné" a "kopírovatelné"
+
+%\usepackage{upgreek}	% Balíček pro sazbu stojatých řeckých písmem
+											%% např. stojaté pí: \uppi
+											%% např. stojaté mí: \upmu (použitelné třeba v mikrometrech)
+											%% pozor, grafická nekompatibilita s fonty typu Computer Modern!
+                      
+%\usepackage{amsmath} %balíček pro sabu náročnější matematiky                 
+
+\usepackage{dirtree}	% sazba adresářové struktury
+                      % vhodné pro prezentaci obsahu elektronické přílohy (např. CD)
+
+\usepackage[formats]{listings}	% Balíček pro sazbu zdrojových textů
+\lstset{              % nastavení
+%	Definice jazyka použitého ve výpisech
+%    language=[LaTeX]{TeX},	% LaTeX
+%	language={Matlab},		% Matlab
+	language={C},           % jazyk C
+    basicstyle=\ttfamily,	% definice základního stylu písma
+    tabsize=2,			% definice velikosti tabulátoru
+    inputencoding=utf8,         % pro soubory uložené v kódování UTF-8
+		columns=fixed,  %fixed nebo flexible,
+		fontadjust=true %licovani sloupcu
+    extendedchars=true,
+    literate=%  definice symbolů s diakritikou
+    {á}{{\'a}}1
+    {č}{{\v{c}}}1
+    {ď}{{\v{d}}}1
+    {é}{{\'e}}1
+    {ě}{{\v{e}}}1
+    {í}{{\'i}}1
+    {ň}{{\v{n}}}1
+    {ó}{{\'o}}1
+    {ř}{{\v{r}}}1
+    {š}{{\v{s}}}1
+    {ť}{{\v{t}}}1
+    {ú}{{\'u}}1
+    {ů}{{\r{u}}}1
+    {ý}{{\'y}}1
+    {ž}{{\v{z}}}1
+    {Á}{{\'A}}1
+    {Č}{{\v{C}}}1
+    {Ď}{{\v{D}}}1
+    {É}{{\'E}}1
+    {Ě}{{\v{E}}}1
+    {Í}{{\'I}}1
+    {Ň}{{\v{N}}}1
+    {Ó}{{\'O}}1
+    {Ř}{{\v{R}}}1
+    {Š}{{\v{S}}}1
+    {Ť}{{\v{T}}}1
+    {Ú}{{\'U}}1
+    {Ů}{{\r{U}}}1
+    {Ý}{{\'Y}}1
+    {Ž}{{\v{Z}}}1
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%      Definice informací o dokumentu             %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{nastaveni}  % do tohoto souboru doplňte údaje o sobě, druhu práce, názvu...
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%     Nastavení polí ve Vlastnostech dokumentu PDF      %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Při načteném balíčku 'hyperref' lze použít příkaz '\pdfsettings':
+\pdfsettings
+%  Nastavení polí je možné provést také ručně příkazem:
+%\hypersetup{
+%  pdftitle={Název studentské práce},    	% Pole 'Document Title'
+%  pdfauthor={Autor studenstké práce},   	% Pole 'Author'
+%  pdfsubject={Typ práce}, 						  	% Pole 'Subject'
+%  pdfkeywords={Klíčová slova}           	% Pole 'Keywords'
+%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pdfmapfile{=vafle.map}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%       Začátek dokumentu               %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\pagestyle{empty} %vypnutí číslování stránek
+
+%% Vložení desek 
+\includepdf[pages=1]%  buďto generovaných informačním systémem
+  {pdf/student-desky}% název souboru nesmí obsahovat mezery!
+%% NEBO vytvoření desek z balíčku
+%\makecover
+%%
+\oddpage % při dvojstranném tisku přidá prázdnou stránku
+% kazdopádně ale:
+\setcounter{page}{1} %resetovaní čítače stránek -- desky do číslování nezahrnujeme
+
+%% Vložení titulního listu
+\includepdf[pages=1]%    buďto generovaného informačním systémem
+  {pdf/student-titulka}% název souboru nesmí obsahovat mezery!
+%% NEBO vytvoření titulní stránky z balíčku
+%\maketitle
+%%
+\oddpage  % při dvojstranném tisku se přidá prázdná stránka
+   
+%% Vložení zadání
+\includepdf[pages=1]%   buďto generovaného informačním systémem
+  {pdf/student-zadani}% název souboru nesmí obsahovat mezery!
+%% NEBO lze vytvořit prázdný list příkazem ze šablony
+%\patternpage{}%
+%	{\sffamily\Huge\centering ZDE VLOŽIT LIST ZADÁNÍ}%
+%	{\sffamily\centering Z~důvodu správného číslování stránek}
+%%
+\oddpage% při dvojstranném tisku se přidá prázdná stránka
+
+%% Vysázení stránky s abstraktem
+\makeabstract
+
+%% Vysázení stránky s rozšířeným abstraktem
+% (týká se pouze bc. a dp. prací psaných v angličtině, viz Směrnice rektora 72/2017)
+%\cleardoublepage
+%\noindent
+%{\large\sffamily\bfseries\MakeUppercase{Rozšířený abstrakt}}
+%\\
+%Výtah ze směrnice rektora 72/2017:\\
+%\emph{Bakalářská a diplomová práce předložená v angličtině musí obsahovat rozšířený abstrakt v češtině
+%nebo slovenštině (čl. 15). To se netýká studentů, kteří studují studijní program akreditovaný v
+%angličtině.}
+%(čl. 3, par. 7)\\
+%\emph{Nebude-li vnitřní normou stanoveno jinak, doporučuje se rozšířený abstrakt o rozsahu přibližně 3
+%normostrany, který bude obsahovat úvod, popis řešení a shrnutí a zhodnocení výsledků.}
+%(čl. 15, par. 5)
+
+
+%%% Vysázení prohlaseni o samostatnosti
+\makedeclaration
+
+%%% Vysázení poděkování
+\makeacknowledgement
+
+%%% Vysázení obsahu
+\tableofcontents
+
+%%% Vysázení seznamu obrázků
+% (vynechejte, pokud máte dva nebo méně obrázků)
+\listoffigures
+
+%%% Vysázení seznamu tabulek
+% (vynechejte, pokud máte dvě nebo méně tabulek)
+\listoftables
+
+%%% Vysázení seznamu výpisů kódu
+% (vynechejte, pokud máte dva nebo méně výpisů)
+\lstlistoflistings
+
+\cleardoublepage\pagestyle{plain}   % zapnutí číslování stránek
+
+%Pro vkládání kapitol i příloh používejte raději \include než \input
+%%% Vložení souboru 'text/uvod.tex' s úvodem
+\include{text/uvod}
+
+%%% Vložení souboru 'text/reseni' s popisem řešení práce
+% (rozdělte na více souborů či kapitol, pokud je vhodné)
+\include{text/reseni}
+
+%%% Vložení souboru 'text/vysledky' s popisem vysledků práce
+% (rozdělte na více souborů či kapitol, pokud je vhodné)
+\include{text/vysledky}
+
+%%% Vložení souboru 'text/zaver' se závěrem
+\include{text/zaver}
+
+%%% Vložení souboru 'text/literatura' se seznamem zdrojů
+\include{text/literatura}
+
+%%% Vložení souboru 'text/zkratky' se seznam použitých symbolů, veličin a zkratek
+\include{text/zkratky}
+
+%%% Začátek příloh
+\appendix
+
+%%% Vysázení seznamu příloh
+% (vynechejte, pokud máte dvě nebo méně příloh)
+\listofappendices
+
+%%% Vložení souboru 'text/prilohy' s přílohami
+% Obvykle je přítomen alespoň popis co najdeme na přiloženém médiu
+\include{text/prilohy}
+
+\end{document}

@@ -1,0 +1,189 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Název: VUT FEKT téma pro BEAMER                           							 %%
+%%                                                                         %%
+%% Autor: Jakub Oškera,		                                                 %%
+%%        Pavel Rajmic                                                     %%
+%%                                                                         %%
+%% Verze: 1.0                                                              %%
+%%                                                                         %%
+%% FEKT, VUT v Brne                                                        %%
+%% latex@feec.vutbr.cz                                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Obsah: 	    01. BALÍČKY																							   %%	
+%%							02. BARVY																						  		 %%	
+%%						  03. SPODNÍ LIŠTA SNÍMKŮ																		 %%	
+%%						  04. POSTUPOVÁ LIŠTA																				 %%	
+%%							05. BLOKY																									 %%	
+%%							06. ITEMIZE                                                %%
+%%							07. PLOVOUCÍ PROSTŘEDÍ                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\mode<presentation>
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	01. BALÍČKY
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\RequirePackage{tikz}					% Balíček pro vektorovou grafiku (možnost umístění loga v hlavičce slajdu)
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	02. BARVY
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+% Použití balíčku s definovanýma barvama VUT
+\usecolortheme{VUT}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	03. SPODNÍ LIŠTA SNÍMKŮ
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\makeatother
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=3ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.6\paperwidth,ht=3ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.1\paperwidth,ht=3ex,dp=1ex,center]{date in head/foot}%
+    \usebeamerfont{date in head/foot}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  \end{beamercolorbox}}%
+}
+
+%Vypnuti navigacnich symbolu v pravem dolnim rohu
+\newcommand{\disablenavigationsymbols}{\setbeamertemplate{navigation symbols}}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	04. POSTUPOVÁ LIŠTA
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+\makeatletter
+\def\progressbar@progressbar{} 	% postupová lišta
+\newcount\progressbar@tmpcounta	% pomocný čítač_a
+\newcount\progressbar@tmpcountb	% pomocný čítač_b
+\newdimen\progressbar@pbht 			% výška postupové lišty
+\newdimen\progressbar@pbwd 			%	šířka postupové lišty
+\newdimen\progressbar@tmpdim 		% pomocný rozměr
+\global\let\insertframelogo\@empty
+
+\progressbar@pbwd=\paperwidth
+\progressbar@pbht=1.5pt
+
+\def\progressbar@progressbar{%
+\progressbar@tmpcounta=\insertframenumber
+\progressbar@tmpcountb=\inserttotalframenumber
+\progressbar@tmpdim=0.01\progressbar@pbwd
+\multiply\progressbar@tmpdim by \progressbar@tmpcounta
+\divide\progressbar@tmpdim by \progressbar@tmpcountb
+\progressbar@tmpdim=100\progressbar@tmpdim
+
+  \begin{tikzpicture}[very thin]
+    \shade[top color=vutred,bottom color=vutred,middle color=vutred] %
+        (0pt, 0pt) rectangle ++ (\progressbar@tmpdim, \progressbar@pbht);
+
+\end{tikzpicture}%
+ }
+
+\newlength\progress@raise
+\setlength\progress@raise{-2em}
+\addtolength\progress@raise{-2pt}
+
+\defbeamertemplate*{frametitle}{VUT}[1][left]
+{
+  \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+  \@tempdima=\textwidth%
+  \advance\@tempdima by\beamer@leftmargin%
+  \advance\@tempdima by\beamer@rightmargin%
+  \begin{beamercolorbox}[sep=1ex,#1,wd=\the\@tempdima]{frametitle}
+    \usebeamerfont{frametitle}%
+    \if@tempswa\else\csname beamer@fte#1\endcsname\fi%
+    \strut\insertframetitle\strut%
+    \ifx\insertframelogo\@empty\else\hspace{0pt plus 1 filll}\insertframelogo\fi\par%
+    {%
+      \ifx\insertframesubtitle\@empty%
+      \else%
+      {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\strut\par}%
+      \fi
+    }%
+    \vskip-0.7ex%
+    \if@tempswa\else\vskip-.3cm\fi% set inside beamercolorbox... evil here...
+  \end{beamercolorbox}%
+	\nointerlineskip%
+	  \begin{beamercolorbox}[wd=\paperwidth,ht=1pt,dp=1pt]{}%
+      \progressbar@progressbar%
+	  \end{beamercolorbox}%
+}%
+\makeatother
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	05. BLOKY
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+%Normální běžná informace (modrý blok)
+\setbeamertemplate{block begin}
+{
+\setbeamercolor{item}{parent=block body}
+\par\vskip\medskipamount%
+\begin{beamercolorbox}[sep=.7ex,dp=0.1ex,leftskip=0.5ex,rightskip=0.5ex]{block title}
+\usebeamerfont*{block title}\insertblocktitle%
+\end{beamercolorbox}%
+{\parskip0pt\par}%
+{\nointerlineskip\vskip-0.5pt}%
+\usebeamerfont{block body}%
+\begin{beamercolorbox}[sep=.5ex,dp=0.6ex,leftskip=0.5ex,rightskip=0.5ex,vmode]{block body}%
+}
+\setbeamertemplate{block end}
+{\end{beamercolorbox}\vskip\smallskipamount}
+
+%Zdůrazněná důležitá informace (červený blok)
+\setbeamertemplate{block alerted begin}
+{
+\setbeamercolor{item}{parent=block body alerted}
+\par\vskip\medskipamount%
+\begin{beamercolorbox}[sep=.7ex,dp=0.1ex,leftskip=0.5ex,rightskip=0.5ex]{block title alerted}
+\usebeamerfont*{block title alerted}\insertblocktitle%
+\end{beamercolorbox}%
+{\parskip0pt\par}%
+{\nointerlineskip\vskip-0.5pt}%
+\usebeamerfont{block body alerted}%
+\begin{beamercolorbox}[sep=.5ex,dp=0.6ex,leftskip=0.5ex,rightskip=0.5ex,vmode]{block body alerted}%
+}
+\setbeamertemplate{block alerted end}
+{\end{beamercolorbox}\vskip\smallskipamount}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	06. ITEMIZE
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+%Vytvoření symbolů pro itemize
+\newcommand{\vutctverecvelky}{\textcolor{vutred}{\raisebox{.4ex}{\rule{0.8ex}{0.8ex}}}}
+\newcommand{\vutctverecstredni}{\textcolor{vutblue}{\raisebox{.4ex}{\rule{0.6ex}{0.6ex}}}}
+\newcommand{\vutctverecmaly}{\textcolor{black}{\raisebox{.4ex}{\rule{0.4ex}{0.4ex}}}}
+
+%Přiřazení symbolů k jednotlivým stupňům itemize
+\setbeamertemplate{itemize item}{\vutctverecvelky}
+\setbeamertemplate{itemize subitem}{\vutctverecstredni}
+\setbeamertemplate{itemize subsubitem}{\vutctverecmaly}
+
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%	07. PLOVOUCÍ PROSTŘEDÍ
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+%Číslování objektů figure a table
+\setbeamertemplate{caption}[numbered]
+
+\mode
+<all>
