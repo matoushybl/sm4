@@ -20,9 +20,11 @@ crc_all = "0.2.0"
 embedded-hal = "0.2.4"
 usb-device = "0.2.3"
 usbd-serial = "0.1.1"
-bxcan = "0.3.0"
+bxcan = "0.4.0"
 nb = "1.0.0"
 embedded-can = "0.3.0"
+sm4-shared = { path = "../sm4-shared" }
+embedded-time = "0.10.1"
 
 [features]
 # set logging levels here

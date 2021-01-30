@@ -1,6 +1,11 @@
 #![no_std]
 
+pub mod board;
+pub mod current_reference;
+pub mod direction;
+pub mod step_counter;
 pub mod step_timer;
+pub mod usb;
 
 use core::sync::atomic::{AtomicUsize, Ordering};
 
