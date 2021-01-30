@@ -1,5 +1,7 @@
 #![no_std]
 
+use core::marker::PhantomData;
+
 /// Marker struct denoting the first motor.
 /// The struct is meant to be used in trait implementations to provide extra level of type safety.
 pub struct Motor1;
@@ -30,6 +32,7 @@ pub trait StepGenerator<M> {
 }
 
 /// This enum represents the direction where the motor is turning.
+#[derive(Copy, Clone)]
 pub enum Direction {
     Clockwise,
     CounterClockwise,
@@ -67,9 +70,69 @@ pub trait DirectionController<M> {
 pub trait StepCounter<M> {
     fn reset_steps(&mut self);
 
-    fn get_steps(&mut self) -> f32;
+    fn get_steps(&mut self) -> i64;
 
     fn set_direction(&mut self, direction: Direction);
+}
+
+pub struct Driver<M, G, D, C, R> {
+    _motor: PhantomData<M>,
+    generator: G,
+    dir: D,
+    counter: C,
+    reference: R,
+}
+
+pub trait StepperDriver {
+    fn set_step_frequency(&mut self, freq: f32);
+    fn get_steps(&mut self) -> i64;
+    fn reset_step_counter(&mut self);
+}
+
+impl<M, G, D, C, R> Driver<M, G, D, C, R>
+where
+    G: StepGenerator<M>,
+    D: DirectionController<M>,
+    C: StepCounter<M>,
+    R: CurrentReference<M>,
+{
+    pub fn new(generator: G, dir: D, counter: C, mut reference: R) -> Self {
+        reference.set_current(400);
+        Self {
+            _motor: Default::default(),
+            generator,
+            dir,
+            counter,
+            reference,
+        }
+    }
+}
+
+impl<M, G, D, C, R> StepperDriver for Driver<M, G, D, C, R>
+where
+    G: StepGenerator<M>,
+    D: DirectionController<M>,
+    C: StepCounter<M>,
+    R: CurrentReference<M>,
+{
+    fn set_step_frequency(&mut self, freq: f32) {
+        let direction = if freq < 0.0 {
+            Direction::CounterClockwise
+        } else {
+            Direction::Clockwise
+        };
+        self.generator.set_step_frequency(freq);
+        self.dir.set_direction(direction);
+        self.counter.set_direction(direction);
+    }
+
+    fn get_steps(&mut self) -> i64 {
+        self.counter.get_steps()
+    }
+
+    fn reset_step_counter(&mut self) {
+        self.counter.reset_steps();
+    }
 }
 
 // #[cfg(test)]

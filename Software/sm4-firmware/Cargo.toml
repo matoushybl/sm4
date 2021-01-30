@@ -25,6 +25,7 @@ nb = "1.0.0"
 embedded-can = "0.3.0"
 sm4-shared = { path = "../sm4-shared" }
 embedded-time = "0.10.1"
+blinq = "0.1.2"
 
 [features]
 # set logging levels here

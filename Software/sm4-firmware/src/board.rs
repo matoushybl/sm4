@@ -7,6 +7,10 @@ use stm32f4xx_hal::gpio::{
     AF8,
 };
 
+pub mod prelude {
+    pub use super::*;
+}
+
 pub type Dir1 = PA1<Output<PushPull>>;
 pub type Dir2 = PB12<Output<PushPull>>;
 

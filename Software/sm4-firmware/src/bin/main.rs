@@ -10,25 +10,48 @@ use stm32f4xx_hal as hal;
 use hal::prelude::*;
 use hal::stm32;
 
-use sm4_firmware::board::{Dir1, StatusLED, GPIO};
-use sm4_firmware::current_reference::initialize_current_ref;
+use sm4_firmware::board::prelude::*;
+use sm4_firmware::current_reference::{initialize_current_ref, Reference};
 use sm4_firmware::direction::DirectionPin;
+use sm4_firmware::leds::LEDs;
 use sm4_firmware::step_counter::Counter;
 use sm4_firmware::step_timer::ControlTimer;
 use sm4_firmware::usb::USBProtocol;
-use sm4_shared::{CurrentReference, Direction, DirectionController, StepCounter, StepGenerator};
+use sm4_shared::{Direction, Driver, Motor1, Motor2, StepperDriver};
+use stm32f4xx_hal::adc::config::{AdcConfig, Align, Clock, Resolution, SampleTime};
+use stm32f4xx_hal::adc::Temperature;
+use stm32f4xx_hal::dma::traits::{Channel, Stream};
+use stm32f4xx_hal::dma::{Channel0, Stream0, StreamsTuple};
+use stm32f4xx_hal::hal::adc::Channel;
+use stm32f4xx_hal::signature::{VtempCal110, VtempCal30};
 
 const SECOND: u32 = 168_000_000;
 
-const BLINK_PERIOD: u32 = SECOND / 4;
+const BLINK_PERIOD: u32 = SECOND / 10;
+
+type Motor1Driver = Driver<
+    Motor1,
+    ControlTimer<stm32::TIM8>,
+    DirectionPin<Dir1>,
+    Counter<stm32::TIM5>,
+    Reference<CurrentRef1Channel>,
+>;
+
+type Motor2Driver = Driver<
+    Motor2,
+    ControlTimer<stm32::TIM1>,
+    DirectionPin<Dir2>,
+    Counter<stm32::TIM2>,
+    Reference<CurrentRef2Channel>,
+>;
 
 #[rtic::app(device = stm32f4xx_hal::stm32, peripherals = true, monotonic = rtic::cyccnt::CYCCNT)]
 const APP: () = {
     struct Resources {
-        led: StatusLED,
+        leds: LEDs,
         usb: USBProtocol,
-        counter1: Counter<stm32::TIM2>,
-        dir1: DirectionPin<Dir1>,
+        driver1: Motor1Driver,
+        driver2: Motor2Driver,
     }
 
     #[init(schedule = [blink])]
@@ -36,13 +59,12 @@ const APP: () = {
         let mut core: rtic::Peripherals = cx.core;
         let device: stm32::Peripherals = cx.device;
 
-        // enable CYCCNT
         core.DCB.enable_trace();
         DWT::unlock();
         core.DWT.enable_cycle_counter();
 
-        let rcc = device.RCC;
-        let rcc = rcc
+        let clocks = device
+            .RCC
             .constrain()
             .cfgr
             .use_hse(25.mhz())
@@ -50,8 +72,8 @@ const APP: () = {
             .hclk(168.mhz())
             .pclk1(42.mhz())
             .pclk2(84.mhz())
-            .require_pll48clk();
-        let clocks = rcc.freeze();
+            .require_pll48clk()
+            .freeze();
 
         let gpio = GPIO::configure(
             device.GPIOA.split(),
@@ -68,32 +90,51 @@ const APP: () = {
             clocks,
         );
 
-        let (mut ref1, mut ref2) = initialize_current_ref(device.DAC, gpio.ref1, gpio.ref2);
+        let mut leds = LEDs::new(gpio.status_led, gpio.error_led);
+        leds.signalize_sync();
 
-        ref1.set_current(600);
-        ref2.set_current(600);
+        let dma2 = StreamsTuple::new(device.DMA2);
 
-        let mut dir1 = DirectionPin::dir1(gpio.dir1);
-        let mut dir2 = DirectionPin::dir2(gpio.dir2);
-        dir1.set_direction(Direction::CounterClockwise);
-        dir2.set_direction(Direction::Clockwise);
+        let mut stream0 = dma2.0;
 
-        let mut timer1 = ControlTimer::init_tim1(device.TIM1, clocks);
-        let mut timer2 = ControlTimer::init_tim8(device.TIM8, clocks);
-        timer1.set_step_frequency(200.0);
-        timer2.set_step_frequency(0.0);
+        // let res = adc.convert::<Temperature>(&Temperature, SampleTime::Cycles_480);
+        // defmt::error!(
+        //     "raw {:?}, {:?}, {:?}",
+        //     res,
+        //     VtempCal30::get().read(),
+        //     VtempCal110::get().read()
+        // );
+        // defmt::error!(
+        //     "temp: {:?}",
+        //     (110 - 30) * (res - VtempCal30::get().read())
+        //         / (VtempCal110::get().read() - VtempCal30::get().read())
+        //         + 30
+        // );
+        //
+        // let res = adc.convert(&gpio.battery_voltage, SampleTime::Cycles_480);
+        // defmt::error!("volt: {:?}", res);
 
-        let counter1 = Counter::tim2(device.TIM2);
-        let counter2 = Counter::tim5(device.TIM5);
+        let (ref1, ref2) = initialize_current_ref(device.DAC, gpio.ref1, gpio.ref2);
+        let dir1 = DirectionPin::dir1(gpio.dir1);
+        let dir2 = DirectionPin::dir2(gpio.dir2);
+        let timer1 = ControlTimer::init_tim8(device.TIM8, clocks);
+        let timer2 = ControlTimer::init_tim1(device.TIM1, clocks);
+        let counter1 = Counter::tim5(device.TIM5);
+        let counter2 = Counter::tim2(device.TIM2);
+
+        let driver1 = Driver::new(timer1, dir1, counter1, ref1);
+        let mut driver2 = Driver::new(timer2, dir2, counter2, ref2);
+
+        driver2.set_step_frequency(20.0);
 
         let now = cx.start;
         cx.schedule.blink(now + BLINK_PERIOD.cycles()).unwrap();
 
         init::LateResources {
-            led: gpio.status_led,
-            counter1,
+            leds,
             usb,
-            dir1,
+            driver1,
+            driver2,
         }
     }
 
@@ -109,17 +150,9 @@ const APP: () = {
         cx.resources.usb.process_interrupt();
     }
 
-    #[task(resources = [led, counter1, dir1], schedule = [blink])]
+    #[task(resources = [leds], schedule = [blink])]
     fn blink(cx: blink::Context) {
-        let led: &mut StatusLED = cx.resources.led;
-        let counter1: &mut Counter<stm32::TIM2> = cx.resources.counter1;
-        if led.is_low().unwrap() {
-            led.set_high().unwrap();
-        } else {
-            led.set_low().unwrap();
-        }
-
-        defmt::error!("pulses {:f32}", counter1.get_steps());
+        cx.resources.leds.tick();
 
         cx.schedule
             .blink(cx.scheduled + BLINK_PERIOD.cycles())

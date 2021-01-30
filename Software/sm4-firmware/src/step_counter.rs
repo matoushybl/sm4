@@ -1,7 +1,12 @@
-use crate::board::MICROSTEPS;
 use sm4_shared::{Direction, Motor1, Motor2, StepCounter};
 use stm32f4xx_hal::stm32;
 use stm32f4xx_hal::stm32::{TIM2, TIM5};
+
+pub struct Counter<T> {
+    timer: T,
+    direction: Direction,
+    accumulator: i64,
+}
 
 macro_rules! counter {
     ($m:ident, $tim:ident, $new:ident, $ts:literal, $en:ident, $rst:ident) => {
@@ -35,7 +40,7 @@ macro_rules! counter {
                 Self {
                     timer,
                     direction: Direction::Clockwise,
-                    accumulator: 0.0,
+                    accumulator: 0,
                 }
             }
 
@@ -50,33 +55,25 @@ macro_rules! counter {
 
         impl StepCounter<$m> for Counter<$tim> {
             fn reset_steps(&mut self) {
-                self.accumulator = 0.0;
+                self.accumulator = 0;
                 self.reset_raw_count();
             }
 
-            fn get_steps(&mut self) -> f32 {
-                self.accumulator += (self.direction.multiplier() as f32)
-                    * (self.get_raw_count() as f32)
-                    / MICROSTEPS;
+            fn get_steps(&mut self) -> i64 {
+                self.accumulator +=
+                    (self.direction.multiplier() as i64) * (self.get_raw_count() as i64);
                 self.reset_raw_count();
                 self.accumulator
             }
 
             fn set_direction(&mut self, direction: Direction) {
-                self.accumulator += (self.direction.multiplier() as f32)
-                    * (self.get_raw_count() as f32)
-                    / MICROSTEPS;
+                self.accumulator +=
+                    (self.direction.multiplier() as i64) * (self.get_raw_count() as i64);
                 self.reset_raw_count();
                 self.direction = direction;
             }
         }
     };
-}
-
-pub struct Counter<T> {
-    timer: T,
-    direction: Direction,
-    accumulator: f32,
 }
 
 counter!(Motor2, TIM2, tim2, 0, tim2en, tim2rst);

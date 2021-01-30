@@ -83,10 +83,18 @@ macro_rules! generator {
 
         impl StepGenerator<$m> for ControlTimer<$tim> {
             fn set_step_frequency(&mut self, freq: f32) {
-                self.set_frequency(Hertz((freq * MICROSTEPS) as u32))
+                self.set_frequency(Hertz((fabs(freq) * MICROSTEPS) as u32))
             }
         }
     };
+}
+
+fn fabs(val: f32) -> f32 {
+    if val < 0.0 {
+        -val
+    } else {
+        val
+    }
 }
 
 generator!(Motor2, TIM1, init_tim1, tim1en, tim1rst);
