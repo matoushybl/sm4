@@ -14,20 +14,17 @@ use sm4_firmware::board::prelude::*;
 use sm4_firmware::current_reference::{initialize_current_ref, Reference};
 use sm4_firmware::direction::DirectionPin;
 use sm4_firmware::leds::LEDs;
+use sm4_firmware::monitoring::Monitoring;
 use sm4_firmware::step_counter::Counter;
 use sm4_firmware::step_timer::ControlTimer;
 use sm4_firmware::usb::USBProtocol;
 use sm4_shared::{Direction, Driver, Motor1, Motor2, StepperDriver};
-use stm32f4xx_hal::adc::config::{AdcConfig, Align, Clock, Resolution, SampleTime};
-use stm32f4xx_hal::adc::Temperature;
-use stm32f4xx_hal::dma::traits::{Channel, Stream};
-use stm32f4xx_hal::dma::{Channel0, Stream0, StreamsTuple};
-use stm32f4xx_hal::hal::adc::Channel;
-use stm32f4xx_hal::signature::{VtempCal110, VtempCal30};
+use stm32f4xx_hal::dma::StreamsTuple;
 
 const SECOND: u32 = 168_000_000;
 
 const BLINK_PERIOD: u32 = SECOND / 10;
+const MONITORING_PERIOD: u32 = SECOND / 10;
 
 type Motor1Driver = Driver<
     Motor1,
@@ -52,9 +49,10 @@ const APP: () = {
         usb: USBProtocol,
         driver1: Motor1Driver,
         driver2: Motor2Driver,
+        monitoring: Monitoring,
     }
 
-    #[init(schedule = [blink])]
+    #[init(schedule = [blink, monitoring])]
     fn init(cx: init::Context) -> init::LateResources {
         let mut core: rtic::Peripherals = cx.core;
         let device: stm32::Peripherals = cx.device;
@@ -94,8 +92,9 @@ const APP: () = {
         leds.signalize_sync();
 
         let dma2 = StreamsTuple::new(device.DMA2);
+        let stream0 = dma2.0;
 
-        let mut stream0 = dma2.0;
+        let monitoring = Monitoring::new(device.ADC1, gpio.battery_voltage, stream0);
 
         // let res = adc.convert::<Temperature>(&Temperature, SampleTime::Cycles_480);
         // defmt::error!(
@@ -129,12 +128,16 @@ const APP: () = {
 
         let now = cx.start;
         cx.schedule.blink(now + BLINK_PERIOD.cycles()).unwrap();
+        cx.schedule
+            .monitoring(now + MONITORING_PERIOD.cycles())
+            .unwrap();
 
         init::LateResources {
             leds,
             usb,
             driver1,
             driver2,
+            monitoring,
         }
     }
 
@@ -157,6 +160,25 @@ const APP: () = {
         cx.schedule
             .blink(cx.scheduled + BLINK_PERIOD.cycles())
             .unwrap();
+    }
+
+    #[task(resources = [monitoring], schedule = [monitoring])]
+    fn monitoring(cx: monitoring::Context) {
+        cx.resources.monitoring.poll();
+
+        cx.schedule
+            .monitoring(cx.scheduled + MONITORING_PERIOD.cycles())
+            .unwrap();
+    }
+
+    #[task(binds = DMA2_STREAM0, resources = [monitoring])]
+    fn dma(cx: dma::Context) {
+        cx.resources.monitoring.transfer_complete();
+        defmt::error!(
+            "temp: {:?}, vol: {:?}",
+            cx.resources.monitoring.get_temperature(),
+            cx.resources.monitoring.get_battery_voltage()
+        );
     }
 
     extern "C" {
