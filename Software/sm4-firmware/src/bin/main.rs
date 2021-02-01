@@ -92,26 +92,8 @@ const APP: () = {
         leds.signalize_sync();
 
         let dma2 = StreamsTuple::new(device.DMA2);
-        let stream0 = dma2.0;
 
-        let monitoring = Monitoring::new(device.ADC1, gpio.battery_voltage, stream0);
-
-        // let res = adc.convert::<Temperature>(&Temperature, SampleTime::Cycles_480);
-        // defmt::error!(
-        //     "raw {:?}, {:?}, {:?}",
-        //     res,
-        //     VtempCal30::get().read(),
-        //     VtempCal110::get().read()
-        // );
-        // defmt::error!(
-        //     "temp: {:?}",
-        //     (110 - 30) * (res - VtempCal30::get().read())
-        //         / (VtempCal110::get().read() - VtempCal30::get().read())
-        //         + 30
-        // );
-        //
-        // let res = adc.convert(&gpio.battery_voltage, SampleTime::Cycles_480);
-        // defmt::error!("volt: {:?}", res);
+        let monitoring = Monitoring::new(device.ADC1, gpio.battery_voltage, dma2.0);
 
         let (ref1, ref2) = initialize_current_ref(device.DAC, gpio.ref1, gpio.ref2);
         let dir1 = DirectionPin::dir1(gpio.dir1);
@@ -174,11 +156,6 @@ const APP: () = {
     #[task(binds = DMA2_STREAM0, resources = [monitoring])]
     fn dma(cx: dma::Context) {
         cx.resources.monitoring.transfer_complete();
-        defmt::error!(
-            "temp: {:?}, vol: {:?}",
-            cx.resources.monitoring.get_temperature(),
-            cx.resources.monitoring.get_battery_voltage()
-        );
     }
 
     extern "C" {
