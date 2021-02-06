@@ -1,0 +1,46 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ matrix.toolchain }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: thumbv6m-none-eabi
+          override: true
+          components: llvm-tools-preview
+
+      - name: Run cargo doc
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all --no-deps
+
+      - name: move to output directory
+        run: mkdir public && mv target/thumbv6m-none-eabi/doc public
+
+      - name: create index output directory
+        run: cp .github/index.html public
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: public # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch
