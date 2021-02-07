@@ -14,13 +14,16 @@ jobs:
         working-directory: Software/sm4-firmware
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
           components: rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+
+      - name: format
+        run: |
+          cd Software/sm4-firmware
+          cargo fmt --all -- --check
