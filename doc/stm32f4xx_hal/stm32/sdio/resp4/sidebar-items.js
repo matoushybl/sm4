@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["CARDSTATUS4_R","Reader of field `CARDSTATUS4`"],["R","Reader of register RESP4"]]});

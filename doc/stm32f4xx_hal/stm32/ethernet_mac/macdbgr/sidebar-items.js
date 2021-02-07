@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["CR_R","Reader of field `CR`"],["CSR_R","Reader of field `CSR`"],["MCFHP_R","Reader of field `MCFHP`"],["MCF_R","Reader of field `MCF`"],["MCP_R","Reader of field `MCP`"],["R","Reader of register MACDBGR"],["ROR_R","Reader of field `ROR`"]]});

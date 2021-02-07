@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["HRDAP_R","Reader of field `HRDAP`"],["R","Reader of register DMACHRDR"]]});

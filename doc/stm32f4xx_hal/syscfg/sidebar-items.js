@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["SysCfg",""]],"trait":[["SysCfgExt","Extension trait that constrains the `SYSCFG` peripheral"]]});

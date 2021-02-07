@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["HTL_W","Write proxy for field `HTL`"]],"type":[["HTL_R","Reader of field `HTL`"],["R","Reader of register MACHTLR"],["W","Writer for register MACHTLR"]]});

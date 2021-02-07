@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["clear","Clears the bit on the provided register without modifying other bits."],["set","Sets the bit on the provided register without modifying other bits."],["write","Sets or clears the bit on the provided register without modifying other bits."]]});

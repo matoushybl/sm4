@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Id","A CAN Identifier (standard or extended)."]],"mod":[["blocking","Blocking CAN API"]],"struct":[["ExtendedId","Extended 29-bit CAN Identifier (`0..=1FFF_FFFF`)."],["StandardId","Standard 11-bit CAN Identifier (`0..=0x7FF`)."]],"trait":[["Can","A CAN interface that is able to transmit and receive frames."],["Frame","A CAN2.0 Frame"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FSMCLPEN_A","Flexible static memory controller module clock enable during Sleep mode"]],"struct":[["FSMCLPEN_W","Write proxy for field `FSMCLPEN`"]],"type":[["FSMCLPEN_R","Reader of field `FSMCLPEN`"],["R","Reader of register AHB3LPENR"],["W","Writer for register AHB3LPENR"]]});

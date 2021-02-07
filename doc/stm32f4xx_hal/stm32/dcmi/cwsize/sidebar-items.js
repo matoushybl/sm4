@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["CAPCNT_W","Write proxy for field `CAPCNT`"],["VLINE_W","Write proxy for field `VLINE`"]],"type":[["CAPCNT_R","Reader of field `CAPCNT`"],["R","Reader of register CWSIZE"],["VLINE_R","Reader of field `VLINE`"],["W","Writer for register CWSIZE"]]});

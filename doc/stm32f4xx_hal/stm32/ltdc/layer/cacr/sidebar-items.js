@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["CONSTA_W","Write proxy for field `CONSTA`"]],"type":[["CONSTA_R","Reader of field `CONSTA`"],["R","Reader of register CACR"],["W","Writer for register CACR"]]});

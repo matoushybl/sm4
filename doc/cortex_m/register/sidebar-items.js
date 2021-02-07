@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["basepri","Base Priority Mask Register"],["basepri_max","Base Priority Mask Register (conditional write)"],["control","Control register"],["faultmask","Fault Mask Register"],["msp","Main Stack Pointer"],["primask","Priority mask register"],["psp","Process Stack Pointer"]]});

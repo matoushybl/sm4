@@ -1,5 +1,0 @@
-(function() {var implementors = {};
-implementors["bxcan"] = [{"text":"impl AsMut&lt;[u8]&gt; for Data","synthetic":false,"types":[]}];
-implementors["generic_array"] = [{"text":"impl&lt;T, N&gt; AsMut&lt;[T]&gt; for GenericArray&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
-implementors["heapless"] = [{"text":"impl&lt;T, N&gt; AsMut&lt;Vec&lt;T, N&gt;&gt; for Vec&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;T, N&gt; AsMut&lt;[T]&gt; for Vec&lt;T, N&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;N: ArrayLength&lt;T&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

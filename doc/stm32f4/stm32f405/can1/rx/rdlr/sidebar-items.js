@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["DATA0_R","Reader of field `DATA0`"],["DATA1_R","Reader of field `DATA1`"],["DATA2_R","Reader of field `DATA2`"],["DATA3_R","Reader of field `DATA3`"],["R","Reader of register RDLR"]]});

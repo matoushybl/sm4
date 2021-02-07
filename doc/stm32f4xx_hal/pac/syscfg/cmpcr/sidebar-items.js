@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["CMP_PD_R","Reader of field `CMP_PD`"],["R","Reader of register CMPCR"],["READY_R","Reader of field `READY`"]]});

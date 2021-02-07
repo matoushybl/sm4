@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["UG_AW","Update generation"]],"struct":[["UG_W","Write proxy for field `UG`"]],"type":[["W","Writer for register EGR"]]});

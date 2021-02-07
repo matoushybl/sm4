@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["PVU_R","Reader of field `PVU`"],["R","Reader of register SR"],["RVU_R","Reader of field `RVU`"]]});

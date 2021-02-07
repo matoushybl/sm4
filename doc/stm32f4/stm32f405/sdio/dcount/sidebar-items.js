@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["DATACOUNT_R","Reader of field `DATACOUNT`"],["R","Reader of register DCOUNT"]]});

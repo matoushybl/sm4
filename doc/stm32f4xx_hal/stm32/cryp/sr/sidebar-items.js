@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["BUSY_R","Reader of field `BUSY`"],["IFEM_R","Reader of field `IFEM`"],["IFNF_R","Reader of field `IFNF`"],["OFFU_R","Reader of field `OFFU`"],["OFNE_R","Reader of field `OFNE`"],["R","Reader of register SR"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["DACC1DOR_R","Reader of field `DACC1DOR`"],["R","Reader of register DOR1"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["fr1","Filter bank 0 register 1"],["fr2","Filter bank 0 register 2"]],"type":[["FR1","Filter bank 0 register 1"],["FR2","Filter bank 0 register 2"]]});

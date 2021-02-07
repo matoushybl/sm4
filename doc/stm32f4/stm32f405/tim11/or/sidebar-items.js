@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["RMP_W","Write proxy for field `RMP`"]],"type":[["R","Reader of register OR"],["RMP_R","Reader of field `RMP`"],["W","Writer for register OR"]]});

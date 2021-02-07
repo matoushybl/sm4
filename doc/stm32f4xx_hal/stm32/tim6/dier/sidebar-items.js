@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["UDE_A","Update DMA request enable"],["UIE_A","Update interrupt enable"]],"struct":[["UDE_W","Write proxy for field `UDE`"],["UIE_W","Write proxy for field `UIE`"]],"type":[["R","Reader of register DIER"],["UDE_R","Reader of field `UDE`"],["UIE_R","Reader of field `UIE`"],["W","Writer for register DIER"]]});

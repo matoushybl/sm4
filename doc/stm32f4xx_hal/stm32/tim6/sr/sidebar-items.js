@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["UIF_A","Update interrupt flag"]],"struct":[["UIF_W","Write proxy for field `UIF`"]],"type":[["R","Reader of register SR"],["UIF_R","Reader of field `UIF`"],["W","Writer for register SR"]]});

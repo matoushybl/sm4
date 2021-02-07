@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["R","Reader of register MMCTGFSCCR"],["TGFSCC_R","Reader of field `TGFSCC`"]]});

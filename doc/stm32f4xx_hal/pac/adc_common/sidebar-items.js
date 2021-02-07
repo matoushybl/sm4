@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["ccr","ADC common control register"],["cdr","ADC common regular data register for dual and triple modes"],["csr","ADC Common status register"]],"struct":[["RegisterBlock","Register block"]],"type":[["CCR","ADC common control register"],["CDR","ADC common regular data register for dual and triple modes"],["CSR","ADC Common status register"]]});

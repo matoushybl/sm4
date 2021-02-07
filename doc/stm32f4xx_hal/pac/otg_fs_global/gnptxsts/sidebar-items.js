@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["NPTQXSAV_R","Reader of field `NPTQXSAV`"],["NPTXFSAV_R","Reader of field `NPTXFSAV`"],["NPTXQTOP_R","Reader of field `NPTXQTOP`"],["R","Reader of register GNPTXSTS"]]});

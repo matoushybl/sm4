@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["ECC_R","Reader of field `ECC`"],["R","Reader of register ECCR2"]]});

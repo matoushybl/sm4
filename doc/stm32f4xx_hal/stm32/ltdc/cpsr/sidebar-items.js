@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["CXPOS_R","Reader of field `CXPOS`"],["CYPOS_R","Reader of field `CYPOS`"],["R","Reader of register CPSR"]]});

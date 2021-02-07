@@ -1,4 +1,0 @@
-(function() {var implementors = {};
-implementors["bxcan"] = [{"text":"impl Format for ListEntry16","synthetic":false,"types":[]},{"text":"impl Format for ListEntry32","synthetic":false,"types":[]},{"text":"impl Format for Mask16","synthetic":false,"types":[]},{"text":"impl Format for Mask32","synthetic":false,"types":[]},{"text":"impl Format for BankConfig","synthetic":false,"types":[]},{"text":"impl Format for Frame","synthetic":false,"types":[]},{"text":"impl Format for Data","synthetic":false,"types":[]},{"text":"impl Format for Interrupt","synthetic":false,"types":[]}];
-implementors["defmt"] = [];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

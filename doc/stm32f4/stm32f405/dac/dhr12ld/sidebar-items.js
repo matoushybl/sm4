@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["DACC1DHR_W","Write proxy for field `DACC1DHR`"],["DACC2DHR_W","Write proxy for field `DACC2DHR`"]],"type":[["DACC1DHR_R","Reader of field `DACC1DHR`"],["DACC2DHR_R","Reader of field `DACC2DHR`"],["R","Reader of register DHR12LD"],["W","Writer for register DHR12LD"]]});

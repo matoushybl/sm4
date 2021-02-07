@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["consts","Type aliases for many constants."],["patterns","Handy patterns to blink"]],"struct":[["Blinq","A blinking queue"],["Pattern","A blinking pattern encoded as a u32"]]});

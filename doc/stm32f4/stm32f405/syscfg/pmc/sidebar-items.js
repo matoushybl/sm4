@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MII_RMII_SEL_W","Write proxy for field `MII_RMII_SEL`"]],"type":[["MII_RMII_SEL_R","Reader of field `MII_RMII_SEL`"],["R","Reader of register PMC"],["W","Writer for register PMC"]]});

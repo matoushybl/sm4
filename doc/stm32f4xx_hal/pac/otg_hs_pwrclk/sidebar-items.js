@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["pcgcctl","Power and clock gating control register"]],"struct":[["RegisterBlock","Register block"]],"type":[["PCGCCTL","Power and clock gating control register"]]});

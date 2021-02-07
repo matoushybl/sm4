@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["R","Reader of register TXCRCR"],["TXCRC_R","Reader of field `TxCRC`"]]});

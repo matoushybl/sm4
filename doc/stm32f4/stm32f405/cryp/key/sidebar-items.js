@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["klr","key registers"],["krr","key registers"]],"type":[["KLR","key registers"],["KRR","key registers"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["FIFOCOUNT_R","Reader of field `FIFOCOUNT`"],["R","Reader of register FIFOCNT"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["CFUIF_W","Write proxy for field `CFUIF`"],["CLIF_W","Write proxy for field `CLIF`"],["CRRIF_W","Write proxy for field `CRRIF`"],["CTERRIF_W","Write proxy for field `CTERRIF`"]],"type":[["W","Writer for register ICR"]]});

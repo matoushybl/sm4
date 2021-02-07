@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error",""]],"struct":[["I2c","I2C abstraction"]],"trait":[["PinScl",""],["PinSda",""],["Pins",""]]});

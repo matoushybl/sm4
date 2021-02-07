@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Crc32","A handle to a HAL CRC32 peripheral"]]});

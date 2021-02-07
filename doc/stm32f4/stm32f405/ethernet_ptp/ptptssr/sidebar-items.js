@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["R","Reader of register PTPTSSR"],["TSSO_R","Reader of field `TSSO`"],["TSTTR_R","Reader of field `TSTTR`"]]});

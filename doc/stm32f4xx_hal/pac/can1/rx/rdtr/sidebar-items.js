@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["DLC_R","Reader of field `DLC`"],["FMI_R","Reader of field `FMI`"],["R","Reader of register RDTR"],["TIME_R","Reader of field `TIME`"]]});
