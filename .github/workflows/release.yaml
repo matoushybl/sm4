@@ -8,11 +8,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-
-defaults:
-  run:
-    working-directory: Software/sm4-firmware
-
 jobs:
   compile:
     runs-on: ubuntu-latest
