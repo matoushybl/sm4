@@ -8,6 +8,11 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+
+defaults:
+  run:
+    working-directory: Software/sm4-firmware
+
 jobs:
   compile:
     runs-on: ubuntu-latest
@@ -21,7 +26,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          target: thumbv6m-none-eabi
+          target: thumbv7em-none-eabihf
           override: true
           components: llvm-tools-preview
 
@@ -32,7 +37,7 @@ jobs:
           args: --all --no-deps
 
       - name: move to output directory
-        run: mkdir public && mv target/thumbv6m-none-eabi/doc public
+        run: mkdir public && mv target/thumbv7em-none-eabihf/doc public
 
       - name: create index output directory
         run: cp .github/index.html public

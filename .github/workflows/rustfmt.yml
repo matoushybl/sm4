@@ -5,6 +5,10 @@ on:
 
 name: Code formatting check
 
+defaults:
+  run:
+    working-directory: Software/sm4-firmware
+
 jobs:
   fmt:
     name: Rustfmt

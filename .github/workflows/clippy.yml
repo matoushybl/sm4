@@ -3,6 +3,10 @@ on:
     branches: [ main ]
   pull_request:
 
+defaults:
+  run:
+    working-directory: Software/sm4-firmware
+
 name: Clippy check
 jobs:
   clippy_check:
@@ -13,7 +17,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: thumbv6m-none-eabi
+          target: thumbv7em-none-eabihf
           override: true
           components: clippy
       - uses: actions-rs/clippy-check@v1
