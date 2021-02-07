@@ -30,7 +30,7 @@ jobs:
       - name: Run cargo doc
         run: |
           cd Software/sm4-firmware
-          cargo doc
+          cargo doc --no-deps --document-private-items
           ls target
           ls target/thumbv7em-none-eabihf
 
