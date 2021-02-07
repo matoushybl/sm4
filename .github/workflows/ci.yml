@@ -14,6 +14,8 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - name: Install Rust ${{ matrix.toolchain }}
         uses: actions-rs/toolchain@v1
         with:
