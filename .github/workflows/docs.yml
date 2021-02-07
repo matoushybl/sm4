@@ -35,13 +35,17 @@ jobs:
           ls target/thumbv7em-none-eabihf
 
       - name: move to output directory
-        run: mkdir public && mv target/thumbv7em-none-eabihf/doc public
+        run: |
+          cd Software/sm4-firmware
+          mkdir public && mv target/thumbv7em-none-eabihf/doc public
 
       - name: create index output directory
-        run: cp .github/index.html public
+        run: cp .github/index.html Software/sm4-firmware/public
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
+        env:
+          working-directory: Software/sm4-firmware
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
