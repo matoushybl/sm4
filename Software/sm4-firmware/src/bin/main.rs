@@ -54,7 +54,7 @@ impl TrapRampGen {
         Self {
             current_speed: 0.0,
             target_acceleration,
-            generation_frequency: frequency
+            generation_frequency: frequency,
         }
     }
     pub fn generate(&mut self, target_speed: f32) -> f32 {
@@ -72,15 +72,18 @@ impl TrapRampGen {
 pub struct DriverWithGen<T> {
     driver: T,
     ramp_gen: TrapRampGen,
-    target_speed: f32
+    target_speed: f32,
 }
 
-impl<T> DriverWithGen<T> where T: StepperDriver {
+impl<T> DriverWithGen<T>
+where
+    T: StepperDriver,
+{
     pub fn new(driver: T, ramp_gen: TrapRampGen) -> Self {
         Self {
             driver,
             ramp_gen,
-            target_speed: 0.0
+            target_speed: 0.0,
         }
     }
 
@@ -166,9 +169,7 @@ const APP: () = {
         cx.schedule
             .monitoring(now + MONITORING_PERIOD.cycles())
             .unwrap();
-        cx.schedule
-            .ramping(now + RAMPING_PERIOD.cycles())
-            .unwrap();
+        cx.schedule.ramping(now + RAMPING_PERIOD.cycles()).unwrap();
 
         init::LateResources {
             leds,

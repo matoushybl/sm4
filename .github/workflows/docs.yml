@@ -31,6 +31,8 @@ jobs:
         run: |
           cd Software/sm4-firmware
           cargo doc
+          ls target
+          ls target/thumbv7em-none-eabihf
 
       - name: move to output directory
         run: mkdir public && mv target/thumbv7em-none-eabihf/doc public
