@@ -5,14 +5,13 @@ on:
 
 name: Code formatting check
 
-defaults:
-  run:
-    working-directory: Software/sm4-firmware
-
 jobs:
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Software/sm4-firmware
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
