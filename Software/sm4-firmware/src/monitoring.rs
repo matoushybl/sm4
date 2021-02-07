@@ -1,7 +1,7 @@
 use crate::board::BatteryVoltage;
 use stm32f4xx_hal::adc::config::{AdcConfig, Dma, SampleTime, Scan, Sequence};
 use stm32f4xx_hal::adc::{Adc, Temperature};
-use stm32f4xx_hal::dma::config::{DmaConfig};
+use stm32f4xx_hal::dma::config::DmaConfig;
 use stm32f4xx_hal::dma::{Channel0, PeripheralToMemory, Stream0, Transfer};
 use stm32f4xx_hal::pac;
 use stm32f4xx_hal::stm32::{ADC1, DMA2};
@@ -18,11 +18,7 @@ pub struct Monitoring {
 }
 
 impl Monitoring {
-    pub fn new(
-        raw_adc: pac::ADC1,
-        battery_voltage: BatteryVoltage,
-        dma: Stream0<DMA2>,
-    ) -> Self {
+    pub fn new(raw_adc: pac::ADC1, battery_voltage: BatteryVoltage, dma: Stream0<DMA2>) -> Self {
         let config = DmaConfig::default()
             .transfer_complete_interrupt(true)
             .memory_increment(true)
