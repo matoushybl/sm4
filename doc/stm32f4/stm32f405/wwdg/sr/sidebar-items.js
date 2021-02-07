@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["EWIF_A","Early wakeup interrupt flag"],["EWIF_AW","Early wakeup interrupt flag"]],"struct":[["EWIF_W","Write proxy for field `EWIF`"]],"type":[["EWIF_R","Reader of field `EWIF`"],["R","Reader of register SR"],["W","Writer for register SR"]]});

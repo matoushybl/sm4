@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CYCCNT","Implementation of the `Monotonic` trait based on CYCle CouNTer"],["Duration","A `Duration` type to represent a span of time."],["Instant","A measurement of the CYCCNT. Opaque and useful only with `Duration`"]],"trait":[["U32Ext","Adds the `cycles` method to the `u32` type"]]});

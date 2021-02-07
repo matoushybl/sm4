@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["FUIF_R","Reader of field `FUIF`"],["LIF_R","Reader of field `LIF`"],["R","Reader of register ISR"],["RRIF_R","Reader of field `RRIF`"],["TERRIF_R","Reader of field `TERRIF`"]]});

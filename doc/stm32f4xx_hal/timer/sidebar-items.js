@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""],["Event","Interrupt events"]],"struct":[["Instant","A measurement of a monotonically non-decreasing clock"],["MonoTimer","A monotonic non-decreasing timer"],["Timer","Hardware timers"]],"trait":[["PinC1",""],["PinC2",""],["PinC3",""],["PinC4",""]]});

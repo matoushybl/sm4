@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `embedded_dma` crate."><meta name="keywords" content="rust, rustlang, rust-lang, embedded_dma"><title>embedded_dma - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../embedded_dma/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate embedded_dma</p><div class="block version"><p>Version 0.1.2</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all embedded_dma's items</p></a><div class="block items"><ul><li><a href="#traits">Traits</a></li></ul></div><p class="location"></p><script>window.sidebarCurrent = {name: "embedded_dma", ty: "mod", relpath: "../"};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/embedded_dma/lib.rs.html#1-390" title="goto source code">[src]</a></span><span class="in-band">Crate <a class="mod" href="">embedded_dma</a></span></h1><div class="docblock"><p>Traits to aid the correct use of buffers in DMA abstractions.</p>
+<p>This library provides the <code>ReadBuffer</code> and <code>WriteBuffer</code> unsafe traits to be used as bounds to
+buffers types used in DMA operations.</p>
+<p>There are some subtleties to the extent of the guarantees provided by these traits, all of these
+subtleties are properly documented in the safety requirements in this crate. However, as a
+measure of redundancy, some are listed below:</p>
+<ul>
+<li>
+<p>The traits only guarantee a stable location while no <code>&amp;mut self</code> methods are called upon
+<code>Self</code> (with the exception of <a href="trait.WriteBuffer.html#tymethod.write_buffer"><code>write_buffer</code></a> in
+our case). This is to allow types like <code>Vec</code>, this restriction doesn't apply to <code>Self::Target</code>.</p>
+</li>
+<li>
+<p>The location is only guaranteed to be stable for the duration of <code>Self</code>, that means that
+<code>Self</code> doesn't need to be <code>'static</code>, i.e. <code>&amp;'a [u8]</code> is valid. This can be a bit subtle for
+most DMA abstractions, because they almost always require <code>'static</code>, given the intrinsics of
+<code>mem::forget</code> and the Rust language itself. Those APIs must also bound to <code>'static</code> and not only
+<code>WriteBuffer</code>/<code>ReadBuffer</code>. The reason we don't require <code>'static</code> in the traits themselves is
+because it would block implementations that can deal with stack allocated buffers, like APIs
+that use closures to prevent memory corruption.</p>
+</li>
+</ul>
+<p>If your API also needs a <code>'static</code> bound, prefer the use of <a href="trait.StaticReadBuffer.html">StaticReadBuffer</a> and
+<a href="trait.StaticWriteBuffer.html">StaticWriteBuffer</a>. They are a stricter version that requires a <code>'static</code> lifetime invariant,
+while also allowing end users to <strong>unsafely</strong> bypass it.</p>
+<p>If you are not sure which version of the traits you should be bounding to in your DMA
+implementations, prefer the &quot;Static&quot; versions, they are sound for a bigger number of techniques
+that deal with DMA.</p>
+<p>The above list is not exhaustive, for a complete set of requirements and guarantees, the
+documentation of each trait and method should be analyzed.</p>
+</div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.ReadBuffer.html" title="embedded_dma::ReadBuffer trait">ReadBuffer</a></td><td class="docblock-short"><p>Trait for buffers that can be given to DMA for reading.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.ReadTarget.html" title="embedded_dma::ReadTarget trait">ReadTarget</a></td><td class="docblock-short"><p>Trait for <code>Deref</code> targets used by the blanket <code>DmaReadBuffer</code> impl.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.StaticReadBuffer.html" title="embedded_dma::StaticReadBuffer trait">StaticReadBuffer</a></td><td class="docblock-short"><p>Trait for buffers that can be given to DMA for reading. This is a more strict version of
+<a href="trait.ReadBuffer.html">ReadBuffer</a>, if you are not sure about which one to use on your safe
+API, prefer this one. This trait also allows end users to <strong>unsafely</strong> bypass the <code>'static</code>
+invariant.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.StaticWriteBuffer.html" title="embedded_dma::StaticWriteBuffer trait">StaticWriteBuffer</a></td><td class="docblock-short"><p>Trait for buffers that can be given to DMA for writing. This is a more strict version of
+<a href="trait.WriteBuffer.html">WriteBuffer</a>, if you are not sure about which one to use on your safe
+API, prefer this one. This trait also allows end users to <strong>unsafely</strong> bypass the <code>'static</code>
+invariant.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Word.html" title="embedded_dma::Word trait">Word</a></td><td class="docblock-short"><p>Trait for DMA word types used by the blanket DMA buffer impls.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.WriteBuffer.html" title="embedded_dma::WriteBuffer trait">WriteBuffer</a></td><td class="docblock-short"><p>Trait for buffers that can be given to DMA for writing.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.WriteTarget.html" title="embedded_dma::WriteTarget trait">WriteTarget</a></td><td class="docblock-short"><p>Trait for <code>DerefMut</code> targets used by the blanket <code>DmaWriteBuffer</code> impl.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "embedded_dma";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

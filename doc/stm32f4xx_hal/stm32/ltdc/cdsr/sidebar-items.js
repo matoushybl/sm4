@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["HDES_R","Reader of field `HDES`"],["HSYNCS_R","Reader of field `HSYNCS`"],["R","Reader of register CDSR"],["VDES_R","Reader of field `VDES`"],["VSYNCS_R","Reader of field `VSYNCS`"]]});

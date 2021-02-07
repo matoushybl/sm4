@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TOTALH_W","Write proxy for field `TOTALH`"],["TOTALW_W","Write proxy for field `TOTALW`"]],"type":[["R","Reader of register TWCR"],["TOTALH_R","Reader of field `TOTALH`"],["TOTALW_R","Reader of field `TOTALW`"],["W","Writer for register TWCR"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["BYTE0_R","Reader of field `Byte0`"],["BYTE1_R","Reader of field `Byte1`"],["BYTE2_R","Reader of field `Byte2`"],["BYTE3_R","Reader of field `Byte3`"],["R","Reader of register DR"]]});

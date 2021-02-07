@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["WDGA_A","Activation bit"]],"struct":[["T_W","Write proxy for field `T`"],["WDGA_W","Write proxy for field `WDGA`"]],"type":[["R","Reader of register CR"],["T_R","Reader of field `T`"],["W","Writer for register CR"],["WDGA_R","Reader of field `WDGA`"]]});

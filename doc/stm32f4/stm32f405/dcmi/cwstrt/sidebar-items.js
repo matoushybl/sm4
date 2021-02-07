@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["HOFFCNT_W","Write proxy for field `HOFFCNT`"],["VST_W","Write proxy for field `VST`"]],"type":[["HOFFCNT_R","Reader of field `HOFFCNT`"],["R","Reader of register CWSTRT"],["VST_R","Reader of field `VST`"],["W","Writer for register CWSTRT"]]});

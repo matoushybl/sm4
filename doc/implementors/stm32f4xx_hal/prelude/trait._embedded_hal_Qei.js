@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["stm32f4xx_hal"] = [{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM1, PINS&gt;","synthetic":false,"types":[]},{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM5, PINS&gt;","synthetic":false,"types":[]},{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM2, PINS&gt;","synthetic":false,"types":[]},{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM3, PINS&gt;","synthetic":false,"types":[]},{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM4, PINS&gt;","synthetic":false,"types":[]},{"text":"impl&lt;PINS&gt; Qei for Qei&lt;TIM8, PINS&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["UsbDeviceBuilder","Used to build new [`UsbDevice`]s."],["UsbVidPid","A USB vendor ID and product ID pair."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FSLSPCS_W","Write proxy for field `FSLSPCS`"]],"type":[["FSLSPCS_R","Reader of field `FSLSPCS`"],["FSLSS_R","Reader of field `FSLSS`"],["R","Reader of register HCFG"],["W","Writer for register HCFG"]]});

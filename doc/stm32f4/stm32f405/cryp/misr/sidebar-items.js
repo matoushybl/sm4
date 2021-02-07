@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["INMIS_R","Reader of field `INMIS`"],["OUTMIS_R","Reader of field `OUTMIS`"],["R","Reader of register MISR"]]});

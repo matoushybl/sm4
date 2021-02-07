@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CRCPOLY_W","Write proxy for field `CRCPOLY`"]],"type":[["CRCPOLY_R","Reader of field `CRCPOLY`"],["R","Reader of register CRCPR"],["W","Writer for register CRCPR"]]});

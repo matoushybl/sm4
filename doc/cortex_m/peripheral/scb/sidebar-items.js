@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Exception","Processor core exceptions (internal interrupts)"],["FpuAccessMode","FPU access mode"],["SystemHandler","System handlers, exceptions with configurable priority"],["VectActive","Active exception number"]],"struct":[["RegisterBlock","Register block"]]});

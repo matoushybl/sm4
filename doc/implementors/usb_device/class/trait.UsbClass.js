@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["usb_device"] = [];
+implementors["usbd_serial"] = [{"text":"impl&lt;B:&nbsp;UsbBus, '_&gt; UsbClass&lt;B&gt; for CdcAcmClass&lt;'_, B&gt;","synthetic":false,"types":[]},{"text":"impl&lt;B, RS, WS, '_&gt; UsbClass&lt;B&gt; for SerialPort&lt;'_, B, RS, WS&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;B: UsbBus,<br>&nbsp;&nbsp;&nbsp;&nbsp;RS: BorrowMut&lt;[u8]&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;WS: BorrowMut&lt;[u8]&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

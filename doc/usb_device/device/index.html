@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `device` mod in crate `usb_device`."><meta name="keywords" content="rust, rustlang, rust-lang, device"><title>usb_device::device - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../usb_device/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module device</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li></ul></div><p class="location"><a href="../index.html">usb_device</a></p><script>window.sidebarCurrent = {name: "device", ty: "mod", relpath: "../"};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/usb_device/device.rs.html#1-495" title="goto source code">[src]</a></span><span class="in-band">Module <a href="../index.html">usb_device</a>::<wbr><a class="mod" href="">device</a></span></h1><div class="docblock"><p>USB composite device.</p>
+<p>The <a href="../../usb_device/device/struct.UsbDevice.html">UsbDevice</a> type in this module is the core of this crate. It combines
+multiple USB class implementations and the USB bus driver and dispatches bus state changes and
+control messages between them.</p>
+<p>To implement USB support for your own project, the required code is usually as follows:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="kw">use</span> <span class="ident">usb_device</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">usb_serial</span>; <span class="comment">// example class crate (not included)</span>
+
+<span class="comment">// Create the device-specific USB peripheral driver. The exact name and arguments are device</span>
+<span class="comment">// specific, so check the documentation for your device driver crate.</span>
+<span class="kw">let</span> <span class="ident">usb_bus</span> <span class="op">=</span> <span class="ident">device_specific_usb</span>::<span class="ident">UsbBus</span>::<span class="ident">new</span>(...);
+
+<span class="comment">// Create one or more USB class implementation. The name and arguments depend on the class,</span>
+<span class="comment">// however most classes require the UsbAllocator as the first argument in order to allocate</span>
+<span class="comment">// the required shared resources.</span>
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serial</span> <span class="op">=</span> <span class="ident">usb_serial</span>::<span class="ident">SerialPort</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">usb_bus</span>.<span class="ident">allocator</span>());
+
+<span class="comment">// Build the final [UsbDevice](device::UsbDevice) instance. The required arguments are a</span>
+<span class="comment">// reference to the peripheral driver created earlier, as well as a USB vendor ID/product ID</span>
+<span class="comment">// pair. Additional builder arguments can specify parameters such as device class code or</span>
+<span class="comment">// product name. If using an existing class, remember to check the class crate documentation</span>
+<span class="comment">// for correct values.</span>
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">usb_dev</span> <span class="op">=</span> <span class="ident">UsbDeviceBuilder</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">usb_bus</span>, <span class="ident">UsbVidPid</span>(<span class="number">0x5824</span>, <span class="number">0x27dd</span>))
+    .<span class="ident">product</span>(<span class="string">&quot;Serial port&quot;</span>)
+    .<span class="ident">device_class</span>(<span class="ident">usb_serial</span>::<span class="ident">DEVICE_CLASS</span>)
+    .<span class="ident">build</span>();
+
+<span class="comment">// At this point the USB peripheral is enabled and a connected host will attempt to enumerate</span>
+<span class="comment">// it.</span>
+<span class="kw">loop</span> {
+    <span class="comment">// Must be called more often than once every 10ms to handle events and stay USB compilant,</span>
+    <span class="comment">// or from a device-specific interrupt handler.</span>
+    <span class="kw">if</span> (<span class="ident">usb_dev</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">serial</span>])) {}
+        <span class="comment">// Call class-specific methods here</span>
+        <span class="ident">serial</span>.<span class="ident">read</span>(...);
+    }
+}</pre></div>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.UsbDevice.html" title="usb_device::device::UsbDevice struct">UsbDevice</a></td><td class="docblock-short"><p>A USB device consisting of one or more device classes.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.UsbDeviceBuilder.html" title="usb_device::device::UsbDeviceBuilder struct">UsbDeviceBuilder</a></td><td class="docblock-short"><p>Used to build new <a href="../../usb_device/device/struct.UsbDevice.html" title="UsbDevice"><code>UsbDevice</code></a>s.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.UsbVidPid.html" title="usb_device::device::UsbVidPid struct">UsbVidPid</a></td><td class="docblock-short"><p>A USB vendor ID and product ID pair.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.UsbDeviceState.html" title="usb_device::device::UsbDeviceState enum">UsbDeviceState</a></td><td class="docblock-short"><p>The global state of the USB device.</p>
+</td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.CONFIGURATION_NONE.html" title="usb_device::device::CONFIGURATION_NONE constant">CONFIGURATION_NONE</a></td><td class="docblock-short"><p>The bConfiguration value for the not configured state.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.CONFIGURATION_VALUE.html" title="usb_device::device::CONFIGURATION_VALUE constant">CONFIGURATION_VALUE</a></td><td class="docblock-short"><p>The bConfiguration value for the single configuration supported by this device.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.DEFAULT_ALTERNATE_SETTING.html" title="usb_device::device::DEFAULT_ALTERNATE_SETTING constant">DEFAULT_ALTERNATE_SETTING</a></td><td class="docblock-short"><p>The default value for bAlternateSetting for all interfaces.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "usb_device";</script><script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

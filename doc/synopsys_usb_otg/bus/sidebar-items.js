@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EndpointAllocator",""],["UsbBus","USB peripheral driver for STM32 microcontrollers."]]});

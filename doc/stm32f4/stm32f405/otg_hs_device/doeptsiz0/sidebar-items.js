@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PKTCNT_W","Write proxy for field `PKTCNT`"],["STUPCNT_W","Write proxy for field `STUPCNT`"],["XFRSIZ_W","Write proxy for field `XFRSIZ`"]],"type":[["PKTCNT_R","Reader of field `PKTCNT`"],["R","Reader of register DOEPTSIZ0"],["STUPCNT_R","Reader of field `STUPCNT`"],["W","Writer for register DOEPTSIZ0"],["XFRSIZ_R","Reader of field `XFRSIZ`"]]});

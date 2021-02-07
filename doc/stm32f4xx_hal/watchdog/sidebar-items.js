@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IndependentWatchdog","Wraps the Independent Watchdog (IWDG) peripheral"]]});

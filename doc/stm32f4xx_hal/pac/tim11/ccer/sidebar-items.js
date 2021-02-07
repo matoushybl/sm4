@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CC1E_W","Write proxy for field `CC1E`"],["CC1NP_W","Write proxy for field `CC1NP`"],["CC1P_W","Write proxy for field `CC1P`"]],"type":[["CC1E_R","Reader of field `CC1E`"],["CC1NP_R","Reader of field `CC1NP`"],["CC1P_R","Reader of field `CC1P`"],["R","Reader of register CCER"],["W","Writer for register CCER"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ENDUAL_A","Dual addressing mode enable"]],"struct":[["ADD2_W","Write proxy for field `ADD2`"],["ENDUAL_W","Write proxy for field `ENDUAL`"]],"type":[["ADD2_R","Reader of field `ADD2`"],["ENDUAL_R","Reader of field `ENDUAL`"],["R","Reader of register OAR2"],["W","Writer for register OAR2"]]});

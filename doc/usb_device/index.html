@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `usb_device` crate."><meta name="keywords" content="rust, rustlang, rust-lang, usb_device"><title>usb_device - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../usb_device/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate usb_device</p><div class="block version"><p>Version 0.2.7</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all usb_device's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#enums">Enums</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><script>window.sidebarCurrent = {name: "usb_device", ty: "mod", relpath: "../"};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/usb_device/lib.rs.html#1-257" title="goto source code">[src]</a></span><span class="in-band">Crate <a class="mod" href="">usb_device</a></span></h1><div class="docblock"><p>Experimental device-side USB stack for embedded devices.</p>
+<h2 id="implementing-a-usb-device" class="section-header"><a href="#implementing-a-usb-device">Implementing a USB device</a></h2>
+<p>A USB device consists of a <a href="../usb_device/device/struct.UsbDevice.html"><code>UsbDevice</code></a> instance, one or more
+<a href="../usb_device/class/trait.UsbClass.html"><code>UsbClass</code></a>es, and a platform-specific <a href="../usb_device/bus/trait.UsbBus.html"><code>UsbBus</code></a>
+implementation which together form a USB composite device.</p>
+<p>In the future USB device implementors will be able to use pre-existing peripheral driver crates
+and USB class implementation crates. The necessary types for the basic USB composite device
+implementation are available with:</p>
+<p><code>use usb_device::prelude::*</code>.</p>
+<p>See the <a href="../usb_device/device/index.html" title="device"><code>device</code></a> module for a more complete example.</p>
+<h2 id="usb-classes" class="section-header"><a href="#usb-classes">USB classes</a></h2>
+<p>For information on how to implement new USB classes, see the <a href="../usb_device/class/index.html" title="class"><code>class</code></a> module and the
+<a href="../usb_device/test_class/struct.TestClass.html"><code>TestClass</code></a> source code for an example of a custom USB device class
+implementation. The necessary types for creating new classes are available with:</p>
+<p><code>use usb_device::class_prelude::*</code>.</p>
+<h2 id="usb-peripheral-drivers" class="section-header"><a href="#usb-peripheral-drivers">USB peripheral drivers</a></h2>
+<p>New peripheral driver crates can be created by implementing the <a href="../usb_device/bus/trait.UsbBus.html"><code>UsbBus</code></a> trait.</p>
+<h1 id="note-about-terminology" class="section-header"><a href="#note-about-terminology">Note about terminology</a></h1>
+<p>This crate uses standard host-centric USB terminology for transfer directions. Therefore an OUT
+transfer refers to a host-to-device transfer, and an IN transfer refers to a device-to-host
+transfer. This is mainly a concern for implementing new USB peripheral drivers and USB classes,
+and people doing that should be familiar with the USB standard.</p>
+</div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="bus/index.html" title="usb_device::bus mod">bus</a></td><td class="docblock-short"><p>For implementing peripheral drivers.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="class/index.html" title="usb_device::class mod">class</a></td><td class="docblock-short"><p>For implementing standard as well as vendor-specific USB classes.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="class_prelude/index.html" title="usb_device::class_prelude mod">class_prelude</a></td><td class="docblock-short"><p>Prelude for class implementors.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="control/index.html" title="usb_device::control mod">control</a></td><td class="docblock-short"><p>USB control transfers and the SETUP packet.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="descriptor/index.html" title="usb_device::descriptor mod">descriptor</a></td><td class="docblock-short"><p>Creating USB descriptors</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="device/index.html" title="usb_device::device mod">device</a></td><td class="docblock-short"><p>USB composite device.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="endpoint/index.html" title="usb_device::endpoint mod">endpoint</a></td><td class="docblock-short"><p>USB endpoints.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="prelude/index.html" title="usb_device::prelude mod">prelude</a></td><td class="docblock-short"><p>Prelude for device implementors.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="test_class/index.html" title="usb_device::test_class mod">test_class</a></td><td class="docblock-short"><p>Test USB class for testing USB driver implementations. Peripheral driver implementations should
+include an example called &quot;test_class&quot; that creates a device with this class to enable the
+driver to be tested with the test_class_host example in this crate.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.UsbDirection.html" title="usb_device::UsbDirection enum">UsbDirection</a></td><td class="docblock-short"><p>Direction of USB traffic. Note that in the USB standard the direction is always indicated from
+the perspective of the host, which is backward for devices, but the standard directions are used
+for consistency.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.UsbError.html" title="usb_device::UsbError enum">UsbError</a></td><td class="docblock-short"><p>A USB stack error.</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.Result.html" title="usb_device::Result type">Result</a></td><td class="docblock-short"><p>Result for USB operations.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "usb_device";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

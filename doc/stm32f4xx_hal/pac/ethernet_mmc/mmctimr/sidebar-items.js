@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TGFMSCM_W","Write proxy for field `TGFMSCM`"],["TGFM_W","Write proxy for field `TGFM`"],["TGFSCM_W","Write proxy for field `TGFSCM`"]],"type":[["R","Reader of register MMCTIMR"],["TGFMSCM_R","Reader of field `TGFMSCM`"],["TGFM_R","Reader of field `TGFM`"],["TGFSCM_R","Reader of field `TGFSCM`"],["W","Writer for register MMCTIMR"]]});

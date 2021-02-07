@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["BUSY_R","Reader of field `BUSY`"],["DUALF_R","Reader of field `DUALF`"],["GENCALL_R","Reader of field `GENCALL`"],["MSL_R","Reader of field `MSL`"],["PEC_R","Reader of field `PEC`"],["R","Reader of register SR2"],["SMBDEFAULT_R","Reader of field `SMBDEFAULT`"],["SMBHOST_R","Reader of field `SMBHOST`"],["TRA_R","Reader of field `TRA`"]]});

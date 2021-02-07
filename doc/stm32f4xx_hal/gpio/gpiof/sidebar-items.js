@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PF","Partially erased pin"],["PF0","Pin"],["PF1","Pin"],["PF10","Pin"],["PF11","Pin"],["PF12","Pin"],["PF13","Pin"],["PF14","Pin"],["PF15","Pin"],["PF2","Pin"],["PF3","Pin"],["PF4","Pin"],["PF5","Pin"],["PF6","Pin"],["PF7","Pin"],["PF8","Pin"],["PF9","Pin"],["Parts","GPIO parts"]]});

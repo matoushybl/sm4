@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JOFFSET_W","Write proxy for field `JOFFSET`"]],"type":[["JOFFSET_R","Reader of field `JOFFSET`"],["R","Reader of register JOFR%s"],["W","Writer for register JOFR%s"]]});

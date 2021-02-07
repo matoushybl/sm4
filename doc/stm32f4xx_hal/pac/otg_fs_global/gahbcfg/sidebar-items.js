@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GINT_W","Write proxy for field `GINT`"],["PTXFELVL_W","Write proxy for field `PTXFELVL`"],["TXFELVL_W","Write proxy for field `TXFELVL`"]],"type":[["GINT_R","Reader of field `GINT`"],["PTXFELVL_R","Reader of field `PTXFELVL`"],["R","Reader of register GAHBCFG"],["TXFELVL_R","Reader of field `TXFELVL`"],["W","Writer for register GAHBCFG"]]});

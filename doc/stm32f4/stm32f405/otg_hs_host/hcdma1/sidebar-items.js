@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DMAADDR_W","Write proxy for field `DMAADDR`"]],"type":[["DMAADDR_R","Reader of field `DMAADDR`"],["R","Reader of register HCDMA1"],["W","Writer for register HCDMA1"]]});

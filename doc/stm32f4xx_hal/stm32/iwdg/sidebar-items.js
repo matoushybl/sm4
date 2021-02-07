@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["kr","Key register"],["pr","Prescaler register"],["rlr","Reload register"],["sr","Status register"]],"struct":[["RegisterBlock","Register block"]],"type":[["KR","Key register"],["PR","Prescaler register"],["RLR","Reload register"],["SR","Status register"]]});

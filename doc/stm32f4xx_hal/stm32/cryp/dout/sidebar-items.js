@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DATAOUT_R","Reader of field `DATAOUT`"],["R","Reader of register DOUT"]]});

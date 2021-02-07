@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["apb1_fz","Debug MCU APB1 Freeze registe"],["apb2_fz","Debug MCU APB2 Freeze registe"],["cr","Control Register"],["idcode","IDCODE"]],"struct":[["RegisterBlock","Register block"]],"type":[["APB1_FZ","Debug MCU APB1 Freeze registe"],["APB2_FZ","Debug MCU APB2 Freeze registe"],["CR","Control Register"],["IDCODE","IDCODE"]]});

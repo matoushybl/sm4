@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DEV_ID_R","Reader of field `DEV_ID`"],["R","Reader of register IDCODE"],["REV_ID_R","Reader of field `REV_ID`"]]});

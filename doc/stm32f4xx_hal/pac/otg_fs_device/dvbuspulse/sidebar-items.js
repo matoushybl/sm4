@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DVBUSP_W","Write proxy for field `DVBUSP`"]],"type":[["DVBUSP_R","Reader of field `DVBUSP`"],["R","Reader of register DVBUSPULSE"],["W","Writer for register DVBUSPULSE"]]});

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl DirectionController&lt;Motor1&gt; for DirectionPin&lt;Dir1&gt;","synthetic":false,"types":[]},{"text":"impl DirectionController&lt;Motor2&gt; for DirectionPin&lt;Dir2&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

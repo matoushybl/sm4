@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["UIF_A","Update interrupt flag"]],"struct":[["CC1IF_W","Write proxy for field `CC1IF`"],["CC1OF_W","Write proxy for field `CC1OF`"],["UIF_W","Write proxy for field `UIF`"]],"type":[["CC1IF_R","Reader of field `CC1IF`"],["CC1OF_R","Reader of field `CC1OF`"],["R","Reader of register SR"],["UIF_R","Reader of field `UIF`"],["W","Writer for register SR"]]});

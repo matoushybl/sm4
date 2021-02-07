@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ClockDuration","Clock difference with capability to calculate SI units (s)"],["Delay",""],["Dwt","DWT (Data Watchpoint and Trace) unit"],["StopWatch","Very simple stopwatch which reads from DWT Cycle Counter to record timing."]],"trait":[["DwtExt",""]]});

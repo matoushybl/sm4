@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PTXFD_W","Write proxy for field `PTXFD`"],["PTXSA_W","Write proxy for field `PTXSA`"]],"type":[["PTXFD_R","Reader of field `PTXFD`"],["PTXSA_R","Reader of field `PTXSA`"],["R","Reader of register HPTXFSIZ"],["W","Writer for register HPTXFSIZ"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Can","A blocking CAN interface that is able to transmit and receive frames."],["Default","Default implementation of `blocking::can::Can` for implementers of `can::Can`"]]});

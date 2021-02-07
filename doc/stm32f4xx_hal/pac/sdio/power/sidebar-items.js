@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PWRCTRL_W","Write proxy for field `PWRCTRL`"]],"type":[["PWRCTRL_R","Reader of field `PWRCTRL`"],["R","Reader of register POWER"],["W","Writer for register POWER"]]});

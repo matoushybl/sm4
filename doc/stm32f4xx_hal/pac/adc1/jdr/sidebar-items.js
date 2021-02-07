@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["JDATA_R","Reader of field `JDATA`"],["R","Reader of register JDR%s"]]});

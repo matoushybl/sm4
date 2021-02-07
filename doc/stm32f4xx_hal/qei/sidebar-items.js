@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Qei","Hardware quadrature encoder interface peripheral"]],"trait":[["Pins",""]]});

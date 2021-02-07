@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ADDMODE_A","Addressing mode (slave mode)"]],"struct":[["ADDMODE_W","Write proxy for field `ADDMODE`"],["ADD_W","Write proxy for field `ADD`"]],"type":[["ADDMODE_R","Reader of field `ADDMODE`"],["ADD_R","Reader of field `ADD`"],["R","Reader of register OAR1"],["W","Writer for register OAR1"]]});

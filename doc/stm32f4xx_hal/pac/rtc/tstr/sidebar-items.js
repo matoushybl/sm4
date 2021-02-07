@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["ALARMOUTTYPE_R","Reader of field `ALARMOUTTYPE`"],["R","Reader of register TSTR"],["TAMP1E_R","Reader of field `TAMP1E`"],["TAMP1INSEL_R","Reader of field `TAMP1INSEL`"],["TAMP1TRG_R","Reader of field `TAMP1TRG`"],["TAMPIE_R","Reader of field `TAMPIE`"],["TSINSEL_R","Reader of field `TSINSEL`"]]});
