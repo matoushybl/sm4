@@ -11,14 +11,16 @@ use hal::prelude::*;
 use hal::stm32;
 
 use sm4_firmware::board::prelude::*;
+use sm4_firmware::can::CAN;
 use sm4_firmware::current_reference::{initialize_current_ref, Reference};
 use sm4_firmware::direction::DirectionPin;
 use sm4_firmware::leds::LEDs;
 use sm4_firmware::monitoring::Monitoring;
+use sm4_firmware::ramp::{DriverWithGen, TrapRampGen};
 use sm4_firmware::step_counter::Counter;
 use sm4_firmware::step_timer::ControlTimer;
 use sm4_firmware::usb::USBProtocol;
-use sm4_shared::{Driver, Motor1, Motor2, StepperDriver};
+use sm4_shared::{Driver, Motor1, Motor2};
 use stm32f4xx_hal::dma::StreamsTuple;
 
 const SECOND: u32 = 168_000_000;
@@ -26,6 +28,8 @@ const SECOND: u32 = 168_000_000;
 const BLINK_PERIOD: u32 = SECOND / 10;
 const MONITORING_PERIOD: u32 = SECOND / 10;
 const RAMPING_PERIOD: u32 = SECOND / 10;
+
+const CAN_ID: u8 = 0x01;
 
 type Motor1Driver = Driver<
     Motor1,
@@ -43,65 +47,12 @@ type Motor2Driver = Driver<
     Reference<CurrentRef2Channel>,
 >;
 
-pub struct TrapRampGen {
-    current_speed: f32,
-    target_acceleration: f32,
-    generation_frequency: f32,
-}
-
-impl TrapRampGen {
-    pub fn new(target_acceleration: f32, frequency: f32) -> Self {
-        Self {
-            current_speed: 0.0,
-            target_acceleration,
-            generation_frequency: frequency,
-        }
-    }
-    pub fn generate(&mut self, target_speed: f32) -> f32 {
-        let step = self.target_acceleration / self.generation_frequency;
-        let diff = target_speed - self.current_speed;
-        if diff < step {
-            self.current_speed = target_speed;
-        } else {
-            // self.current_speed += diff.signum() * step;
-        }
-        self.current_speed
-    }
-}
-
-pub struct DriverWithGen<T> {
-    driver: T,
-    ramp_gen: TrapRampGen,
-    target_speed: f32,
-}
-
-impl<T> DriverWithGen<T>
-where
-    T: StepperDriver,
-{
-    pub fn new(driver: T, ramp_gen: TrapRampGen) -> Self {
-        Self {
-            driver,
-            ramp_gen,
-            target_speed: 0.0,
-        }
-    }
-
-    pub fn update(&mut self) {
-        let new_speed = self.ramp_gen.generate(self.target_speed) * 200.0;
-        self.driver.set_step_frequency(new_speed);
-    }
-
-    pub fn set_speed(&mut self, speed: f32) {
-        self.target_speed = speed;
-    }
-}
-
 #[rtic::app(device = stm32f4xx_hal::stm32, peripherals = true, monotonic = rtic::cyccnt::CYCCNT)]
 const APP: () = {
     struct Resources {
         leds: LEDs,
         usb: USBProtocol,
+        can: CAN,
         driver1: DriverWithGen<Motor1Driver>,
         driver2: DriverWithGen<Motor2Driver>,
         monitoring: Monitoring,
@@ -143,10 +94,14 @@ const APP: () = {
             clocks,
         );
 
-        let mut leds = LEDs::new(gpio.status_led, gpio.error_led);
-        leds.signalize_sync();
+        let can = CAN::new(
+            hal::can::Can::new(device.CAN1, (gpio.can_tx, gpio.can_rx)),
+            CAN_ID,
+        );
 
         let dma2 = StreamsTuple::new(device.DMA2);
+        let mut leds = LEDs::new(gpio.status_led, gpio.error_led);
+        leds.signalize_sync();
 
         let monitoring = Monitoring::new(device.ADC1, gpio.battery_voltage, dma2.0);
 
@@ -161,8 +116,8 @@ const APP: () = {
         let driver1 = Driver::new(timer1, dir1, counter1, ref1);
         let driver2 = Driver::new(timer2, dir2, counter2, ref2);
 
-        let driver1 = DriverWithGen::new(driver1, TrapRampGen::new(1.0, 10.0));
-        let driver2 = DriverWithGen::new(driver2, TrapRampGen::new(1.0, 10.0));
+        let driver1 = DriverWithGen::new(driver1, 3.0, TrapRampGen::new(2.0, 10.0));
+        let driver2 = DriverWithGen::new(driver2, 3.0, TrapRampGen::new(2.0, 10.0));
 
         let now = cx.start;
         cx.schedule.blink(now + BLINK_PERIOD.cycles()).unwrap();
@@ -176,6 +131,7 @@ const APP: () = {
             usb,
             driver1,
             driver2,
+            can,
             monitoring,
         }
     }
@@ -223,6 +179,11 @@ const APP: () = {
     #[task(binds = DMA2_STREAM0, resources = [monitoring])]
     fn dma(cx: dma::Context) {
         cx.resources.monitoring.transfer_complete();
+    }
+
+    #[task(binds = CAN1_RX0, resources = [can])]
+    fn can_handler(cx: can_handler::Context) {
+        cx.resources.can.process_incoming_frame();
     }
 
     extern "C" {

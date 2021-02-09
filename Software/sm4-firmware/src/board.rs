@@ -4,7 +4,7 @@ use stm32f4xx_hal::gpio::gpiob::{PB1, PB10, PB11, PB12, PB6, PB7, PB8, PB9};
 use stm32f4xx_hal::gpio::gpioc::{PC4, PC5, PC6};
 use stm32f4xx_hal::gpio::{
     Alternate, AlternateOD, Analog, Floating, Input, Output, PullDown, PushPull, AF1, AF10, AF4,
-    AF8,
+    AF9,
 };
 
 pub mod prelude {
@@ -36,8 +36,8 @@ pub type BatteryVoltage = PB1<Analog>;
 pub type ErrorLED = PB6<Output<PushPull>>;
 pub type StatusLED = PB7<Output<PushPull>>;
 
-pub type CANRx = PB8<Alternate<AF8>>;
-pub type CANTx = PB9<Alternate<AF8>>;
+pub type CANRx = PB8<Alternate<AF9>>;
+pub type CANTx = PB9<Alternate<AF9>>;
 
 pub type SCL = PB10<AlternateOD<AF4>>;
 pub type SDA = PB11<AlternateOD<AF4>>;
@@ -94,8 +94,8 @@ impl GPIO {
             battery_voltage: gpiob.pb1.into_analog(),
             error_led: gpiob.pb6.into_push_pull_output(),
             status_led: gpiob.pb7.into_push_pull_output(),
-            can_rx: gpiob.pb8.into_alternate_af8(),
-            can_tx: gpiob.pb9.into_alternate_af8(),
+            can_rx: gpiob.pb8.into_alternate_af9(),
+            can_tx: gpiob.pb9.into_alternate_af9(),
             scl: gpiob.pb10.into_alternate_af4_open_drain(),
             sda: gpiob.pb11.into_alternate_af4_open_drain(),
             usb_minus: gpioa.pa11.into_alternate_af10(),

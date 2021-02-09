@@ -61,7 +61,7 @@ impl Monitoring {
 
     pub fn transfer_complete(&mut self) {
         let result = unsafe {
-            self.transfer.next_transfer_with(|data, buffer| {
+            self.transfer.next_transfer_with(|data, _| {
                 let raw_temp = data[0];
                 let raw_volt = data[1];
                 (data, (raw_temp, raw_volt))

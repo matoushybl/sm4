@@ -1,10 +1,12 @@
 #![no_std]
 
 pub mod board;
+pub mod can;
 pub mod current_reference;
 pub mod direction;
 pub mod leds;
 pub mod monitoring;
+pub mod ramp;
 pub mod step_counter;
 pub mod step_timer;
 pub mod usb;
