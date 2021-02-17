@@ -3,8 +3,8 @@ use stm32f4xx_hal::gpio::gpioa::{PA1, PA11, PA12, PA3, PA4, PA5, PA6, PA7, PA8, 
 use stm32f4xx_hal::gpio::gpiob::{PB1, PB10, PB11, PB12, PB6, PB7, PB8, PB9};
 use stm32f4xx_hal::gpio::gpioc::{PC4, PC5, PC6};
 use stm32f4xx_hal::gpio::{
-    Alternate, AlternateOD, Analog, Floating, Input, Output, PullDown, PushPull, AF1, AF10, AF4,
-    AF9,
+    Alternate, AlternateOD, Analog, Floating, Input, Output, PullDown, PushPull, AF1, AF10, AF3,
+    AF4, AF9,
 };
 
 pub mod prelude {
@@ -25,7 +25,7 @@ pub type CurrentRef2Channel = C2;
 pub type En1 = PA6<Input<Floating>>;
 pub type En2 = PA7<Input<Floating>>;
 
-pub type Step1 = PC6<Alternate<AF1>>; // TODO not sure about AF
+pub type Step1 = PC6<Alternate<AF3>>; // TODO not sure about AF
 pub type Step2 = PA8<Alternate<AF1>>;
 
 pub type Err1 = PC5<Input<PullDown>>;
@@ -87,7 +87,7 @@ impl GPIO {
             ref2: gpioa.pa5.into_analog(),
             en1: gpioa.pa6.into_floating_input(),
             en2: gpioa.pa7.into_floating_input(),
-            step1: gpioc.pc6.into_alternate_af1(),
+            step1: gpioc.pc6.into_alternate_af3(),
             step2: gpioa.pa8.into_alternate_af1(),
             err1: gpioc.pc5.into_pull_down_input(),
             err2: gpioc.pc4.into_pull_down_input(),

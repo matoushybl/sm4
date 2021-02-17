@@ -54,6 +54,20 @@ where
 
     pub fn set_speed(&mut self, speed: f32) {
         // clamp is unstable
-        self.target_speed = speed.max(-self.max_speed).min(self.max_speed);
+        self.target_speed = fmaxf(-self.max_speed, fminf(speed, self.max_speed));
     }
+}
+
+fn fmaxf(a: f32, b: f32) -> f32 {
+    if a > b {
+        return a;
+    }
+    b
+}
+
+fn fminf(a: f32, b: f32) -> f32 {
+    if b > a {
+        return a;
+    }
+    b
 }

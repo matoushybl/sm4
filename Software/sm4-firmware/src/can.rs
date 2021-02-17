@@ -6,12 +6,13 @@ use stm32f4xx_hal as hal;
 
 type BUS = Can<hal::can::Can<hal::pac::CAN1>>;
 
-pub struct CAN {
+pub struct CANOpen {
     bus: BUS,
-    device: CANOpenDevice,
+    id: u8,
+    nmt_state: NMTState,
 }
 
-impl CAN {
+impl CANOpen {
     pub fn new(bus: hal::can::Can<hal::pac::CAN1>, id: u8) -> Self {
         let mut bus = Can::new(bus);
         bus.configure(|config| {
@@ -28,57 +29,114 @@ impl CAN {
         nb::block!(bus.enable()).unwrap();
         Self {
             bus,
-            device: CANOpenDevice::new(id),
-        }
-    }
-
-    pub fn process_incoming_frame(&mut self) {
-        match nb::block!(self.bus.receive()) {
-            Ok(frame) => {
-                defmt::error!("Received can message: {:?}", frame.dlc())
-            }
-            Err(_) => {
-                defmt::debug!("Failed to read.");
-            }
-        }
-    }
-}
-
-pub struct CANOpenDevice {
-    id: u8,
-    nmt_state: NMTState,
-}
-
-impl CANOpenDevice {
-    pub fn new(id: u8) -> Self {
-        Self {
             id,
             nmt_state: NMTState::BootUp,
         }
     }
 
-    pub fn process_frame(&mut self, frame: &Frame) {
-        let frame_id = match frame.id() {
+    pub fn process_incoming_frame(&mut self) -> Option<(CANOpenMessage, Frame)> {
+        match nb::block!(self.bus.receive()) {
+            Ok(frame) => {
+                defmt::error!("Received can message: {:?}", frame.dlc());
+                if let Some((device, message)) = frame.parse_id() {
+                    Some((message, frame))
+                } else {
+                    None
+                }
+            }
+            Err(_) => {
+                defmt::debug!("Failed to read.");
+                None
+            }
+        }
+    }
+}
+
+pub enum CANOpenMessage {
+    NMTNodeControl,
+    GlobalFailsafeCommand,
+    Sync,
+    Emergency,
+    TimeStamp,
+    TxPDO1,
+    RxPDO1,
+    TxPDO2,
+    RxPDO2,
+    TxPDO3,
+    RxPDO3,
+    TxPDO4,
+    RxPDO4,
+    TxSDO,
+    RxSDO,
+    NMTNodeMonitoring,
+}
+
+impl TryFrom<u16> for CANOpenMessage {
+    type Error = ();
+
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        match value & 0xff80 {
+            0x000 => Ok(Self::NMTNodeControl),
+            0x001 => Ok(Self::GlobalFailsafeCommand),
+            0x080 => Ok(Self::Sync),
+            0x081 => Ok(Self::Emergency),
+            0x100 => Ok(Self::TimeStamp),
+            0x180 => Ok(Self::TxPDO1),
+            0x200 => Ok(Self::RxPDO1),
+            0x280 => Ok(Self::TxPDO2),
+            0x300 => Ok(Self::RxPDO2),
+            0x380 => Ok(Self::TxPDO3),
+            0x400 => Ok(Self::RxPDO3),
+            0x480 => Ok(Self::TxPDO4),
+            0x500 => Ok(Self::RxPDO4),
+            0x580 => Ok(Self::TxSDO),
+            0x600 => Ok(Self::RxSDO),
+            0x700 => Ok(Self::NMTNodeMonitoring),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<CANOpenMessage> for u16 {
+    fn from(message: CANOpenMessage) -> Self {
+        match message {
+            CANOpenMessage::NMTNodeControl => 0x000,
+            CANOpenMessage::GlobalFailsafeCommand => 0x001,
+            CANOpenMessage::Sync => 0x080,
+            CANOpenMessage::Emergency => 0x081,
+            CANOpenMessage::TimeStamp => 0x100,
+            CANOpenMessage::TxPDO1 => 0x180,
+            CANOpenMessage::RxPDO1 => 0x200,
+            CANOpenMessage::TxPDO2 => 0x280,
+            CANOpenMessage::RxPDO2 => 0x300,
+            CANOpenMessage::TxPDO3 => 0x380,
+            CANOpenMessage::RxPDO3 => 0x400,
+            CANOpenMessage::TxPDO4 => 0x480,
+            CANOpenMessage::RxPDO4 => 0x500,
+            CANOpenMessage::TxSDO => 0x580,
+            CANOpenMessage::RxSDO => 0x600,
+            CANOpenMessage::NMTNodeMonitoring => 0x700,
+        }
+    }
+}
+
+pub trait CANOpenFrame {
+    fn parse_id(&self) -> Option<(u8, CANOpenMessage)>;
+}
+
+impl CANOpenFrame for Frame {
+    fn parse_id(&self) -> Option<(u8, CANOpenMessage)> {
+        let frame_id = match self.id() {
             Id::Standard(std) => std.as_raw(),
             Id::Extended(_) => {
-                return;
+                return None;
             }
         };
         let target_device = (frame_id & 0x7f) as u8;
         let message_id = frame_id & 0xff80;
-        match message_id {
-            0x000 => {
-                // NMT requested state
-                let data = frame.data().unwrap_or(&Data::empty());
-                if frame.dlc() == 2 && data[1] == self.id {
-                    if let Ok(new_state) = NMTRequestedState::try_from(data[0]) {
-                        defmt::info!("Requested NMT state: {:?}", data[0]);
-                    }
-                }
-            }
-            _ => {
-                defmt::error!("Unknown CANOpen frame id received.");
-            }
+        match CANOpenMessage::try_from(message_id) {
+            Ok(message) => Some((target_device, message)),
+            Err(_) => None,
         }
     }
 }
