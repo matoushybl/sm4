@@ -4,6 +4,7 @@ pub mod board;
 pub mod can;
 pub mod current_reference;
 pub mod direction;
+pub mod float;
 pub mod leds;
 pub mod monitoring;
 pub mod ramp;
@@ -125,8 +126,10 @@ impl SM4 {
         let driver1 = Driver::new(timer1, dir1, counter1, ref1);
         let driver2 = Driver::new(timer2, dir2, counter2, ref2);
 
-        let driver1 = DriverWithGen::new(driver1, 3.0, TrapRampGen::new(2.0, 10.0));
+        let mut driver1 = DriverWithGen::new(driver1, 3.0, TrapRampGen::new(2.0, 10.0));
         let driver2 = DriverWithGen::new(driver2, 3.0, TrapRampGen::new(2.0, 10.0));
+
+        driver1.set_speed(3.0);
 
         defmt::error!("init done");
 

@@ -16,8 +16,8 @@ pub struct Motor2;
 pub trait CurrentReference<M> {
     /// Sets the reference current to the supplied value
     /// # Arguments
-    /// * current - target current in milliamps
-    fn set_current(&mut self, current: u16);
+    /// * current - target current in amps
+    fn set_current(&mut self, current: f32);
 }
 
 /// Defines a shared interface for working with systems that generates steps that control the stepper motors.
@@ -75,12 +75,17 @@ pub trait StepCounter<M> {
     fn set_direction(&mut self, direction: Direction);
 }
 
+const STANDSTILL_CURRENT: f32 = 0.2;
+const ACCELERATION_CURRENT: f32 = 0.7;
+const CONSTANT_SPEED_CURRENT: f32 = 0.4;
+
 pub struct Driver<M, G, D, C, R> {
     _motor: PhantomData<M>,
     generator: G,
     dir: D,
     counter: C,
     reference: R,
+    current_step_frequency: f32,
 }
 
 pub trait StepperDriver {
@@ -97,13 +102,14 @@ where
     R: CurrentReference<M>,
 {
     pub fn new(generator: G, dir: D, counter: C, mut reference: R) -> Self {
-        reference.set_current(400);
+        reference.set_current(STANDSTILL_CURRENT);
         Self {
             _motor: Default::default(),
             generator,
             dir,
             counter,
             reference,
+            current_step_frequency: 0.0,
         }
     }
 }
@@ -124,6 +130,16 @@ where
         self.generator.set_step_frequency(freq);
         self.dir.set_direction(direction);
         self.counter.set_direction(direction);
+
+        if freq == 0.0 {
+            self.reference.set_current(STANDSTILL_CURRENT);
+        } else if freq == self.current_step_frequency {
+            self.reference.set_current(CONSTANT_SPEED_CURRENT);
+        } else {
+            self.reference.set_current(ACCELERATION_CURRENT);
+        }
+
+        self.current_step_frequency = freq;
     }
 
     fn get_steps(&mut self) -> i64 {
