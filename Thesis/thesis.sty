@@ -20,8 +20,8 @@
 %% Autor: Jakub Hrabec                                                     %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\def\fileversion{4.02}
-\def\filedate{2020/03/04}  %year/month/day
+\def\fileversion{4.03}  % oproti 4.02 upravy pro vetsi kompatibilitu s nove vzniklou wordovskou sablonou
+\def\filedate{2020/12/22}  %year/month/day
 \def\filename{thesis.sty}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -247,6 +247,8 @@
 %% Prikazy pro zmenu informaci o dokumentu                                 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Prikaz pro zadani VUT identifikacniho cisla
+\newcommand\butid[1]{\def\but@id{#1}}
 %% Prikaz pro zadani jmena autora, parametry ve tvaru [tituly pred]{Jmeno}{Prijmeni}[tituly za]
 \renewcommand\author{\def\osoba@{author}\futurelet\nextchar\rozbor@jmena}
 
@@ -288,6 +290,7 @@
 %% Prikaz pro zadani roku obhajoby
 \newcommand\graduateyear[1]{\gdef\@grade{#1}}
 \renewcommand\date[1]{\gdef\@date{#1}}
+\newcommand\academicyear[1]{\gdef\academic@year{#1}}
 
 %% Prikaz pro zadani mista obhajoby
 \newcommand\city[1]{\gdef\@city{#1}\gdef\@City{\MakeUppercase{#1}}}
@@ -508,65 +511,22 @@
 %% Vychozi text prohlaseni v pouzitych jazycich
 \newcommand\prohlasenitext@czech%
 {%
-  \par%\hspace{2ex}
+  \par\noindent%
   Prohla\v{s}uji, \v{z}e
-  \ifcase\akt@type\relax
-      %type@semestral
-    svou semestr\'{a}ln\'{\i} pr\'{a}ci
-  \or % type@bachelor
-    svou bakal\'{a}\v{r}skou pr\'{a}ci
-  \or %type@diploma
-    svou diplomovou pr\'{a}ci
-  \or %type@treatise
-    sv\'{e} pojedn\'{a}n\'{i} o~dizerta\v{c}n\'{i} pr\'{a}ci
-  \or %type@phd
-    svou dizerta\v{c}n\'{\i} pr\'{a}ci %doktorskou pr\'{a}ci
-  \fi
-  na t\'{e}ma \uv{\title@orig@lang} jsem vypracoval%
+    svou z\'{a}v\v{e}re\v{c}nou pr\'{a}ci
+  jsem vypracoval%
 	\ifnum\@pohlavi=1 a\ \else\ \fi
 	samostatn\v{e} pod veden\'{\i}m
-  \ifcase\akt@type\relax
-      %type@semestral
-    vedouc\'{\i}ho semestr\'{a}ln\'{\i} pr\'{a}ce
-  \or %type@bachelor
-    vedouc\'{\i}ho bakal\'{a}\v{r}sk\'{e} pr\'{a}ce
-  \or %type@diploma
-    vedouc\'{\i}ho diplomov\'{e} pr\'{a}ce
-  \or %type@treatise
-    \v{s}kolitele dizerta\v{c}n\'{\i} pr\'{a}ce %doktorsk\'{e} pr\'{a}ce
-  \or %type@phd
-    \v{s}kolitele dizerta\v{c}n\'{\i} pr\'{a}ce %doktorsk\'{e} pr\'{a}ce
-  \fi
+    vedouc\'{\i}/ho z\'{a}v\v{e}re\v{c}n\'{e} pr\'{a}ce
     a~s~pou\v{z}it\'{\i}m odborn\'{e} literatury a~dal\v{s}\'{\i}ch informa\v{c}n\'{\i}ch zdroj\r{u}, kter\'{e} jsou v\v{s}echny citov\'{a}ny v~pr\'{a}ci a~uvedeny v~seznamu literatury na konci pr\'{a}ce.
 
-  \par\hspace{2ex}
+  \vspace{1em}
+  \par\noindent%
   Jako autor%
-	\ifnum\@pohlavi=1 ka\ \else\ \fi
-  \ifcase\akt@type\relax
-      %type@semestral
-    uveden\'{e} semestr\'{a}ln\'{\i} pr\'{a}ce
-  \or %type@bachelor
-    uveden\'{e} bakal\'{a}\v{r}sk\'{e} pr\'{a}ce
-  \or %type@diploma
-    uveden\'{e} diplomov\'{e} pr\'{a}ce
-  \or %type@treatise
-    uveden\'{e}ho pojedn\'{a}n\'{i} o~dizerta\v{c}n\'{i} pr\'{a}ci
-  \or %type@phd
-    uveden\'{e} dizerta\v{c}n\'{\i} pr\'{a}ce %doktorsk\'{e} pr\'{a}ce
-  \fi
+  \ifnum\@pohlavi=1 ka\ \else\ \fi
+  uveden\'{e} z\'{a}v\v{e}re\v{c}n\'{e} pr\'{a}ce	
     d\'{a}le prohla\v{s}uji, \v{z}e v~souvislosti s~vytvo\v{r}en\'{\i}m
-  \ifcase\akt@type\relax
-      %type@semestral
-    t\'{e}to semestr\'{a}ln\'{\i} pr\'{a}ce
-  \or %type@bachelor
-    t\'{e}to bakal\'{a}\v{r}sk\'{e} pr\'{a}ce
-  \or %type@diploma
-    t\'{e}to diplomov\'{e} pr\'{a}ce
-  \or %type@treatise
-    tohoto pojedn\'{a}n\'{i} o~dizerta\v{c}n\'{i} pr\'{a}ci
-  \or %type@phd
-    t\'{e}to dizerta\v{c}n\'{\i} pr\'{a}ce %doktorsk\'{e} pr\'{a}ce
-  \fi
+    t\'{e}to  z\'{a}v\v{e}re\v{c}n\'{e} pr\'{a}ce	
   jsem neporu\v{s}il%
 	\ifnum\@pohlavi=1 a\ \else\ \fi
 	autorsk\'{a} pr\'{a}va t\v{r}et\'{\i}ch osob, zejm\'{e}na jsem nezas\'{a}hl%
@@ -584,68 +544,24 @@
 %
 \newcommand\prohlasenitext@slovak%
 {%
-  \par%\hspace{2ex}
+  \par\noindent%
   Vyhlasujem, \v{z}e
-  \ifcase\akt@type\relax
-      %type@semestral
-    svoju semestr\'{a}ln\'{u} pr\'{a}cu
-  \or %type@bachelor
-    svoju bakal\'{a}rsku pr\'{a}cu
-  \or %type@diploma
-    svoju diplomov\'{u} pr\'{a}cu
-  \or %type@treatise
-    svoje pojednanie o~dizerta\v{c}nej pr\'{a}ci
-  \or %type@phd
-    svoju dizerta\v{c}n\'{u} pr\'{a}cu %doktorsk\'{u} pr\'{a}cu
-  \fi
-  na t\'{e}mu \uv{\title@orig@lang} som vypracoval%
+    svoju z\'{a}vere\v{c}n\'{u} pr\'{a}cu
+    som vypracoval%
 	\ifnum\@pohlavi=1 a\ \else\ \fi
-	samostatne pod veden\'{\i}m ved\'{u}ceho
-  \ifcase\akt@type\relax
-      %type@semestral
-    semestr\'{a}lnej pr\'{a}ce,
-  \or %type@bachelor
-    bakal\'{a}rskej pr\'{a}ce,
-  \or %type@diploma
-    diplomovej pr\'{a}ce,
-  \or %type@treatise
-    dizerta\v{c}nej pr\'{a}ce %doktorskej pr\'{a}ce,
-    %pojednanie o~dizerta\v{c}nej pr\'{a}ci,
-  \or %type@phd
-    dizerta\v{c}nej pr\'{a}ce %doktorskej pr\'{a}ce,
-  \fi
+	samostatne pod veden\'{\i}m ved\'{u}-cej/c\'{e}ho
+    z\'{a}vere\v{c}nej pr\'{a}ce,
 %  a s~pou\v{z}it\'{\i}m
   s~vyu\v{z}it\'{\i}m
   odbornej literat\'{u}ry a \v{d}al\v{s}\'{\i}ch informa\v{c}n\'{y}ch zdrojov, ktor\'{e} s\'{u} v\v{s}etky citovan\'{e} v~pr\'{a}ci a uveden\'{e} v~zozname literat\'{u}ry na konci pr\'{a}ce.
 
-  \par\hspace{2ex}
+  \vspace{1em}
+  \par\noindent%
   Ako autor%
-	\ifnum\@pohlavi=1 a\ \else\ \fi
-  \ifcase\akt@type\relax
-      %type@semestral
-    uvedenej semestr\'{a}lnej pr\'{a}ce
-  \or %type@bachelor
-    uvedenej bakal\'{a}rskej pr\'{a}ce
-  \or %type@diploma
-    uvedenej diplomovej pr\'{a}ce
-  \or %type@treatise
-    tohto pojednania o~dizerta\v{c}nej pr\'{a}ci
-  \or %type@phd
-    uvedenej dizerta\v{c}nej pr\'{a}ce %doktorskej pr\'{a}ce
-  \fi
+	\ifnum\@pohlavi=1 ka\ \else\ \fi
+    uvedenej z\'{a}vere\v{c}nej pr\'{a}ce
     \v{d}alej vyhlasujem, \v{z}e v~s\'{u}vislosti s~vytvoren\'{\i}m
-  \ifcase\akt@type
-      %type@semestral
-    tejto semestr\'{a}lnej pr\'{a}ce
-  \or %type@bachelor
-    tejto bakal\'{a}rskej pr\'{a}ce
-  \or %type@diploma
-    tejto diplomovej pr\'{a}ce
-  \or %type@treatise
-    tohto pojednania o~dizerta\v{c}nej pr\'{a}ci
-  \or %type@phd
-    tejto dizerta\v{c}nej pr\'{a}ce %doktorskej pr\'{a}ce
-  \fi
+    tejto z\'{a}vere\v{c}nej pr\'{a}ce
   som neporu\v{s}il%
 	\ifnum\@pohlavi=1 a\ \else\ \fi
 	autorsk\'{e} pr\'{a}va tret\'{\i}ch os\^{o}b, najm\"{a} som
@@ -663,71 +579,22 @@ a~som si plne vedom%
 %
 \newcommand\prohlasenitext@english%
 {%
-  \par%\hspace{2ex}
-  I~declare that I~have written the %elaborated
-  \ifcase\akt@type\relax
-      %type@semestral
-    semestral project
-  \or %type@bachelor
-    Bachelor's Thesis
-    %bachelor's thesis
-  \or %type@diploma
-    Master's Thesis
-    %master's thesis
-  \or %type@treatise
-    treatise on doctoral thesis
-  \or %type@phd
-    Doctoral Thesis
-  \fi
-    titled
-    %on the theme of
-    ``\title@orig@lang'' independently, under the guidance %supervision
+  \par\noindent
+  I~declare that I~have written %elaborated
+  this paper
+  independently, under the guidance %supervision
     of the
-  %\ifcase\akt@type
-       %type@semestral
-    %semestral project
-  %\or %type@bachelor
-    %bachelor's thesis
-  %\or %type@diploma
-    %master's thesis
-  %\or %type@treatise
-    %doctoral thesis
-    %%treatise on doctoral thesis
-  %\or %type@phd
-    %doctoral thesis
-  %\fi
     advisor %supervisor
     and using exclusively the technical references and other sources of information cited in the
     %and using the technical literature and other sources of information  which are all cited in the
-  \ifcase\akt@type\relax
-      %type@semestral
-    project
-  \or %type@bachelor
-    thesis
-  \or %type@diploma
-    thesis
-  \or %type@treatise
-    treatise
-  \or %type@phd
-    thesis
-  \fi
+    paper
     and listed in the comprehensive bibliography at the end of the
     %and detailed in the list of literature at the end of the
-  \ifcase\akt@type\relax
-      %type@semestral
-    project.
-  \or %type@bachelor
-    thesis.
-  \or %type@diploma
-    thesis.
-  \or %type@treatise
-    treatise.
-  \or %type@phd
-    thesis.
-  \fi
+    paper.
 
-  \par\hspace{2ex}
-    As the author
+  \vspace{1em}%
+  \par\noindent%
+    As the author,
     %of the
   %\ifcase\akt@type\relax
        %type@semestral
@@ -743,19 +610,7 @@ a~som si plne vedom%
   %\fi
     I~furthermore declare that, with respect to the creation of this
     %as regards the creation of this
-  \ifcase\akt@type\relax
-       %type@semestral
-    semestral project,
-  \or %type@bachelor
-    Bachelor's Thesis,
-  \or %type@diploma
-    Master's Thesis,
-    %master's thesis,
-  \or %type@treatise
-    treatise on doctoral thesis,
-  \or %type@phd
-    Doctoral Thesis,
-  \fi
+    paper,
   I~have not infringed any copyright
   or violated anyone's personal and/or ownership rights.
   %In particular, I~have not unlawfully encroached on anyone's personal
@@ -771,7 +626,7 @@ a~som si plne vedom%
   %and formulated in later regulations, inclusive of the possible consequences resulting from the provisions of
   %Criminal Act No\,40/2009 Sb.\ of the Czech Republic, Section 2, Head VI, Part 4.
   and of any breach of rights related to intellectual property or introduced within amendments to relevant Acts
-  such as the Intellectual Property Act or the Criminal Code, Act No.\,40/2009 Coll., Section 2, Head VI, Part 4.
+  such as the Intellectual Property Act or the Criminal Code, Act No.\,40/2009 Coll.\ of the Czech Republic, Section 2, Head VI, Part 4.
 }%
 
 %% Vychozi nazev skoly v pouzitych jazycich
@@ -790,14 +645,14 @@ a~som si plne vedom%
 %
 \edef\logo@skola{\csname\akt@driver @logo@skola\endcsname}
 
-%% Vychozi nazev fakulty v pouzitych jazycich
-\iflanguage{english}{
-	\newcommand\faculty@orig@lang{Faculty of Electrical Engineering and Communication}
-	\newcommand\faculty@tran@lang{Fakulta elektrotechniky a~komunika\v{c}n\'{\i}ch technologi\'{\i}}
-}{
-	\newcommand\faculty@orig@lang{Fakulta elektrotechniky a~komunika\v{c}n\'{\i}ch technologi\'{\i}}
-	\newcommand\faculty@tran@lang{Faculty of Electrical Engineering and Communication}
-}
+%%% Vychozi nazev fakulty v pouzitych jazycich  %nadbytecne od doby kdy je mozne volit fakultu
+%\iflanguage{english}{
+	%\newcommand\faculty@orig@lang{Faculty of Electrical Engineering and Communication}
+	%\newcommand\faculty@tran@lang{Fakulta elektrotechniky a~komunika\v{c}n\'{\i}ch technologi\'{\i}}
+%}{
+	%\newcommand\faculty@orig@lang{Fakulta elektrotechniky a~komunika\v{c}n\'{\i}ch technologi\'{\i}}
+	%\newcommand\faculty@tran@lang{Faculty of Electrical Engineering and Communication}
+%}
 
 %%%%%%logo VUT FEKT ustav telekomunikaci
 %% Vychozi obrazovy soubor s logem fakulty v cestine
@@ -859,6 +714,7 @@ a~som si plne vedom%
 
 %% Vychozi nastaveni roku obhajoby
 \def\@grade{{\color{red} 2020}\@latex@warning@no@line{Nezadan rok \noexpand\graduateyear/Unknown graduation year}}
+\def\academic@year{{\color{red} 2020/21}\@latex@warning@no@line{Nezadan akademický rok \noexpand\academicyear/Unknown academic year}}
 \def\@date{{\color{red} 1.1.2020}\@latex@warning@no@line{Nezadano datum \noexpand\date/Unknown date of defense}}
 
 %% Vychozi nastaveni mista obhajoby
@@ -877,6 +733,9 @@ a~som si plne vedom%
 
 %% Vychozi podekovani
 \def\acknowledgement@orig@lang{\@latex@warning@no@line{Nezadano podekovani \noexpand\acknowledgement/Unknown acknowledgement}}
+
+%% Vychozi sazba VUT identifikacniho cisla autora
+\def\but@id{{\color{red}butid}\@latex@warning@no@line{Nezadano identifikacni cislo autora \noexpand\butid /Unknown author's VUT ID}}
 
 %% Vychozi sazba jmena autora
 \def\@autor
@@ -991,6 +850,12 @@ a~som si plne vedom%
   \providecommand\oznacenipodekovani{\@latex@warning@no@line{Nezadan preklad \noexpand\oznacenipodekovani\ do aktualniho jazyka/Missing translation of \noexpand\oznacenipodekovani}}
   \providecommand\mistopodekovani{\@city} % definovano shodne pro vsechny jazyky (pokud by se anglicky psalo mesto jinak nez cesky (napr. Praha vs. Prague), je treba v thesis vyplnit to, co chceme zobrazovat
   \providecommand\thesisadvertisment{\@latex@warning@no@line{Nezadan preklad \noexpand\thesisadvertisment\ do aktualniho jazyka/Missing translation of \noexpand\thesisadvertisment}}
+  \providecommand\prohlaseni@autor{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@autor\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@autor}}
+  \providecommand\prohlaseni@butid{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@butid\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@butid}}
+  \providecommand\prohlaseni@paper{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@paper\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@paper}}
+  \providecommand\prohlaseni@rok{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@rok\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@rok}}
+  \providecommand\prohlaseni@nazev{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@nazev\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@nazev}}
+  \providecommand\prohlaseni@poznamka{\@latex@warning@no@line{Nezadan preklad \noexpand\prohlaseni@poznamka\ do aktualniho jazyka/Missing translation of \noexpand\prohlaseni@poznamka}}
 
   %% Vychozi oznaceni typu prace v pouzitych jazycich
 
@@ -1112,7 +977,8 @@ a~som si plne vedom%
     \addto\captionsczech{\renewcommand\indexname{Rejst\v{r}\'{\i}k}}
     \addto\captionsczech{\renewcommand\keywordsname{Kl\'{\i}\v{c}ov\'{a} slova}}
     \addto\captionsczech{\renewcommand\listfigurename{Seznam obr\'{a}zk\r{u}}}
-    \addto\captionsczech{\renewcommand\listofabbrevname{Seznam symbol\r{u}, veli\v{c}in a zkratek}}
+    %\addto\captionsczech{\renewcommand\listofabbrevname{Seznam symbol\r{u}, veli\v{c}in a zkratek}}
+    \addto\captionsczech{\renewcommand\listofabbrevname{Seznam symbol\r{u} a zkratek}} % update od v4.03
     \addto\captionsczech{\renewcommand\listofappendicesname{Seznam p\v{r}\'{\i}loh}}
     \addto\captionsczech{\renewcommand\listtablename{Seznam tabulek}}
     \addto\captionsczech{\renewcommand\pagename{Strana}}
@@ -1126,7 +992,13 @@ a~som si plne vedom%
     \addto\captionsczech{\renewcommand\lstlistlistingname{Seznam v\'{y}pis\r{u}}}
     \addto\captionsczech{\renewcommand\citace@stran{s}}
     \addto\captionsczech{\renewcommand\oborstudiatext{Obor}}
-    \addto\captionsczech{\renewcommand\oznaceniprohlaseni{Prohl\'{a}\v{s}en\'{\i}}}
+    \addto\captionsczech{\renewcommand\oznaceniprohlaseni{Prohl\'{a}\v{s}en\'{\i} autora o p\r{u}vodnosti d\'{\i}la}}
+    \addto\captionsczech{\renewcommand\prohlaseni@autor{Jm\'{e}no a p\v{r}\'{\i}jmen\'{\i} autora}}
+    \addto\captionsczech{\renewcommand\prohlaseni@butid{VUT ID autora}}
+    \addto\captionsczech{\renewcommand\prohlaseni@paper{Typ pr\'{a}ce}}
+    \addto\captionsczech{\renewcommand\prohlaseni@rok{Akademick\'{y} rok}}
+    \addto\captionsczech{\renewcommand\prohlaseni@nazev{T\'{e}ma z\'{a}v\v{e}re\v{c}n\'{e} pr\'{a}ce}}
+	\addto\captionsczech{\renewcommand\prohlaseni@poznamka{Autor podepisuje pouze v~ti\v{s}t\v{e}n\'{e} verzi.}}
     \addto\captionsczech{\renewcommand\oznacenipodpisu{\ifnum\@pohlavi=1 podpis autorky\else podpis autora\fi}}
     \addto\captionsczech{\renewcommand\oznacenipodekovani{Pod\v{e}kov\'{a}n\'{\i}}}
     \addto\captionsczech{\renewcommand\thesisadvertisment{%
@@ -1151,7 +1023,7 @@ a~som si plne vedom%
     \addto\captionsenglish{\renewcommand\keywordsname{Keywords}}
     \addto\captionsenglish{\renewcommand\listfigurename{List of Figures}}
     %\addto\captionsenglish{\renewcommand\listofabbrevname{List of symbols, physical constants and abbreviations}}
-    \addto\captionsenglish{\renewcommand\listofabbrevname{List of symbols, quantities and abbreviations}}
+    \addto\captionsenglish{\renewcommand\listofabbrevname{Symbols and abbreviations}}
     \addto\captionsenglish{\renewcommand\listofappendicesname{List of appendices}}
     \addto\captionsenglish{\renewcommand\listtablename{List of Tables}}
     \addto\captionsenglish{\renewcommand\pagename{Page}}
@@ -1163,7 +1035,13 @@ a~som si plne vedom%
     \addto\captionsenglish{\renewcommand\tablename{Tab.}}
     \addto\captionsenglish{\renewcommand\citace@stran{p}}
     \addto\captionsenglish{\renewcommand\oborstudiatext{Specialization of Study}}
-    \addto\captionsenglish{\renewcommand\oznaceniprohlaseni{Declaration}}
+    \addto\captionsenglish{\renewcommand\oznaceniprohlaseni{Author's Declaration}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@autor{Author}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@butid{Author's ID}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@paper{Paper type}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@rok{Academic year}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@nazev{Topic}}
+    \addto\captionsenglish{\renewcommand\prohlaseni@poznamka{The author signs only in the printed version.}}
     \addto\captionsenglish{\renewcommand\oznacenipodpisu{author's signature}}
     \addto\captionsenglish{\renewcommand\oznacenipodekovani{Acknowledgement}}
     \addto\captionsenglish{\renewcommand\thesisadvertisment{%
@@ -1187,7 +1065,7 @@ a~som si plne vedom%
     \addto\captionsslovak{\renewcommand\indexname{Register}}
     \addto\captionsslovak{\renewcommand\keywordsname{K\v{l}\'{u}\v{c}ov\'{e} slov\'{a}}}
     \addto\captionsslovak{\renewcommand\listfigurename{Zoznam obr\'{a}zkov}}
-    \addto\captionsslovak{\renewcommand\listofabbrevname{Zoznam symbolov, veli\v{c}\'{\i}n a skratiek}}
+    \addto\captionsslovak{\renewcommand\listofabbrevname{Zoznam symbolov a skratiek}}
     \addto\captionsslovak{\renewcommand\listofappendicesname{Zoznam pr\'{i}loh}}
     \addto\captionsslovak{\renewcommand\listtablename{Zoznam tabuliek}}
     \addto\captionsslovak{\renewcommand\pagename{Str.}}
@@ -1200,7 +1078,13 @@ a~som si plne vedom%
     \addto\captionsslovak{\renewcommand\lstlistingname{V\'{y}pis}}
     \addto\captionsslovak{\renewcommand\lstlistlistingname{Zoznam v\'{y}pisov}}
     \addto\captionsslovak{\renewcommand\citace@stran{s}}
-    \addto\captionsslovak{\renewcommand\oznaceniprohlaseni{Vyhl\'{a}senie}}
+    \addto\captionsslovak{\renewcommand\oznaceniprohlaseni{Vyhl\'{a}senie autora o p\^{o}vodnosti diela}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@autor{Meno a priezvisko autora}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@butid{VUT ID autora}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@paper{Typ pr\'{a}ce}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@rok{Akademick\'{y} rok}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@nazev{T\'{e}ma z\'{a}v\v{e}re\v{c}nej pr\'{a}ce}}
+    \addto\captionsslovak{\renewcommand\prohlaseni@poznamka{Autor podpisuje iba v tla\v{c}enej verzii.}}
     \addto\captionsslovak{\renewcommand\oborstudiatext{Odbor}} %nebo Odbor?
     \addto\captionsslovak{\renewcommand\oznacenipodpisu{\ifnum\@pohlavi=1 podpis autorky\else podpis autora\fi}}
     \addto\captionsslovak{\renewcommand\oznacenipodekovani{Po\v{d}akovanie}}
@@ -1869,6 +1753,30 @@ a~som si plne vedom%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Sazba stranky s citaci prikazem \makecitation                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\makecitation{%
+\cleardoublepage
+\mbox{}
+\vfill
+{%% sazba bibliograficke citace   %do verze 4.02 byvalo na spolecne strance s abstrakty
+	\vspace{\stretch{1}}\noindent
+	\parbox{\linewidth}{%%%
+		\sffamily \MakeUppercase{\author@prijmeni},~\author@jmeno{}.
+		{\slshape \title@orig@lang}.
+		\@city:
+		\university@orig@lang,
+		\faculty@orig@lang,
+		\department@orig@lang,
+		\@grade, \pocet@stran~\citace@stran.
+		{\csname oznaceniprace@\orig@lang\endcsname}.
+		\csname citace@vedouci@\orig@lang\endcsname
+	}%%%
+}%%
+}%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Sazba stranky s abstraktem prikazem \makeabstract                     %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand\makeabstract{\par
@@ -1996,19 +1904,20 @@ a~som si plne vedom%
   \noindent%
   \rule{\linewidth}{0pt}\nopagebreak
   \vskip 2em plus 2fill
-  {%% sazba bibliograficke citace
-    \vspace{\stretch{1}}\noindent
-    \parbox{\linewidth}{%%%
-      \sffamily \MakeUppercase{\author@prijmeni},~\author@jmeno{}.
-      {\slshape \title@orig@lang}.
-      \@city, \@grade, \pocet@stran~\citace@stran.
-      {\csname oznaceniprace@\orig@lang\endcsname}.
-      \university@orig@lang,
-      \faculty@orig@lang,
-      \department@orig@lang.
-      \csname citace@vedouci@\orig@lang\endcsname
-    }%%%
-  }%%
+  %{%% sazba bibliograficke citace
+    %\vspace{\stretch{1}}\noindent
+    %\parbox{\linewidth}{%%%
+      %\sffamily \MakeUppercase{\author@prijmeni},~\author@jmeno{}.
+      %{\slshape \title@orig@lang}.
+      %\@city:
+			%\university@orig@lang,
+      %\faculty@orig@lang,
+      %\department@orig@lang,
+			%\@grade, \pocet@stran~\citace@stran.
+      %{\csname oznaceniprace@\orig@lang\endcsname}.
+      %\csname citace@vedouci@\orig@lang\endcsname
+    %}%%%
+  %}%%
 
   \vspace*{2ex}
 
@@ -2058,29 +1967,37 @@ a~som si plne vedom%
 
 \def\makedeclaration@vut{%
   \cleardoublepage
-  \patternpage{%%nahore
-  }{%%uprostred
-    \sffamily
+    \sffamily%
+    \noindent%
     \begin{center}%
-      \large
-      \MakeUppercase{\oznaceniprohlaseni}%
+      \Large\textbf{\oznaceniprohlaseni}%
     \end{center}%
 
-    \vspace{1em}%
+	\vspace{3em}%
+	\begin{tabular}{p{55mm}p{70mm}}
+		\bfseries\prohlaseni@autor{}: & \@autor \\[1em]
+		\bfseries \prohlaseni@butid{}: & \but@id \\[1em]
+		\bfseries \prohlaseni@paper{}: & \csname oznaceniprace@\orig@lang\endcsname \\[1em]
+		\bfseries \prohlaseni@rok{}:	  & \academic@year \\[1em]
+		\bfseries \prohlaseni@nazev{}: & \title@orig@lang
+	\end{tabular}
+
+    \vspace{4em}%
     \noindent
     \csname prohlasenitext@\orig@lang\endcsname
 
-    \vspace{3em}%
-    \mistoprohlaseni
-    \hspace{1em}\makebox[7em][c]{\dotfill} \hfill
-    \begin{minipage}[t][][t]{15em}%
-      \begin{center}%
-        \dotfill \\
-        \oznacenipodpisu
-      \end{center}%
-    \end{minipage}%
-  }{%%dole
-  }%%
+    \vspace{4em}%
+    
+    \begin{center}
+    \begin{tabular}{lc}
+    	\mistoprohlaseni\hspace{1em}\makebox[8em][c]{\dotfill}\hspace{5em} &
+    	\dotfill \\
+    	& \oznacenipodpisu\begin{NoHyper}\footnotemark\end{NoHyper} \\
+    	& \rule{15em}{0pt}
+    \end{tabular}
+    \end{center}
+
+    \footnotetext{\prohlaseni@poznamka}
 }
 
 %\endinput
@@ -2149,11 +2066,11 @@ a~som si plne vedom%
     \gdef\insertframelogo{\raisebox{-0.4em}{\includegraphics[height=1.6em]{\zkracenelogo@fakulta}}}
 }
 
-\ifnum\akt@type=\type@semestral  %u typu semestral se netisknou abstrakty apod.
-  \renewcommand\makeabstract\relax
-  %\renewcommand\makedeclaration\relax  %prohlaseni ma dle doc. Ciky byt pritomno i v SP
-  \renewcommand\makeacknowledgement\relax
-\fi
+%\ifnum\akt@type=\type@semestral  %u typu semestral se netisknou abstrakty apod.
+  %\renewcommand\makeabstract\relax
+  %%\renewcommand\makedeclaration\relax  %prohlaseni ma dle doc. Ciky byt pritomno i v SP
+  %\renewcommand\makeacknowledgement\relax
+%\fi
 
 %\newcommand{\vlozprazdnoustranku}{%
 	%\newpage%

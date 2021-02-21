@@ -4,15 +4,15 @@
 
 \usepackage[
 %%% Z následujících voleb jazyka lze použít pouze jednu
-  czech-english,		% originální jazyk je čeština, překlad je anglicky (výchozí)
-  %english-czech,	% originální jazyk je angličtina, překlad je česky
+ % czech-english,		% originální jazyk je čeština, překlad je anglicky (výchozí)
+  english-czech,	% originální jazyk je angličtina, překlad je česky
   %slovak-english,	% originální jazyk je slovenština, překlad je anglicky
   %english-slovak,	% originální jazyk je angličtina, překlad je slovensky
 %
 %%% Z následujících voleb typu práce lze použít pouze jednu
-  semestral,		  % semestrální práce (nesází se abstrakty, prohlášení, poděkování) (výchozí)
+  %semestral,		  % semestrální práce (nesází se abstrakty, prohlášení, poděkování) (výchozí)
   %bachelor,			%	bakalářská práce
-  %master,			  % diplomová práce
+  master,			  % diplomová práce
   %treatise,			% pojednání o dizertační práci
   %doctoral,			% dizertační práce
 %
@@ -26,7 +26,8 @@
 %%% Jméno a příjmení autora ve tvaru
 %  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
 % Pokud osoba nemá titul před/za jménem, smažte celý řetězec '[...]'
-\author[Bc.]{Křestní}{Příjmení}
+\author[Bc.]{Matouš}{Hýbl}
+\butid{191600}
 
 %%% Pohlaví autora/autorky
 % (nepoužije se ve variantě english-czech ani english-slovak)
@@ -36,7 +37,7 @@
 %%% Jméno a příjmení vedoucího/školitele včetně titulů
 %  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
 % Pokud osoba nemá titul před/za jménem, smažte celý řetězec '[...]'
-\advisor[prof.\ Ing.]{Křestní}{Příjmení}[CSc.]
+\advisor[prof. Ing.]{Luděk}{Žalud}[Ph.D.]
 
 %%% Jméno a příjmení oponenta včetně titulů
 %  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
@@ -44,39 +45,18 @@
 % Nastavení oponenta se uplatní pouze v prezentaci k obhajobě;
 % v případě, že nechcete, aby se na titulním snímku prezentace zobrazoval oponent, pouze příkaz zakomentujte;
 % u obhajoby semestrální práce se oponent nezobrazuje (jelikož neexistuje)
-\opponent[doc.\ Mgr.]{Křestní}{Příjmení}[Ph.D.]
+\opponent[Ing.]{Lukáš}{Kopečný}[Ph.D.]
 
 %%% Název práce
 %  Parametr ve složených závorkách {} je název v originálním jazyce,
 %  parametr v hranatých závorkách [] je překlad (podle toho jaký je originální jazyk)
-\title[Title of Student's Thesis]{Název studentské práce}
+\title[Dvoukanálový kontrolér krokových motorů]{Two channel stepper motor controller}
 
-%%% Označení oboru studia
-%  Parametr ve složených závorkách {} je název oboru v originálním jazyce,
-%  parametr v hranatých závorkách [] je překlad
-\specialization[Teleinformatics]{Teleinformatika}
+\specialization[Kybernetika, Automatizace a Měření]{Cybernetics, Control and Measurements}
 
-%%% Označení ústavu
-%  Parametr ve složených závorkách {} je název ústavu v originálním jazyce,
-%  parametr v hranatých závorkách [] je překlad
-%\department[Department of Control and Instrumentation]{Ústav automatizace a měřicí techniky}
-%\department[Department of Biomedical Engineering]{Ústav biomedicínského inženýrství}
-%\department[Department of Electrical Power Engineering]{Ústav elektroenergetiky}
-%\department[Department of Electrical and Electronic Technology]{Ústav elektrotechnologie}
-%\department[Department of Physics]{Ústav fyziky}
-%\department[Department of Foreign Languages]{Ústav jazyků}
-%\department[Department of Mathematics]{Ústav matematiky}
-%\department[Department of Microelectronics]{Ústav mikroelektroniky}
-%\department[Department of Radio Electronics]{Ústav radioelektroniky}
-%\department[Department of Theoretical and Experimental Electrical Engineering]{Ústav teoretické a experimentální elektrotechniky}
-\department[Department of Telecommunications]{Ústav telekomunikací}
-%\department[Department of Power Electrical and Electronic Engineering]{Ústav výkonové elektrotechniky a elektroniky}
+\department[Ústav automatizace a měřicí techniky]{Department of Control and Instrumentation}
 
-%%% Označení fakulty
-%  Parametr ve složených závorkách {} je název fakulty v originálním jazyce,
-%  parametr v hranatých závorkách [] je překlad
-%\faculty[Faculty of Architecture]{Fakulta architektury}
-\faculty[Faculty of Electrical Engineering and~Communication]{Fakulta elektrotechniky a~komunikačních technologií}
+\faculty[Fakulta elektrotechniky a~komunikačních technologií]{Faculty of Electrical Engineering and~Communication}
 %\faculty[Faculty of Chemistry]{Fakulta chemická}
 %\faculty[Faculty of Information Technology]{Fakulta informačních technologií}
 %\faculty[Faculty of Business and Management]{Fakulta podnikatelská}
@@ -88,7 +68,8 @@
 \facultylogo[logo/FEKT_zkratka_barevne_PANTONE_CZ]{logo/UTKO_color_PANTONE_CZ}
 
 %%% Rok sepsání práce
-\graduateyear{2030}
+\graduateyear{2021}
+\academicyear{2020/21}
 
 %%% Datum obhajoby (uplatní se pouze v prezentaci k obhajobě)
 \date{11.\,11.\,1980} 
