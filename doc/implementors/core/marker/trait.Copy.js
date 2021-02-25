@@ -1,4 +1,4 @@
 (function() {var implementors = {};
-implementors["main"] = [{"text":"impl Copy for Schedule","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]}];
-implementors["sm4_firmware"] = [{"text":"impl Copy for NMTState","synthetic":false,"types":[]},{"text":"impl Copy for ObjectDictionary","synthetic":false,"types":[]}];
+implementors["main"] = [{"text":"impl Copy for Schedule","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Copy for Schedule&lt;'a&gt;","synthetic":false,"types":[]}];
+implementors["sm4_firmware"] = [{"text":"impl Copy for NMTState","synthetic":false,"types":[]},{"text":"impl Copy for ObjectDictionary","synthetic":false,"types":[]},{"text":"impl Copy for DriverState","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

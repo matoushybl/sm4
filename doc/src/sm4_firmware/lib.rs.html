@@ -225,6 +225,75 @@
 <span id="222">222</span>
 <span id="223">223</span>
 <span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 
@@ -232,7 +301,6 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">can</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">current_reference</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direction</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">float</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">leds</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">monitoring</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ramp</span>;
@@ -243,7 +311,7 @@
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::{<span class="ident">CurrentRef1Channel</span>, <span class="ident">CurrentRef2Channel</span>, <span class="ident">Dir1</span>, <span class="ident">Dir2</span>, <span class="ident">GPIO</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>, <span class="ident">NMTState</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">current_reference</span>::{<span class="ident">initialize_current_ref</span>, <span class="ident">Reference</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">direction</span>::<span class="ident">DirectionPin</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">leds</span>::<span class="ident">LEDs</span>;
@@ -252,9 +320,11 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_counter</span>::<span class="ident">Counter</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_timer</span>::<span class="ident">ControlTimer</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">usb</span>::<span class="ident">USBProtocol</span>;
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">cortex_m</span>::<span class="ident">peripheral</span>::<span class="ident">DWT</span>;
 <span class="kw">use</span> <span class="ident">defmt_rtt</span> <span class="kw">as</span> <span class="kw">_</span>; <span class="comment">// global logger</span>
 <span class="kw">use</span> <span class="ident">panic_probe</span> <span class="kw">as</span> <span class="kw">_</span>;
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">canopen</span>::<span class="ident">RxPDO1</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::{<span class="ident">Driver</span>, <span class="ident">Motor1</span>, <span class="ident">Motor2</span>};
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">dma</span>::<span class="ident">StreamsTuple</span>;
@@ -284,9 +354,19 @@
 
 <span class="doccomment">/// The object dictionary struct represents the global state of the driver</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">struct</span> <span class="ident">ObjectDictionary</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectDictionary</span> {
     <span class="ident">desired_speed1</span>: <span class="ident">f32</span>,
     <span class="ident">desired_speed2</span>: <span class="ident">f32</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">ObjectDictionary</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_desired_speed1</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {
+        <span class="self">self</span>.<span class="ident">desired_speed1</span> <span class="op">=</span> <span class="ident">speed</span>;
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_desired_speed2</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {
+        <span class="self">self</span>.<span class="ident">desired_speed2</span> <span class="op">=</span> <span class="ident">speed</span>;
+    }
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SM4</span> {
@@ -297,6 +377,30 @@
     <span class="ident">driver2</span>: <span class="ident">DriverWithGen</span><span class="op">&lt;</span><span class="ident">Motor2Driver</span><span class="op">&gt;</span>,
     <span class="ident">monitoring</span>: <span class="ident">Monitoring</span>,
     <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>,
+    <span class="ident">state</span>: <span class="ident">DriverState</span>,
+}
+
+<span class="kw">const</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">10</span>; <span class="comment">// ticks of a failsafe timer</span>
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="kw">struct</span> <span class="ident">DriverState</span> {
+    <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>,
+    <span class="ident">last_received_speed_command_down_counter</span>: <span class="ident">u8</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">DriverState</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_movement_blocked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">nmt_state</span> <span class="op">!</span><span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">Operational</span>
+            <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrement_last_received_speed_command_counter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invalidate_last_received_speed_command_counter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">=</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>;
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">SM4</span> {
@@ -369,7 +473,24 @@
             <span class="ident">can</span>,
             <span class="ident">monitoring</span>,
             <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>::<span class="ident">default</span>(),
+            <span class="ident">state</span>: <span class="ident">DriverState</span>::<span class="ident">default</span>(),
         }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">nmt_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">BootUp</span> {
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">nmt_state</span> <span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">PreOperational</span>;
+        }
+        <span class="kw">let</span> (<span class="ident">speed1</span>, <span class="ident">speed2</span>) <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>() {
+            (<span class="number">0.0</span>, <span class="number">0.0</span>)
+        } <span class="kw">else</span> {
+            (
+                <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">desired_speed1</span>,
+                <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">desired_speed2</span>,
+            )
+        };
+        <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">set_speed</span>(<span class="ident">speed1</span>);
+        <span class="self">self</span>.<span class="ident">driver2</span>.<span class="ident">set_speed</span>(<span class="ident">speed2</span>);
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">blink_leds</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -382,6 +503,10 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monitoring_complete</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">monitoring</span>.<span class="ident">transfer_complete</span>();
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_failsafe</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">decrement_last_received_speed_command_counter</span>();
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ramp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -405,9 +530,18 @@
                 <span class="ident">CANOpenMessage</span>::<span class="ident">TimeStamp</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">let</span> <span class="ident">speed</span> <span class="op">=</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>()[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">f32</span>;
-                    <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;speed: {:?}&quot;</span>, <span class="ident">speed</span>);
-                    <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">set_speed</span>(<span class="ident">speed</span>);
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">is_none</span>() {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Invalid RxPDO1 received.&quot;</span>);
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">pdo</span>) <span class="op">=</span> <span class="ident">RxPDO1</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>()) {
+                        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;speed: {:?}&quot;</span>, <span class="ident">pdo</span>.<span class="ident">driver1_speed</span>);
+                        <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">set_desired_speed1</span>(<span class="ident">pdo</span>.<span class="ident">driver1_speed</span>);
+                        <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">set_desired_speed2</span>(<span class="ident">pdo</span>.<span class="ident">driver2_speed</span>);
+                        <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
+                    } <span class="kw">else</span> {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO1 received.&quot;</span>);
+                    }
                 }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {}
@@ -432,6 +566,10 @@
 
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ramping_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
         <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">20</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">failsafe_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">10</span>
     }
 }
 

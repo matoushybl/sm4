@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Context","Execution context"]]});
+initSidebarItems({"struct":[["Context","Execution context"],["Resources","Resources `main` has access to"]]});

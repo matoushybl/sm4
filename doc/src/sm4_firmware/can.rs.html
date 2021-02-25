@@ -285,9 +285,10 @@
 <span id="282">282</span>
 <span id="283">283</span>
 <span id="284">284</span>
+<span id="285">285</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">bxcan</span>::<span class="ident">filter</span>::<span class="ident">Mask32</span>;
-<span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Can</span>, <span class="ident">Data</span>, <span class="ident">Frame</span>, <span class="ident">Interrupts</span>};
+<span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Can</span>, <span class="ident">Frame</span>, <span class="ident">Interrupts</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">embedded_can</span>::<span class="ident">Id</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
@@ -297,7 +298,6 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CANOpen</span> {
     <span class="ident">bus</span>: <span class="ident">BUS</span>,
     <span class="ident">id</span>: <span class="ident">u8</span>,
-    <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">CANOpen</span> {
@@ -315,18 +315,14 @@
             .<span class="ident">enable_bank</span>(<span class="number">0</span>, <span class="ident">Mask32</span>::<span class="ident">accept_all</span>());
         <span class="ident">bus</span>.<span class="ident">set_automatic_wakeup</span>(<span class="bool-val">true</span>);
         <span class="ident">nb</span>::<span class="macro">block</span><span class="macro">!</span>(<span class="ident">bus</span>.<span class="ident">enable</span>()).<span class="ident">unwrap</span>();
-        <span class="self">Self</span> {
-            <span class="ident">bus</span>,
-            <span class="ident">id</span>,
-            <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>::<span class="ident">BootUp</span>,
-        }
+        <span class="self">Self</span> { <span class="ident">bus</span>, <span class="ident">id</span> }
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_incoming_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">CANOpenMessage</span>, <span class="ident">Frame</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">nb</span>::<span class="macro">block</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">bus</span>.<span class="ident">receive</span>()) {
             <span class="prelude-val">Ok</span>(<span class="ident">frame</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Received can message: {:?}&quot;</span>, <span class="ident">frame</span>.<span class="ident">dlc</span>());
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">device</span>, <span class="ident">message</span>)) <span class="op">=</span> <span class="ident">frame</span>.<span class="ident">parse_id</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">message</span>) <span class="op">=</span> <span class="ident">frame</span>.<span class="ident">parse_id</span>() {
                     <span class="prelude-val">Some</span>((<span class="ident">message</span>, <span class="ident">frame</span>))
                 } <span class="kw">else</span> {
                     <span class="prelude-val">None</span>
@@ -409,21 +405,21 @@
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CANOpenFrame</span> {
-    <span class="kw">fn</span> <span class="ident">parse_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u8</span>, <span class="ident">CANOpenMessage</span>)<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">parse_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CANOpenMessage</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">CANOpenFrame</span> <span class="kw">for</span> <span class="ident">Frame</span> {
-    <span class="kw">fn</span> <span class="ident">parse_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u8</span>, <span class="ident">CANOpenMessage</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CANOpenMessage</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">frame_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">id</span>() {
             <span class="ident">Id</span>::<span class="ident">Standard</span>(<span class="ident">std</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">std</span>.<span class="ident">as_raw</span>(),
             <span class="ident">Id</span>::<span class="ident">Extended</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
         };
-        <span class="kw">let</span> <span class="ident">target_device</span> <span class="op">=</span> (<span class="ident">frame_id</span> <span class="op">&amp;</span> <span class="number">0x7f</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+        <span class="comment">// let target_device = (frame_id &amp; 0x7f) as u8;</span>
         <span class="kw">let</span> <span class="ident">message_id</span> <span class="op">=</span> <span class="ident">frame_id</span> <span class="op">&amp;</span> <span class="number">0xff80</span>;
         <span class="kw">match</span> <span class="ident">CANOpenMessage</span>::<span class="ident">try_from</span>(<span class="ident">message_id</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">message</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">target_device</span>, <span class="ident">message</span>)),
+            <span class="prelude-val">Ok</span>(<span class="ident">message</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">message</span>),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
         }
     }
@@ -437,12 +433,18 @@
     <span class="ident">ResetCommunication</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">NMTState</span> {
     <span class="ident">BootUp</span>,
     <span class="ident">Stopped</span>,
     <span class="ident">Operational</span>,
     <span class="ident">PreOperational</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">NMTState</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">NMTState</span>::<span class="ident">BootUp</span>
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">NMTState</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u8</span> {
