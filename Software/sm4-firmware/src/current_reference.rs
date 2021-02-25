@@ -26,7 +26,7 @@ macro_rules! reference {
 
         impl CurrentReference<$motor> for Reference<$ch> {
             fn set_current(&mut self, current: f32) {
-                let voltage = (crate::float::fabs(current) * MAX_V_REF as f32 / V_FS
+                let voltage = (sm4_shared::float::fabs(current) * MAX_V_REF as f32 / V_FS
                     * (R_SENSE + R_OFFSET)
                     / 0.707) as u16;
                 self.channel.set_value(voltage.min(MAX_V_REF));

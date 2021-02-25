@@ -1,4 +1,7 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
+
+pub mod canopen;
+pub mod float;
 
 use core::marker::PhantomData;
 
@@ -133,7 +136,7 @@ where
 
         if freq == 0.0 {
             self.reference.set_current(STANDSTILL_CURRENT);
-        } else if freq == self.current_step_frequency {
+        } else if float::fabs(freq - self.current_step_frequency) < core::f32::EPSILON {
             self.reference.set_current(CONSTANT_SPEED_CURRENT);
         } else {
             self.reference.set_current(ACCELERATION_CURRENT);
@@ -151,10 +154,10 @@ where
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn it_works() {
-//         assert_eq!(2 + 2, 4);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}

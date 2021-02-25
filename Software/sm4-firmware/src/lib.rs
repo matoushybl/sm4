@@ -4,7 +4,6 @@ pub mod board;
 pub mod can;
 pub mod current_reference;
 pub mod direction;
-pub mod float;
 pub mod leds;
 pub mod monitoring;
 pub mod ramp;
@@ -15,7 +14,7 @@ pub mod usb;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::board::{CurrentRef1Channel, CurrentRef2Channel, Dir1, Dir2, GPIO};
-use crate::can::{CANOpen, CANOpenMessage};
+use crate::can::{CANOpen, CANOpenMessage, NMTState};
 use crate::current_reference::{initialize_current_ref, Reference};
 use crate::direction::DirectionPin;
 use crate::leds::LEDs;
@@ -24,9 +23,11 @@ use crate::ramp::{DriverWithGen, TrapRampGen};
 use crate::step_counter::Counter;
 use crate::step_timer::ControlTimer;
 use crate::usb::USBProtocol;
+use core::convert::TryFrom;
 use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
 use panic_probe as _;
+use sm4_shared::canopen::RxPDO1;
 use sm4_shared::{Driver, Motor1, Motor2};
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple;
@@ -56,9 +57,19 @@ const SECOND: u32 = 168_000_000;
 
 /// The object dictionary struct represents the global state of the driver
 #[derive(Copy, Clone, Default)]
-struct ObjectDictionary {
+pub struct ObjectDictionary {
     desired_speed1: f32,
     desired_speed2: f32,
+}
+
+impl ObjectDictionary {
+    pub fn set_desired_speed1(&mut self, speed: f32) {
+        self.desired_speed1 = speed;
+    }
+
+    pub fn set_desired_speed2(&mut self, speed: f32) {
+        self.desired_speed2 = speed;
+    }
 }
 
 pub struct SM4 {
@@ -69,6 +80,30 @@ pub struct SM4 {
     driver2: DriverWithGen<Motor2Driver>,
     monitoring: Monitoring,
     object_dictionary: ObjectDictionary,
+    state: DriverState,
+}
+
+const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
+
+#[derive(Copy, Clone, Default)]
+struct DriverState {
+    nmt_state: NMTState,
+    last_received_speed_command_down_counter: u8,
+}
+
+impl DriverState {
+    pub fn is_movement_blocked(&self) -> bool {
+        self.nmt_state != NMTState::Operational
+            || self.last_received_speed_command_down_counter == 0
+    }
+
+    pub fn decrement_last_received_speed_command_counter(&mut self) {
+        self.last_received_speed_command_down_counter -= 1;
+    }
+
+    pub fn invalidate_last_received_speed_command_counter(&mut self) {
+        self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
+    }
 }
 
 impl SM4 {
@@ -141,7 +176,24 @@ impl SM4 {
             can,
             monitoring,
             object_dictionary: ObjectDictionary::default(),
+            state: DriverState::default(),
         }
+    }
+
+    pub fn run(&mut self) {
+        if self.state.nmt_state == NMTState::BootUp {
+            self.state.nmt_state = NMTState::PreOperational;
+        }
+        let (speed1, speed2) = if self.state.is_movement_blocked() {
+            (0.0, 0.0)
+        } else {
+            (
+                self.object_dictionary.desired_speed1,
+                self.object_dictionary.desired_speed2,
+            )
+        };
+        self.driver1.set_speed(speed1);
+        self.driver2.set_speed(speed2);
     }
 
     pub fn blink_leds(&mut self) {
@@ -154,6 +206,10 @@ impl SM4 {
 
     pub fn monitoring_complete(&mut self) {
         self.monitoring.transfer_complete();
+    }
+
+    pub fn update_failsafe(&mut self) {
+        self.state.decrement_last_received_speed_command_counter();
     }
 
     pub fn ramp(&mut self) {
@@ -177,9 +233,18 @@ impl SM4 {
                 CANOpenMessage::TimeStamp => {}
                 CANOpenMessage::TxPDO1 => {}
                 CANOpenMessage::RxPDO1 => {
-                    let speed = frame.data().unwrap()[0] as f32;
-                    defmt::error!("speed: {:?}", speed);
-                    self.driver1.set_speed(speed);
+                    if frame.data().is_none() {
+                        defmt::warn!("Invalid RxPDO1 received.");
+                        return;
+                    }
+                    if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
+                        defmt::error!("speed: {:?}", pdo.driver1_speed);
+                        self.object_dictionary.set_desired_speed1(pdo.driver1_speed);
+                        self.object_dictionary.set_desired_speed2(pdo.driver2_speed);
+                        self.state.invalidate_last_received_speed_command_counter();
+                    } else {
+                        defmt::warn!("Malformed RxPDO1 received.");
+                    }
                 }
                 CANOpenMessage::TxPDO2 => {}
                 CANOpenMessage::RxPDO2 => {}
@@ -204,6 +269,10 @@ impl SM4 {
 
     pub const fn ramping_period() -> u32 {
         SECOND / 20
+    }
+
+    pub const fn failsafe_period() -> u32 {
+        SECOND / 10
     }
 }
 

@@ -31,14 +31,17 @@ const APP: () = {
         cx.schedule
             .ramping(now + SM4::ramping_period().cycles())
             .unwrap();
+        cx.schedule
+            .ramping(now + SM4::failsafe_period().cycles())
+            .unwrap();
 
         init::LateResources { driver }
     }
 
-    #[idle(resources = [])]
-    fn main(_cx: main::Context) -> ! {
+    #[idle(resources = [driver])]
+    fn main(mut cx: main::Context) -> ! {
         loop {
-            cortex_m::asm::nop();
+            cx.resources.driver.lock(|driver| driver.run());
         }
     }
 
@@ -71,6 +74,15 @@ const APP: () = {
 
         cx.schedule
             .ramping(cx.scheduled + SM4::ramping_period().cycles())
+            .unwrap();
+    }
+
+    #[task(resources = [driver], schedule = [failsafe])]
+    fn failsafe(cx: failsafe::Context) {
+        cx.resources.driver.update_failsafe();
+
+        cx.schedule
+            .failsafe(cx.scheduled + SM4::failsafe_period().cycles())
             .unwrap();
     }
 

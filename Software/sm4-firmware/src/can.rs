@@ -1,5 +1,5 @@
 use bxcan::filter::Mask32;
-use bxcan::{Can, Data, Frame, Interrupts};
+use bxcan::{Can, Frame, Interrupts};
 use core::convert::TryFrom;
 use embedded_can::Id;
 use stm32f4xx_hal as hal;
@@ -9,7 +9,6 @@ type BUS = Can<hal::can::Can<hal::pac::CAN1>>;
 pub struct CANOpen {
     bus: BUS,
     id: u8,
-    nmt_state: NMTState,
 }
 
 impl CANOpen {
@@ -27,18 +26,14 @@ impl CANOpen {
             .enable_bank(0, Mask32::accept_all());
         bus.set_automatic_wakeup(true);
         nb::block!(bus.enable()).unwrap();
-        Self {
-            bus,
-            id,
-            nmt_state: NMTState::BootUp,
-        }
+        Self { bus, id }
     }
 
     pub fn process_incoming_frame(&mut self) -> Option<(CANOpenMessage, Frame)> {
         match nb::block!(self.bus.receive()) {
             Ok(frame) => {
                 defmt::error!("Received can message: {:?}", frame.dlc());
-                if let Some((device, message)) = frame.parse_id() {
+                if let Some(message) = frame.parse_id() {
                     Some((message, frame))
                 } else {
                     None
@@ -121,21 +116,21 @@ impl From<CANOpenMessage> for u16 {
 }
 
 pub trait CANOpenFrame {
-    fn parse_id(&self) -> Option<(u8, CANOpenMessage)>;
+    fn parse_id(&self) -> Option<CANOpenMessage>;
 }
 
 impl CANOpenFrame for Frame {
-    fn parse_id(&self) -> Option<(u8, CANOpenMessage)> {
+    fn parse_id(&self) -> Option<CANOpenMessage> {
         let frame_id = match self.id() {
             Id::Standard(std) => std.as_raw(),
             Id::Extended(_) => {
                 return None;
             }
         };
-        let target_device = (frame_id & 0x7f) as u8;
+        // let target_device = (frame_id & 0x7f) as u8;
         let message_id = frame_id & 0xff80;
         match CANOpenMessage::try_from(message_id) {
-            Ok(message) => Some((target_device, message)),
+            Ok(message) => Some(message),
             Err(_) => None,
         }
     }
@@ -149,12 +144,18 @@ pub enum NMTRequestedState {
     ResetCommunication,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum NMTState {
     BootUp,
     Stopped,
     Operational,
     PreOperational,
+}
+
+impl Default for NMTState {
+    fn default() -> Self {
+        NMTState::BootUp
+    }
 }
 
 impl From<NMTState> for u8 {
