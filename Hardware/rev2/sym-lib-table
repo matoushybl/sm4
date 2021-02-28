@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name usbc)(type Legacy)(uri /home/matous/Development/Rust/Embedded/Projects/sm4/Hardware/Libs/usbc/Type-C.lib)(options "")(descr ""))
+  (lib (name tmc)(type Legacy)(uri /home/matous/Development/Rust/Embedded/Projects/sm4/Hardware/Libs/tmc2226/2021-02-26_21-29-34.lib)(options "")(descr ""))
+)

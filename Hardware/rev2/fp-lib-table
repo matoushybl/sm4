@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name usbc)(type KiCad)(uri /home/matous/Development/Rust/Embedded/Projects/sm4/Hardware/Libs/usbc)(options "")(descr ""))
+  (lib (name tmc)(type KiCad)(uri /home/matous/Development/Rust/Embedded/Projects/sm4/Hardware/Libs/tmc2226/footprints.pretty)(options "")(descr ""))
+  (lib (name graphics)(type KiCad)(uri ${KIPRJMOD}/graphics.pretty)(options "")(descr ""))
+)
