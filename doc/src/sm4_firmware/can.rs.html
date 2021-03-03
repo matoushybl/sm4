@@ -286,11 +286,44 @@
 <span id="283">283</span>
 <span id="284">284</span>
 <span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">bxcan</span>::<span class="ident">filter</span>::<span class="ident">Mask32</span>;
-<span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Can</span>, <span class="ident">Frame</span>, <span class="ident">Interrupts</span>};
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
-<span class="kw">use</span> <span class="ident">embedded_can</span>::<span class="ident">Id</span>;
+<span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Can</span>, <span class="ident">Data</span>, <span class="ident">Frame</span>, <span class="ident">Interrupts</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+<span class="kw">use</span> <span class="ident">embedded_can</span>::{<span class="ident">Id</span>, <span class="ident">StandardId</span>};
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
 
 <span class="kw">type</span> <span class="ident">BUS</span> <span class="op">=</span> <span class="ident">Can</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">can</span>::<span class="ident">Can</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">CAN1</span><span class="op">&gt;</span><span class="op">&gt;</span>;
@@ -321,7 +354,6 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_incoming_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">CANOpenMessage</span>, <span class="ident">Frame</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">nb</span>::<span class="macro">block</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">bus</span>.<span class="ident">receive</span>()) {
             <span class="prelude-val">Ok</span>(<span class="ident">frame</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Received can message: {:?}&quot;</span>, <span class="ident">frame</span>.<span class="ident">dlc</span>());
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">message</span>) <span class="op">=</span> <span class="ident">frame</span>.<span class="ident">parse_id</span>() {
                     <span class="prelude-val">Some</span>((<span class="ident">message</span>, <span class="ident">frame</span>))
                 } <span class="kw">else</span> {
@@ -334,8 +366,17 @@
             }
         }
     }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="ident">CANOpenMessage</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
+        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">Frame</span>::<span class="ident">new_data</span>(
+            <span class="ident">message</span>.<span class="ident">message_id_with_device</span>(<span class="self">self</span>.<span class="ident">id</span>),
+            <span class="ident">Data</span>::<span class="ident">new</span>(<span class="ident">data</span>).<span class="ident">unwrap</span>(),
+        );
+        <span class="ident">nb</span>::<span class="macro">block</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">bus</span>.<span class="ident">transmit</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">unwrap</span>()
+    }
 }
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CANOpenMessage</span> {
     <span class="ident">NMTNodeControl</span>,
     <span class="ident">GlobalFailsafeCommand</span>,
@@ -381,8 +422,8 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CANOpenMessage</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u16</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">message</span>: <span class="ident">CANOpenMessage</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CANOpenMessage</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u16</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="ident">CANOpenMessage</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">message</span> {
             <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeControl</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x000</span>,
             <span class="ident">CANOpenMessage</span>::<span class="ident">GlobalFailsafeCommand</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x001</span>,
@@ -400,6 +441,31 @@
             <span class="ident">CANOpenMessage</span>::<span class="ident">TxSDO</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x580</span>,
             <span class="ident">CANOpenMessage</span>::<span class="ident">RxSDO</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x600</span>,
             <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeMonitoring</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x700</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">CANOpenMessage</span> {
+    <span class="kw">fn</span> <span class="ident">message_id_with_device</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">device_id</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StandardId</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeControl</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">GlobalFailsafeCommand</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">Sync</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TimeStamp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StandardId</span>::<span class="ident">new</span>(<span class="ident">u16</span>::<span class="ident">from</span>(<span class="self">self</span>)).<span class="ident">unwrap</span>(),
+            <span class="ident">CANOpenMessage</span>::<span class="ident">Emergency</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO1</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO1</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO2</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO3</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO3</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO4</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO4</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">TxSDO</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">RxSDO</span>
+            <span class="op">|</span> <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeMonitoring</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">StandardId</span>::<span class="ident">new</span>(<span class="ident">u16</span>::<span class="ident">from</span>(<span class="self">self</span>) <span class="op">|</span> <span class="ident">device_id</span> <span class="kw">as</span> <span class="ident">u16</span>).<span class="ident">unwrap</span>()
+            }
         }
     }
 }

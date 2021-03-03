@@ -1,4 +1,4 @@
 (function() {var implementors = {};
 implementors["main"] = [{"text":"impl Clone for Schedule","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Clone for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Clone for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Clone for Schedule&lt;'a&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'a&gt; Clone for Schedule&lt;'a&gt;","synthetic":false,"types":[]}];
-implementors["sm4_firmware"] = [{"text":"impl Clone for NMTState","synthetic":false,"types":[]},{"text":"impl Clone for ObjectDictionary","synthetic":false,"types":[]},{"text":"impl Clone for DriverState","synthetic":false,"types":[]}];
+implementors["sm4_firmware"] = [{"text":"impl Clone for CANOpenMessage","synthetic":false,"types":[]},{"text":"impl Clone for NMTState","synthetic":false,"types":[]},{"text":"impl Clone for ObjectDictionary","synthetic":false,"types":[]},{"text":"impl Clone for DriverState","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

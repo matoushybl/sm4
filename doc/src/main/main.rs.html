@@ -120,7 +120,7 @@
         <span class="ident">driver</span>: <span class="ident">SM4</span>,
     }
 
-    <span class="attribute">#[<span class="ident">init</span>(<span class="ident">schedule</span> <span class="op">=</span> [<span class="ident">blink</span>, <span class="ident">monitoring</span>, <span class="ident">ramping</span>]</span>)]
+    <span class="attribute">#[<span class="ident">init</span>(<span class="ident">schedule</span> <span class="op">=</span> [<span class="ident">blink</span>, <span class="ident">monitoring</span>, <span class="ident">ramping</span>, <span class="ident">failsafe</span>]</span>)]
     <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">cx</span>: <span class="ident">init</span>::<span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">init</span>::<span class="ident">LateResources</span> {
         <span class="kw">let</span> <span class="ident">core</span>: <span class="ident">rtic</span>::<span class="ident">Peripherals</span> <span class="op">=</span> <span class="ident">cx</span>.<span class="ident">core</span>;
         <span class="kw">let</span> <span class="ident">device</span>: <span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">Peripherals</span> <span class="op">=</span> <span class="ident">cx</span>.<span class="ident">device</span>;
@@ -138,7 +138,7 @@
             .<span class="ident">ramping</span>(<span class="ident">now</span> <span class="op">+</span> <span class="ident">SM4</span>::<span class="ident">ramping_period</span>().<span class="ident">cycles</span>())
             .<span class="ident">unwrap</span>();
         <span class="ident">cx</span>.<span class="ident">schedule</span>
-            .<span class="ident">ramping</span>(<span class="ident">now</span> <span class="op">+</span> <span class="ident">SM4</span>::<span class="ident">failsafe_period</span>().<span class="ident">cycles</span>())
+            .<span class="ident">failsafe</span>(<span class="ident">now</span> <span class="op">+</span> <span class="ident">SM4</span>::<span class="ident">failsafe_period</span>().<span class="ident">cycles</span>())
             .<span class="ident">unwrap</span>();
 
         <span class="ident">init</span>::<span class="ident">LateResources</span> { <span class="ident">driver</span> }
