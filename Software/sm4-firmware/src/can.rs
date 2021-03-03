@@ -1,7 +1,7 @@
 use bxcan::filter::Mask32;
-use bxcan::{Can, Frame, Interrupts};
-use core::convert::TryFrom;
-use embedded_can::Id;
+use bxcan::{Can, Data, Frame, Interrupts};
+use core::convert::{TryFrom, TryInto};
+use embedded_can::{Id, StandardId};
 use stm32f4xx_hal as hal;
 
 type BUS = Can<hal::can::Can<hal::pac::CAN1>>;
@@ -32,7 +32,6 @@ impl CANOpen {
     pub fn process_incoming_frame(&mut self) -> Option<(CANOpenMessage, Frame)> {
         match nb::block!(self.bus.receive()) {
             Ok(frame) => {
-                defmt::error!("Received can message: {:?}", frame.dlc());
                 if let Some(message) = frame.parse_id() {
                     Some((message, frame))
                 } else {
@@ -45,8 +44,17 @@ impl CANOpen {
             }
         }
     }
+
+    pub fn send(&mut self, message: CANOpenMessage, data: &[u8]) {
+        let frame = Frame::new_data(
+            message.message_id_with_device(self.id),
+            Data::new(data).unwrap(),
+        );
+        nb::block!(self.bus.transmit(&frame)).map(|_| ()).unwrap()
+    }
 }
 
+#[derive(Copy, Clone)]
 pub enum CANOpenMessage {
     NMTNodeControl,
     GlobalFailsafeCommand,
@@ -92,8 +100,8 @@ impl TryFrom<u16> for CANOpenMessage {
     }
 }
 
-impl From<CANOpenMessage> for u16 {
-    fn from(message: CANOpenMessage) -> Self {
+impl From<&CANOpenMessage> for u16 {
+    fn from(message: &CANOpenMessage) -> Self {
         match message {
             CANOpenMessage::NMTNodeControl => 0x000,
             CANOpenMessage::GlobalFailsafeCommand => 0x001,
@@ -111,6 +119,31 @@ impl From<CANOpenMessage> for u16 {
             CANOpenMessage::TxSDO => 0x580,
             CANOpenMessage::RxSDO => 0x600,
             CANOpenMessage::NMTNodeMonitoring => 0x700,
+        }
+    }
+}
+
+impl CANOpenMessage {
+    fn message_id_with_device(&self, device_id: u8) -> StandardId {
+        match self {
+            CANOpenMessage::NMTNodeControl
+            | CANOpenMessage::GlobalFailsafeCommand
+            | CANOpenMessage::Sync
+            | CANOpenMessage::TimeStamp => StandardId::new(u16::from(self)).unwrap(),
+            CANOpenMessage::Emergency
+            | CANOpenMessage::TxPDO1
+            | CANOpenMessage::RxPDO1
+            | CANOpenMessage::TxPDO2
+            | CANOpenMessage::RxPDO2
+            | CANOpenMessage::TxPDO3
+            | CANOpenMessage::RxPDO3
+            | CANOpenMessage::TxPDO4
+            | CANOpenMessage::RxPDO4
+            | CANOpenMessage::TxSDO
+            | CANOpenMessage::RxSDO
+            | CANOpenMessage::NMTNodeMonitoring => {
+                StandardId::new(u16::from(self) | device_id as u16).unwrap()
+            }
         }
     }
 }

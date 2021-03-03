@@ -14,7 +14,7 @@ const APP: () = {
         driver: SM4,
     }
 
-    #[init(schedule = [blink, monitoring, ramping])]
+    #[init(schedule = [blink, monitoring, ramping, failsafe])]
     fn init(cx: init::Context) -> init::LateResources {
         let core: rtic::Peripherals = cx.core;
         let device: hal::pac::Peripherals = cx.device;
@@ -32,7 +32,7 @@ const APP: () = {
             .ramping(now + SM4::ramping_period().cycles())
             .unwrap();
         cx.schedule
-            .ramping(now + SM4::failsafe_period().cycles())
+            .failsafe(now + SM4::failsafe_period().cycles())
             .unwrap();
 
         init::LateResources { driver }

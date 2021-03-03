@@ -1724,7 +1724,7 @@ Text GLabel 15200 5800 1    50   Input ~ 0
 ERR
 Wire Wire Line
 	15200 5800 15200 5900
-Text GLabel 2800 1300 2    50   Input ~ 0
+Text GLabel 2800 1600 2    50   Input ~ 0
 VBAT
 Text GLabel 2800 3900 2    50   Input ~ 0
 CAN_TX
@@ -1892,9 +1892,7 @@ Text GLabel 1300 3600 0    50   Input ~ 0
 STEP1
 Wire Wire Line
 	1300 3600 1350 3600
-Text GLabel 2800 1600 2    50   Input ~ 0
-MODE1
-Text GLabel 2800 1400 2    50   Input ~ 0
+Text GLabel 2800 1700 2    50   Input ~ 0
 DIR1
 Text GLabel 2800 4100 2    50   Input ~ 0
 SDA
@@ -1908,25 +1906,19 @@ Wire Wire Line
 	7475 1150 7925 1150
 Wire Wire Line
 	2800 4500 2750 4500
-Text GLabel 2800 2300 2    50   Input ~ 0
-MODE2
-Text GLabel 2800 4200 2    50   Input ~ 0
+Text GLabel 1300 3900 0    50   Input ~ 0
 DIR2
 Text GLabel 2800 3700 2    50   Input ~ 0
 STATUS
 Text GLabel 2800 3600 2    50   Input ~ 0
 ERR
 NoConn ~ 2750 3500
-NoConn ~ 2750 3400
-NoConn ~ 2750 3300
 NoConn ~ 2750 3200
-NoConn ~ 2750 2800
 NoConn ~ 2750 4300
 NoConn ~ 2750 4400
 NoConn ~ 1350 4500
 NoConn ~ 1350 3700
 NoConn ~ 1350 3800
-NoConn ~ 1350 3900
 NoConn ~ 1350 4000
 NoConn ~ 1350 4100
 NoConn ~ 1350 4200
@@ -1938,8 +1930,6 @@ NoConn ~ 1350 3100
 NoConn ~ 1350 3000
 NoConn ~ 1350 2800
 NoConn ~ 2750 3000
-Wire Wire Line
-	2800 1600 2750 1600
 Wire Wire Line
 	2800 4200 2750 4200
 $Comp
@@ -2618,20 +2608,6 @@ Wire Wire Line
 	3750 8050 3700 8050
 Text GLabel 2800 2200 2    50   Input ~ 0
 DRV_UART
-$Comp
-L MCU_ST_STM32F4:STM32F405RGTx U1
-U 1 1 5FF6DDC0
-P 2050 2900
-F 0 "U1" H 2600 4650 50  0000 C CNN
-F 1 "STM32F405RGTx" H 2500 1150 50  0000 C CNN
-F 2 "Package_QFP:LQFP-64_10x10mm_P0.5mm" H 1450 1200 50  0001 R CNN
-F 3 "http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/DM00037051.pdf" H 2050 2900 50  0001 C CNN
-F 4 "C15742" H 2050 2900 50  0001 C CNN "LCSC"
-	1    2050 2900
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2800 2300 2750 2300
 Text GLabel 4450 7525 0    50   Input ~ 0
 OA11
 Text GLabel 4450 7425 0    50   Input ~ 0
@@ -2651,9 +2627,6 @@ Wire Wire Line
 NoConn ~ 2750 3100
 NoConn ~ 1350 3400
 NoConn ~ 1350 3500
-NoConn ~ 2750 1500
-NoConn ~ 2750 1700
-NoConn ~ 2750 1800
 NoConn ~ 2750 1900
 NoConn ~ 2750 2000
 NoConn ~ 2100 7350
@@ -3388,10 +3361,10 @@ Connection ~ 8700 3400
 Wire Wire Line
 	8700 3400 8625 3400
 $Comp
-L Device:LED_Small D?
+L Device:LED_Small D1
 U 1 1 605BEF68
 P 15700 6250
-F 0 "D?" V 15746 6180 50  0000 R CNN
+F 0 "D1" V 15746 6180 50  0000 R CNN
 F 1 "LED_Small" V 15625 6250 50  0000 R CNN
 F 2 "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder" V 15700 6250 50  0001 C CNN
 F 3 "~" V 15700 6250 50  0001 C CNN
@@ -3400,10 +3373,10 @@ F 4 "C72038" H 15700 6250 50  0001 C CNN "LCSC"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Device:R_Small R?
+L Device:R_Small R9
 U 1 1 605BEF6F
 P 15700 6000
-F 0 "R?" H 15641 5954 50  0000 R CNN
+F 0 "R9" H 15641 5954 50  0000 R CNN
 F 1 "10k" H 15641 6045 50  0000 R CNN
 F 2 "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder" H 15700 6000 50  0001 C CNN
 F 3 "~" H 15700 6000 50  0001 C CNN
@@ -3412,10 +3385,10 @@ F 4 "C25879" H 15700 6000 50  0001 C CNN "LCSC"
 	-1   0    0    1   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0132
 U 1 1 605BEF75
 P 15700 6400
-F 0 "#PWR?" H 15700 6150 50  0001 C CNN
+F 0 "#PWR0132" H 15700 6150 50  0001 C CNN
 F 1 "GND" H 15705 6227 50  0000 C CNN
 F 2 "" H 15700 6400 50  0001 C CNN
 F 3 "" H 15700 6400 50  0001 C CNN
@@ -3429,14 +3402,54 @@ Wire Wire Line
 Wire Wire Line
 	15700 5800 15700 5900
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR0133
 U 1 1 605FA742
 P 15700 5800
-F 0 "#PWR?" H 15700 5650 50  0001 C CNN
+F 0 "#PWR0133" H 15700 5650 50  0001 C CNN
 F 1 "VCC" H 15715 5973 50  0000 C CNN
 F 2 "" H 15700 5800 50  0001 C CNN
 F 3 "" H 15700 5800 50  0001 C CNN
 	1    15700 5800
 	1    0    0    -1  
 $EndComp
+NoConn ~ 2750 2300
+Text GLabel 2800 1300 2    50   Input ~ 0
+ENC2A
+Text GLabel 2800 1400 2    50   Input ~ 0
+ENC2B
+$Comp
+L MCU_ST_STM32F4:STM32F405RGTx U1
+U 1 1 5FF6DDC0
+P 2050 2900
+F 0 "U1" H 2600 4650 50  0000 C CNN
+F 1 "STM32F405RGTx" H 2500 1150 50  0000 C CNN
+F 2 "Package_QFP:LQFP-64_10x10mm_P0.5mm" H 1450 1200 50  0001 R CNN
+F 3 "http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/DM00037051.pdf" H 2050 2900 50  0001 C CNN
+F 4 "C15742" H 2050 2900 50  0001 C CNN "LCSC"
+	1    2050 2900
+	1    0    0    -1  
+$EndComp
+Text GLabel 2800 1500 2    50   Input ~ 0
+ENC2I
+Wire Wire Line
+	2800 1500 2750 1500
+Wire Wire Line
+	2800 1600 2750 1600
+Wire Wire Line
+	2800 1700 2750 1700
+Text GLabel 2800 2800 2    50   Input ~ 0
+ENC1A
+Text GLabel 2800 3300 2    50   Input ~ 0
+ENC1B
+Wire Wire Line
+	2800 3300 2750 3300
+Text GLabel 2800 3400 2    50   Input ~ 0
+ENC1I
+Wire Wire Line
+	2800 3400 2750 3400
+Wire Wire Line
+	1350 3900 1300 3900
+Wire Wire Line
+	2800 2800 2750 2800
+NoConn ~ 2750 1800
 $EndSCHEMATC

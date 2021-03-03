@@ -27,7 +27,7 @@ use core::convert::TryFrom;
 use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
 use panic_probe as _;
-use sm4_shared::canopen::RxPDO1;
+use sm4_shared::canopen::{RxPDO1, TxPDO1};
 use sm4_shared::{Driver, Motor1, Motor2};
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple;
@@ -227,6 +227,13 @@ impl SM4 {
                 CANOpenMessage::NMTNodeControl => {}
                 CANOpenMessage::GlobalFailsafeCommand => {}
                 CANOpenMessage::Sync => {
+                    let pdo = TxPDO1 {
+                        battery_voltage: (self.monitoring.get_battery_voltage() * 1000.0) as u16,
+                        temperature: (self.monitoring.get_temperature() * 10.0) as u16,
+                    };
+                    let mut buffer = [0u8; 8];
+                    let size = pdo.to_raw(&mut buffer).unwrap();
+                    self.can.send(CANOpenMessage::TxPDO1, &buffer[..size]);
                     defmt::error!("sync received");
                 }
                 CANOpenMessage::Emergency => {}
