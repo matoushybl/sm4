@@ -1,6 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
 pub mod canopen;
+pub mod encoder;
 pub mod float;
 
 use core::marker::PhantomData;
