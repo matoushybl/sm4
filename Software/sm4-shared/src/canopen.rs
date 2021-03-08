@@ -7,7 +7,7 @@ pub struct RxPDO1 {
 }
 
 impl RxPDO1 {
-    const SIZE: usize = 4;
+    const SIZE: usize = 8;
 }
 
 impl TryFrom<&[u8]> for RxPDO1 {

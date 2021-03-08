@@ -2,7 +2,7 @@
 <export version="D">
   <design>
     <source>/home/matous/Development/Rust/Embedded/Projects/sm4/Hardware/rev2/sm4.sch</source>
-    <date>Ne 7. března 2021, 22:28:47</date>
+    <date>Po 8. března 2021, 20:20:17</date>
     <tool>Eeschema 5.1.9</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -554,7 +554,7 @@
       <footprint>LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder</footprint>
       <datasheet>~</datasheet>
       <fields>
-        <field name="LCSC">C72038</field>
+        <field name="LCSC"> C72043</field>
       </fields>
       <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
@@ -576,7 +576,7 @@
       <footprint>LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder</footprint>
       <datasheet>~</datasheet>
       <fields>
-        <field name="LCSC">C72038</field>
+        <field name="LCSC"> C2286</field>
       </fields>
       <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
@@ -843,22 +843,16 @@
     </comp>
     <comp ref="R1">
       <value>0.22</value>
-      <footprint>Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder</footprint>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder</footprint>
       <datasheet>~</datasheet>
-      <fields>
-        <field name="LCSC">C20686</field>
-      </fields>
       <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamp>60C49D4B</tstamp>
     </comp>
     <comp ref="R2">
       <value>0.22</value>
-      <footprint>Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder</footprint>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder</footprint>
       <datasheet>~</datasheet>
-      <fields>
-        <field name="LCSC">C20686</field>
-      </fields>
       <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamp>60C4AD42</tstamp>
@@ -1045,22 +1039,16 @@
     </comp>
     <comp ref="R3">
       <value>0.22</value>
-      <footprint>Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder</footprint>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder</footprint>
       <datasheet>~</datasheet>
-      <fields>
-        <field name="LCSC">C20686</field>
-      </fields>
       <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamp>617EC43A</tstamp>
     </comp>
     <comp ref="R5">
       <value>0.22</value>
-      <footprint>Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder</footprint>
+      <footprint>Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder</footprint>
       <datasheet>~</datasheet>
-      <fields>
-        <field name="LCSC">C20686</field>
-      </fields>
       <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamp>617EC441</tstamp>
