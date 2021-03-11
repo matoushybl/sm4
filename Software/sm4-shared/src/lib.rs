@@ -1,3 +1,8 @@
+//! The shared library for the SM4 - dual channel stepper motor controller.
+//!
+//! This shared library contains the abstractions for motor control and common data structures
+//! for interfacing with the control software.
+
 #![cfg_attr(not(test), no_std)]
 
 pub mod canopen;
@@ -5,6 +10,38 @@ pub mod encoder;
 pub mod float;
 
 use core::marker::PhantomData;
+
+/// This enum represents the direction where the motor is turning when looking at the shaft.
+#[derive(Copy, Clone, PartialEq)]
+pub enum Direction {
+    Clockwise,
+    CounterClockwise,
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Self::Clockwise
+    }
+}
+
+impl Direction {
+    /// Returns the opposite direction. `CounterClockwise` when `Clockwise` is selected and vice-versa.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Direction::Clockwise => Direction::CounterClockwise,
+            Direction::CounterClockwise => Direction::CounterClockwise,
+        }
+    }
+
+    /// In motor control the direction of rotation is usually denoted by a positive or negative number.
+    /// This method returns `1` for `Clockwise` and `-1` for `CounterClockwise`
+    pub fn multiplier(&self) -> i32 {
+        match self {
+            Direction::Clockwise => 1,
+            Direction::CounterClockwise => -1,
+        }
+    }
+}
 
 /// Marker struct denoting the first motor.
 /// The struct is meant to be used in trait implementations to provide extra level of type safety.
@@ -33,35 +70,6 @@ pub trait StepGenerator<M> {
     /// # Arguments
     /// * freq - frequency of whole steps output by the generator **not microsteps**.
     fn set_step_frequency(&mut self, freq: f32);
-}
-
-/// This enum represents the direction where the motor is turning.
-#[derive(Copy, Clone)]
-pub enum Direction {
-    Clockwise,
-    CounterClockwise,
-}
-
-impl Default for Direction {
-    fn default() -> Self {
-        Self::Clockwise
-    }
-}
-
-impl Direction {
-    pub fn opposite(&self) -> Self {
-        match self {
-            Direction::Clockwise => Direction::CounterClockwise,
-            Direction::CounterClockwise => Direction::CounterClockwise,
-        }
-    }
-
-    pub fn multiplier(&self) -> i32 {
-        match self {
-            Direction::Clockwise => 1,
-            Direction::CounterClockwise => -1,
-        }
-    }
 }
 
 /// The `DirectionController` interface specifies a way of controlling direction where the motor is turning.
@@ -152,13 +160,5 @@ where
 
     fn reset_step_counter(&mut self) {
         self.counter.reset_steps();
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }
