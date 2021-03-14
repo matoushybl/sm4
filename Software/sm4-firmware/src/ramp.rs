@@ -49,7 +49,7 @@ where
 
     pub fn update(&mut self) {
         let new_speed = self.ramp_gen.generate(self.target_speed) * 200.0;
-        self.driver.set_step_frequency(new_speed);
+        self.driver.set_output_frequency(new_speed);
     }
 
     pub fn set_speed(&mut self, speed: f32) {

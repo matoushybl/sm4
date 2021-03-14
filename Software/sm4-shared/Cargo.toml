@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 embedded-time = "0.10.1"
+embedded-hal = "0.2.4"

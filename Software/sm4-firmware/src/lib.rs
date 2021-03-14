@@ -13,53 +13,57 @@ pub mod usb;
 
 use core::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::board::{CurrentRef1Channel, CurrentRef2Channel, Dir1, Dir2, GPIO};
+use crate::board::{CurrentRef1Channel, CurrentRef2Channel, Dir1, Dir2, Step1, Step2, GPIO};
 use crate::can::{CANOpen, CANOpenMessage, NMTState};
-use crate::current_reference::{initialize_current_ref, Reference};
-use crate::direction::DirectionPin;
+use crate::current_reference::{initialize_current_ref, CurrentDACChannel};
 use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
 use crate::ramp::{DriverWithGen, TrapRampGen};
-use crate::step_counter::Counter;
-use crate::step_timer::ControlTimer;
+use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
 use core::convert::TryFrom;
 use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
 use panic_probe as _;
 use sm4_shared::canopen::{RxPDO1, TxPDO1};
-use sm4_shared::{Driver, Motor1, Motor2};
+use sm4_shared::tmc2100::TMC2100;
+use sm4_shared::{StepperDriver, TMC2100};
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple;
-use stm32f4xx_hal::gpio::GpioExt;
+use stm32f4xx_hal::gpio::gpioa::PA;
+use stm32f4xx_hal::gpio::{GpioExt, Output, PushPull};
 use stm32f4xx_hal::rcc::RccExt;
 use stm32f4xx_hal::time::U32Ext; // memory layout
 
 const CAN_ID: u8 = 0x01;
 
-type Motor1Driver = Driver<
-    Motor1,
-    ControlTimer<hal::pac::TIM8>,
-    DirectionPin<Dir1>,
-    Counter<hal::pac::TIM5>,
-    Reference<CurrentRef1Channel>,
->;
-
-type Motor2Driver = Driver<
-    Motor2,
-    ControlTimer<hal::pac::TIM1>,
-    DirectionPin<Dir2>,
-    Counter<hal::pac::TIM2>,
-    Reference<CurrentRef2Channel>,
->;
+type Motor1Driver =
+    TMC2100<StepGeneratorTimer<hal::pac::TIM8>, Step1, Dir1, CurrentDACChannel<CurrentRef1Channel>>;
+type Motor2Driver =
+    TMC2100<StepGeneratorTimer<hal::pac::TIM1>, Step2, Dir2, CurrentDACChannel<CurrentRef2Channel>>;
 
 const SECOND: u32 = 168_000_000;
 
 /// The object dictionary struct represents the global state of the driver
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone)]
 pub struct ObjectDictionary {
     desired_speed1: f32,
     desired_speed2: f32,
+    standstill_current: f32,
+    acceleration_current: f32,
+    constant_speed_current: f32,
+}
+
+impl Default for ObjectDictionary {
+    fn default() -> Self {
+        Self {
+            desired_speed1: 0.0,
+            desired_speed2: 0.0,
+            standstill_current: 0.2,
+            acceleration_current: 0.7,
+            constant_speed_current: 0.4,
+        }
+    }
 }
 
 impl ObjectDictionary {
@@ -70,14 +74,24 @@ impl ObjectDictionary {
     pub fn set_desired_speed2(&mut self, speed: f32) {
         self.desired_speed2 = speed;
     }
+
+    pub fn set_standstill_current(&mut self, standstill_current: f32) {
+        self.standstill_current = standstill_current;
+    }
+    pub fn set_acceleration_current(&mut self, acceleration_current: f32) {
+        self.acceleration_current = acceleration_current;
+    }
+    pub fn set_constant_speed_current(&mut self, constant_speed_current: f32) {
+        self.constant_speed_current = constant_speed_current;
+    }
 }
 
 pub struct SM4 {
     leds: LEDs,
     usb: USBProtocol,
     can: CANOpen,
-    driver1: DriverWithGen<Motor1Driver>,
-    driver2: DriverWithGen<Motor2Driver>,
+    driver1: Motor1Driver,
+    driver2: Motor2Driver,
     monitoring: Monitoring,
     object_dictionary: ObjectDictionary,
     state: DriverState,
@@ -151,20 +165,14 @@ impl SM4 {
         let monitoring = Monitoring::new(device.ADC1, gpio.battery_voltage, dma2.0);
 
         let (ref1, ref2) = initialize_current_ref(device.DAC, gpio.ref1, gpio.ref2);
-        let dir1 = DirectionPin::dir1(gpio.dir1);
-        let dir2 = DirectionPin::dir2(gpio.dir2);
-        let timer1 = ControlTimer::init_tim8(device.TIM8, clocks);
-        let timer2 = ControlTimer::init_tim1(device.TIM1, clocks);
-        let counter1 = Counter::tim5(device.TIM5);
-        let counter2 = Counter::tim2(device.TIM2);
+        let timer1 = StepGeneratorTimer::init_tim8(device.TIM8, clocks);
+        let timer2 = StepGeneratorTimer::init_tim1(device.TIM1, clocks);
 
-        let driver1 = Driver::new(timer1, dir1, counter1, ref1);
-        let driver2 = Driver::new(timer2, dir2, counter2, ref2);
+        let driver1 = TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, board::SENSE_R);
+        let driver2 = TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, board::SENSE_R);
 
-        let mut driver1 = DriverWithGen::new(driver1, 3.0, TrapRampGen::new(2.0, 10.0));
-        let driver2 = DriverWithGen::new(driver2, 3.0, TrapRampGen::new(2.0, 10.0));
-
-        driver1.set_speed(3.0);
+        // let counter1 = Counter::tim5(device.TIM5);
+        // let counter2 = Counter::tim2(device.TIM2);
 
         defmt::error!("init done");
 
@@ -192,8 +200,8 @@ impl SM4 {
                 self.object_dictionary.desired_speed2,
             )
         };
-        self.driver1.set_speed(speed1);
-        self.driver2.set_speed(speed2);
+        self.driver1.set_output_frequency(speed1);
+        self.driver2.set_output_frequency(speed2);
     }
 
     pub fn blink_leds(&mut self) {
@@ -213,8 +221,8 @@ impl SM4 {
     }
 
     pub fn ramp(&mut self) {
-        self.driver1.update();
-        self.driver2.update();
+        // self.driver1.update();
+        // self.driver2.update();
     }
 
     pub fn process_usb(&mut self) {
@@ -267,7 +275,7 @@ impl SM4 {
     }
 
     pub const fn blink_period() -> u32 {
-        SECOND / 10
+        SECOND / 100
     }
 
     pub const fn monitoring_period() -> u32 {

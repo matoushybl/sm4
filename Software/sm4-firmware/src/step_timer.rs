@@ -1,18 +1,18 @@
 use crate::board::MICROSTEPS;
 use embedded_time::rate::Hertz;
-use sm4_shared::{Motor1, Motor2, StepGenerator};
+use sm4_shared::StepGenerator;
 use stm32f4xx_hal::rcc::Clocks;
 use stm32f4xx_hal::stm32::TIM8;
 use stm32f4xx_hal::{stm32, stm32::TIM1};
 
-pub struct ControlTimer<T> {
+pub struct StepGeneratorTimer<T> {
     timer: T,
     clocks: Clocks,
 }
 
 macro_rules! generator {
-    ($m:ident, $tim:ident, $init:ident, $tim_en:ident, $tim_rst:ident) => {
-        impl ControlTimer<$tim> {
+    ($tim:ident, $init:ident, $tim_en:ident, $tim_rst:ident) => {
+        impl StepGeneratorTimer<$tim> {
             pub fn $init(timer: $tim, clocks: Clocks) -> Self {
                 unsafe {
                     let rcc = &(*stm32::RCC::ptr());
@@ -44,17 +44,16 @@ macro_rules! generator {
 
                 Self { timer, clocks }
             }
+        }
 
-            pub fn set_frequency<T>(&mut self, frequency: T)
-            where
-                T: Into<Hertz>,
-            {
+        impl StepGenerator for StepGeneratorTimer<$tim> {
+            fn set_step_frequency(&mut self, freq: Hertz) {
                 // pause
                 self.timer.cr1.modify(|_, w| w.cen().clear_bit());
                 // reset counter
                 self.timer.cnt.reset();
 
-                let frequency = frequency.into().0;
+                let frequency = freq.0;
                 if frequency == 0 {
                     return; // leave the timer in a paused state
                 }
@@ -80,22 +79,8 @@ macro_rules! generator {
                 self.timer.cr1.modify(|_, w| w.cen().set_bit());
             }
         }
-
-        impl StepGenerator<$m> for ControlTimer<$tim> {
-            fn set_step_frequency(&mut self, freq: f32) {
-                self.set_frequency(Hertz((fabs(freq) * MICROSTEPS) as u32))
-            }
-        }
     };
 }
 
-fn fabs(val: f32) -> f32 {
-    if val < 0.0 {
-        -val
-    } else {
-        val
-    }
-}
-
-generator!(Motor2, TIM1, init_tim1, tim1en, tim1rst);
-generator!(Motor1, TIM8, init_tim8, tim8en, tim8rst);
+generator!(TIM1, init_tim1, tim1en, tim1rst);
+generator!(TIM8, init_tim8, tim8en, tim8rst);
