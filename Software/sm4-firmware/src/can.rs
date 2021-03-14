@@ -1,6 +1,6 @@
 use bxcan::filter::Mask32;
 use bxcan::{Can, Data, Frame, Interrupts};
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryFrom;
 use embedded_can::{Id, StandardId};
 use stm32f4xx_hal as hal;
 

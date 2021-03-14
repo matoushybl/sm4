@@ -18,22 +18,18 @@ use crate::can::{CANOpen, CANOpenMessage, NMTState};
 use crate::current_reference::{initialize_current_ref, CurrentDACChannel};
 use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
-use crate::ramp::{DriverWithGen, TrapRampGen};
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
 use core::convert::TryFrom;
 use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
+use hal::prelude::*;
 use panic_probe as _;
 use sm4_shared::canopen::{RxPDO1, TxPDO1};
 use sm4_shared::tmc2100::TMC2100;
-use sm4_shared::{StepperDriver, TMC2100};
+use sm4_shared::StepperDriver;
 use stm32f4xx_hal as hal;
-use stm32f4xx_hal::dma::StreamsTuple;
-use stm32f4xx_hal::gpio::gpioa::PA;
-use stm32f4xx_hal::gpio::{GpioExt, Output, PushPull};
-use stm32f4xx_hal::rcc::RccExt;
-use stm32f4xx_hal::time::U32Ext; // memory layout
+use stm32f4xx_hal::dma::StreamsTuple; // memory layout
 
 const CAN_ID: u8 = 0x01;
 

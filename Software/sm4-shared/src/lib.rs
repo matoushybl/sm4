@@ -11,10 +11,6 @@ pub mod float;
 pub mod hal;
 pub mod tmc2100;
 
-use crate::float::fabs;
-use core::marker::PhantomData;
-use embedded_time::rate::Hertz;
-
 /// This enum represents the direction where the motor is turning when looking at the shaft.
 #[derive(Copy, Clone, PartialEq)]
 pub enum Direction {

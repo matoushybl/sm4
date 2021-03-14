@@ -200,7 +200,7 @@ impl Speed {
     }
 
     /// Calculates the speed using two sampled positions and the time between those samples.
-    fn from_positions(current: &Position, past: &Position, period: Microseconds) -> Self {
+    pub fn from_positions(current: &Position, past: &Position, period: Microseconds) -> Self {
         let resolution = current.resolution as f32;
         let diff = (current.get_increments() - past.get_increments()) as f32;
         let rps = diff / resolution * 1.0e6 / *period.integer() as f32;
@@ -349,7 +349,7 @@ mod tests {
     #[test]
     fn mock_encoder_test() {
         let mut encoder = MockEncoder::new();
-        encoder.notify_direction_changed(true);
+        encoder.notify_direction_changed(Direction::Clockwise);
         assert_eq!(encoder.get_speed().get_rps(), 0.0);
         assert_eq!(encoder.get_position().get_increments(), 0);
 
