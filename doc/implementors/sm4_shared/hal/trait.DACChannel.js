@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl&lt;CH&gt; DACChannel for CurrentDACChannel&lt;CH&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;CH: DacOut&lt;u16&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

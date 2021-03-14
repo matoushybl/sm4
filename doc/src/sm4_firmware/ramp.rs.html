@@ -126,7 +126,7 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">let</span> <span class="ident">new_speed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ramp_gen</span>.<span class="ident">generate</span>(<span class="self">self</span>.<span class="ident">target_speed</span>) <span class="op">*</span> <span class="number">200.0</span>;
-        <span class="self">self</span>.<span class="ident">driver</span>.<span class="ident">set_step_frequency</span>(<span class="ident">new_speed</span>);
+        <span class="self">self</span>.<span class="ident">driver</span>.<span class="ident">set_output_frequency</span>(<span class="ident">new_speed</span>);
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_speed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {

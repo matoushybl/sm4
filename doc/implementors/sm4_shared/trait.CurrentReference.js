@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["sm4_firmware"] = [{"text":"impl CurrentReference&lt;Motor1&gt; for Reference&lt;CurrentRef1Channel&gt;","synthetic":false,"types":[]},{"text":"impl CurrentReference&lt;Motor2&gt; for Reference&lt;CurrentRef2Channel&gt;","synthetic":false,"types":[]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

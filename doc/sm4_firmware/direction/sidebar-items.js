@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["DirectionPin",""]]});
+initSidebarItems({});

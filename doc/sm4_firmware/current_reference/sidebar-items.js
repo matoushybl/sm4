@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["MAX_V_REF",""],["R_OFFSET",""],["R_SENSE",""],["V_FS",""]],"fn":[["initialize_current_ref",""]],"struct":[["Reference",""]]});
+initSidebarItems({"fn":[["initialize_current_ref",""]],"struct":[["CurrentDACChannel",""]]});

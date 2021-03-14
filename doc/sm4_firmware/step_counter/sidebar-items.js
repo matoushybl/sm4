@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Counter",""]]});
+initSidebarItems({"struct":[["StepCounterEncoder",""]],"trait":[["Counter",""]]});

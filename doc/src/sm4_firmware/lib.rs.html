@@ -301,6 +301,10 @@
 <span id="298">298</span>
 <span id="299">299</span>
 <span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 
@@ -317,53 +321,53 @@
 
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::{<span class="ident">CurrentRef1Channel</span>, <span class="ident">CurrentRef2Channel</span>, <span class="ident">Dir1</span>, <span class="ident">Dir2</span>, <span class="ident">GPIO</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::{<span class="ident">CurrentRef1Channel</span>, <span class="ident">CurrentRef2Channel</span>, <span class="ident">Dir1</span>, <span class="ident">Dir2</span>, <span class="ident">Step1</span>, <span class="ident">Step2</span>, <span class="ident">GPIO</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>, <span class="ident">NMTState</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">current_reference</span>::{<span class="ident">initialize_current_ref</span>, <span class="ident">Reference</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">direction</span>::<span class="ident">DirectionPin</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">current_reference</span>::{<span class="ident">initialize_current_ref</span>, <span class="ident">CurrentDACChannel</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">leds</span>::<span class="ident">LEDs</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">monitoring</span>::<span class="ident">Monitoring</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">ramp</span>::{<span class="ident">DriverWithGen</span>, <span class="ident">TrapRampGen</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_counter</span>::<span class="ident">Counter</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_timer</span>::<span class="ident">ControlTimer</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_timer</span>::<span class="ident">StepGeneratorTimer</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">usb</span>::<span class="ident">USBProtocol</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">cortex_m</span>::<span class="ident">peripheral</span>::<span class="ident">DWT</span>;
 <span class="kw">use</span> <span class="ident">defmt_rtt</span> <span class="kw">as</span> <span class="kw">_</span>; <span class="comment">// global logger</span>
+<span class="kw">use</span> <span class="ident">hal</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">panic_probe</span> <span class="kw">as</span> <span class="kw">_</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">canopen</span>::{<span class="ident">RxPDO1</span>, <span class="ident">TxPDO1</span>};
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::{<span class="ident">Driver</span>, <span class="ident">Motor1</span>, <span class="ident">Motor2</span>};
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">tmc2100</span>::<span class="ident">TMC2100</span>;
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">StepperDriver</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
-<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">dma</span>::<span class="ident">StreamsTuple</span>;
-<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">gpio</span>::<span class="ident">GpioExt</span>;
-<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">rcc</span>::<span class="ident">RccExt</span>;
-<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">time</span>::<span class="ident">U32Ext</span>; <span class="comment">// memory layout</span>
+<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">dma</span>::<span class="ident">StreamsTuple</span>; <span class="comment">// memory layout</span>
 
 <span class="kw">const</span> <span class="ident">CAN_ID</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x01</span>;
 
-<span class="kw">type</span> <span class="ident">Motor1Driver</span> <span class="op">=</span> <span class="ident">Driver</span><span class="op">&lt;</span>
-    <span class="ident">Motor1</span>,
-    <span class="ident">ControlTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM8</span><span class="op">&gt;</span>,
-    <span class="ident">DirectionPin</span><span class="op">&lt;</span><span class="ident">Dir1</span><span class="op">&gt;</span>,
-    <span class="ident">Counter</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM5</span><span class="op">&gt;</span>,
-    <span class="ident">Reference</span><span class="op">&lt;</span><span class="ident">CurrentRef1Channel</span><span class="op">&gt;</span>,
-<span class="op">&gt;</span>;
-
-<span class="kw">type</span> <span class="ident">Motor2Driver</span> <span class="op">=</span> <span class="ident">Driver</span><span class="op">&lt;</span>
-    <span class="ident">Motor2</span>,
-    <span class="ident">ControlTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM1</span><span class="op">&gt;</span>,
-    <span class="ident">DirectionPin</span><span class="op">&lt;</span><span class="ident">Dir2</span><span class="op">&gt;</span>,
-    <span class="ident">Counter</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM2</span><span class="op">&gt;</span>,
-    <span class="ident">Reference</span><span class="op">&lt;</span><span class="ident">CurrentRef2Channel</span><span class="op">&gt;</span>,
-<span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">Motor1Driver</span> <span class="op">=</span>
+    <span class="ident">TMC2100</span><span class="op">&lt;</span><span class="ident">StepGeneratorTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM8</span><span class="op">&gt;</span>, <span class="ident">Step1</span>, <span class="ident">Dir1</span>, <span class="ident">CurrentDACChannel</span><span class="op">&lt;</span><span class="ident">CurrentRef1Channel</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">Motor2Driver</span> <span class="op">=</span>
+    <span class="ident">TMC2100</span><span class="op">&lt;</span><span class="ident">StepGeneratorTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM1</span><span class="op">&gt;</span>, <span class="ident">Step2</span>, <span class="ident">Dir2</span>, <span class="ident">CurrentDACChannel</span><span class="op">&lt;</span><span class="ident">CurrentRef2Channel</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="kw">const</span> <span class="ident">SECOND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">168_000_000</span>;
 
 <span class="doccomment">/// The object dictionary struct represents the global state of the driver</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectDictionary</span> {
     <span class="ident">desired_speed1</span>: <span class="ident">f32</span>,
     <span class="ident">desired_speed2</span>: <span class="ident">f32</span>,
+    <span class="ident">standstill_current</span>: <span class="ident">f32</span>,
+    <span class="ident">acceleration_current</span>: <span class="ident">f32</span>,
+    <span class="ident">constant_speed_current</span>: <span class="ident">f32</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ObjectDictionary</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">desired_speed1</span>: <span class="number">0.0</span>,
+            <span class="ident">desired_speed2</span>: <span class="number">0.0</span>,
+            <span class="ident">standstill_current</span>: <span class="number">0.2</span>,
+            <span class="ident">acceleration_current</span>: <span class="number">0.7</span>,
+            <span class="ident">constant_speed_current</span>: <span class="number">0.4</span>,
+        }
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">ObjectDictionary</span> {
@@ -374,14 +378,24 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_desired_speed2</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {
         <span class="self">self</span>.<span class="ident">desired_speed2</span> <span class="op">=</span> <span class="ident">speed</span>;
     }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_standstill_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">standstill_current</span>: <span class="ident">f32</span>) {
+        <span class="self">self</span>.<span class="ident">standstill_current</span> <span class="op">=</span> <span class="ident">standstill_current</span>;
+    }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_acceleration_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">acceleration_current</span>: <span class="ident">f32</span>) {
+        <span class="self">self</span>.<span class="ident">acceleration_current</span> <span class="op">=</span> <span class="ident">acceleration_current</span>;
+    }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_constant_speed_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">constant_speed_current</span>: <span class="ident">f32</span>) {
+        <span class="self">self</span>.<span class="ident">constant_speed_current</span> <span class="op">=</span> <span class="ident">constant_speed_current</span>;
+    }
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SM4</span> {
     <span class="ident">leds</span>: <span class="ident">LEDs</span>,
     <span class="ident">usb</span>: <span class="ident">USBProtocol</span>,
     <span class="ident">can</span>: <span class="ident">CANOpen</span>,
-    <span class="ident">driver1</span>: <span class="ident">DriverWithGen</span><span class="op">&lt;</span><span class="ident">Motor1Driver</span><span class="op">&gt;</span>,
-    <span class="ident">driver2</span>: <span class="ident">DriverWithGen</span><span class="op">&lt;</span><span class="ident">Motor2Driver</span><span class="op">&gt;</span>,
+    <span class="ident">driver1</span>: <span class="ident">Motor1Driver</span>,
+    <span class="ident">driver2</span>: <span class="ident">Motor2Driver</span>,
     <span class="ident">monitoring</span>: <span class="ident">Monitoring</span>,
     <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>,
     <span class="ident">state</span>: <span class="ident">DriverState</span>,
@@ -455,20 +469,14 @@
         <span class="kw">let</span> <span class="ident">monitoring</span> <span class="op">=</span> <span class="ident">Monitoring</span>::<span class="ident">new</span>(<span class="ident">device</span>.<span class="ident">ADC1</span>, <span class="ident">gpio</span>.<span class="ident">battery_voltage</span>, <span class="ident">dma2</span>.<span class="number">0</span>);
 
         <span class="kw">let</span> (<span class="ident">ref1</span>, <span class="ident">ref2</span>) <span class="op">=</span> <span class="ident">initialize_current_ref</span>(<span class="ident">device</span>.<span class="ident">DAC</span>, <span class="ident">gpio</span>.<span class="ident">ref1</span>, <span class="ident">gpio</span>.<span class="ident">ref2</span>);
-        <span class="kw">let</span> <span class="ident">dir1</span> <span class="op">=</span> <span class="ident">DirectionPin</span>::<span class="ident">dir1</span>(<span class="ident">gpio</span>.<span class="ident">dir1</span>);
-        <span class="kw">let</span> <span class="ident">dir2</span> <span class="op">=</span> <span class="ident">DirectionPin</span>::<span class="ident">dir2</span>(<span class="ident">gpio</span>.<span class="ident">dir2</span>);
-        <span class="kw">let</span> <span class="ident">timer1</span> <span class="op">=</span> <span class="ident">ControlTimer</span>::<span class="ident">init_tim8</span>(<span class="ident">device</span>.<span class="ident">TIM8</span>, <span class="ident">clocks</span>);
-        <span class="kw">let</span> <span class="ident">timer2</span> <span class="op">=</span> <span class="ident">ControlTimer</span>::<span class="ident">init_tim1</span>(<span class="ident">device</span>.<span class="ident">TIM1</span>, <span class="ident">clocks</span>);
-        <span class="kw">let</span> <span class="ident">counter1</span> <span class="op">=</span> <span class="ident">Counter</span>::<span class="ident">tim5</span>(<span class="ident">device</span>.<span class="ident">TIM5</span>);
-        <span class="kw">let</span> <span class="ident">counter2</span> <span class="op">=</span> <span class="ident">Counter</span>::<span class="ident">tim2</span>(<span class="ident">device</span>.<span class="ident">TIM2</span>);
+        <span class="kw">let</span> <span class="ident">timer1</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim8</span>(<span class="ident">device</span>.<span class="ident">TIM8</span>, <span class="ident">clocks</span>);
+        <span class="kw">let</span> <span class="ident">timer2</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim1</span>(<span class="ident">device</span>.<span class="ident">TIM1</span>, <span class="ident">clocks</span>);
 
-        <span class="kw">let</span> <span class="ident">driver1</span> <span class="op">=</span> <span class="ident">Driver</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">dir1</span>, <span class="ident">counter1</span>, <span class="ident">ref1</span>);
-        <span class="kw">let</span> <span class="ident">driver2</span> <span class="op">=</span> <span class="ident">Driver</span>::<span class="ident">new</span>(<span class="ident">timer2</span>, <span class="ident">dir2</span>, <span class="ident">counter2</span>, <span class="ident">ref2</span>);
+        <span class="kw">let</span> <span class="ident">driver1</span> <span class="op">=</span> <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">gpio</span>.<span class="ident">step1</span>, <span class="ident">gpio</span>.<span class="ident">dir1</span>, <span class="ident">ref1</span>, <span class="ident">board</span>::<span class="ident">SENSE_R</span>);
+        <span class="kw">let</span> <span class="ident">driver2</span> <span class="op">=</span> <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer2</span>, <span class="ident">gpio</span>.<span class="ident">step2</span>, <span class="ident">gpio</span>.<span class="ident">dir2</span>, <span class="ident">ref2</span>, <span class="ident">board</span>::<span class="ident">SENSE_R</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">driver1</span> <span class="op">=</span> <span class="ident">DriverWithGen</span>::<span class="ident">new</span>(<span class="ident">driver1</span>, <span class="number">3.0</span>, <span class="ident">TrapRampGen</span>::<span class="ident">new</span>(<span class="number">2.0</span>, <span class="number">10.0</span>));
-        <span class="kw">let</span> <span class="ident">driver2</span> <span class="op">=</span> <span class="ident">DriverWithGen</span>::<span class="ident">new</span>(<span class="ident">driver2</span>, <span class="number">3.0</span>, <span class="ident">TrapRampGen</span>::<span class="ident">new</span>(<span class="number">2.0</span>, <span class="number">10.0</span>));
-
-        <span class="ident">driver1</span>.<span class="ident">set_speed</span>(<span class="number">3.0</span>);
+        <span class="comment">// let counter1 = Counter::tim5(device.TIM5);</span>
+        <span class="comment">// let counter2 = Counter::tim2(device.TIM2);</span>
 
         <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;init done&quot;</span>);
 
@@ -496,8 +504,8 @@
                 <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">desired_speed2</span>,
             )
         };
-        <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">set_speed</span>(<span class="ident">speed1</span>);
-        <span class="self">self</span>.<span class="ident">driver2</span>.<span class="ident">set_speed</span>(<span class="ident">speed2</span>);
+        <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">set_output_frequency</span>(<span class="ident">speed1</span>);
+        <span class="self">self</span>.<span class="ident">driver2</span>.<span class="ident">set_output_frequency</span>(<span class="ident">speed2</span>);
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">blink_leds</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -517,8 +525,8 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ramp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">update</span>();
-        <span class="self">self</span>.<span class="ident">driver2</span>.<span class="ident">update</span>();
+        <span class="comment">// self.driver1.update();</span>
+        <span class="comment">// self.driver2.update();</span>
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_usb</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -571,7 +579,7 @@
     }
 
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">blink_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">10</span>
+        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">100</span>
     }
 
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">monitoring_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {

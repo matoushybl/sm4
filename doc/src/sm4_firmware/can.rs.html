@@ -322,7 +322,7 @@
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">bxcan</span>::<span class="ident">filter</span>::<span class="ident">Mask32</span>;
 <span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Can</span>, <span class="ident">Data</span>, <span class="ident">Frame</span>, <span class="ident">Interrupts</span>};
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">embedded_can</span>::{<span class="ident">Id</span>, <span class="ident">StandardId</span>};
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
 

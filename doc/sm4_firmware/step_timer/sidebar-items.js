@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["fabs",""]],"struct":[["ControlTimer",""]]});
+initSidebarItems({"struct":[["StepGeneratorTimer",""]]});
