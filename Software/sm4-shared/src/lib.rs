@@ -29,7 +29,7 @@ impl Direction {
     pub fn opposite(&self) -> Self {
         match self {
             Direction::Clockwise => Direction::CounterClockwise,
-            Direction::CounterClockwise => Direction::CounterClockwise,
+            Direction::CounterClockwise => Direction::Clockwise,
         }
     }
 
