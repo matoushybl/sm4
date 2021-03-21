@@ -6,6 +6,7 @@ pub mod current_reference;
 pub mod direction;
 pub mod leds;
 pub mod monitoring;
+mod object_dictionary;
 pub mod ramp;
 pub mod step_counter;
 pub mod step_timer;
@@ -20,7 +21,6 @@ use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
-use core::convert::TryFrom;
 use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
 use hal::prelude::*;
@@ -39,48 +39,6 @@ type Motor2Driver =
     TMC2100<StepGeneratorTimer<hal::pac::TIM1>, Step2, Dir2, CurrentDACChannel<CurrentRef2Channel>>;
 
 const SECOND: u32 = 168_000_000;
-
-/// The object dictionary struct represents the global state of the driver
-#[derive(Copy, Clone)]
-pub struct ObjectDictionary {
-    desired_speed1: f32,
-    desired_speed2: f32,
-    standstill_current: f32,
-    acceleration_current: f32,
-    constant_speed_current: f32,
-}
-
-impl Default for ObjectDictionary {
-    fn default() -> Self {
-        Self {
-            desired_speed1: 0.0,
-            desired_speed2: 0.0,
-            standstill_current: 0.2,
-            acceleration_current: 0.7,
-            constant_speed_current: 0.4,
-        }
-    }
-}
-
-impl ObjectDictionary {
-    pub fn set_desired_speed1(&mut self, speed: f32) {
-        self.desired_speed1 = speed;
-    }
-
-    pub fn set_desired_speed2(&mut self, speed: f32) {
-        self.desired_speed2 = speed;
-    }
-
-    pub fn set_standstill_current(&mut self, standstill_current: f32) {
-        self.standstill_current = standstill_current;
-    }
-    pub fn set_acceleration_current(&mut self, acceleration_current: f32) {
-        self.acceleration_current = acceleration_current;
-    }
-    pub fn set_constant_speed_current(&mut self, constant_speed_current: f32) {
-        self.constant_speed_current = constant_speed_current;
-    }
-}
 
 pub struct SM4 {
     leds: LEDs,
@@ -244,18 +202,18 @@ impl SM4 {
                 CANOpenMessage::TimeStamp => {}
                 CANOpenMessage::TxPDO1 => {}
                 CANOpenMessage::RxPDO1 => {
-                    if frame.data().is_none() {
-                        defmt::warn!("Invalid RxPDO1 received.");
-                        return;
-                    }
-                    if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
-                        defmt::error!("speed: {:?}", pdo.driver1_speed);
-                        self.object_dictionary.set_desired_speed1(pdo.driver1_speed);
-                        self.object_dictionary.set_desired_speed2(pdo.driver2_speed);
-                        self.state.invalidate_last_received_speed_command_counter();
-                    } else {
-                        defmt::warn!("Malformed RxPDO1 received.");
-                    }
+                    // if frame.data().is_none() {
+                    //     defmt::warn!("Invalid RxPDO1 received.");
+                    //     return;
+                    // }
+                    // if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
+                    //     defmt::error!("speed: {:?}", pdo.);
+                    //     self.object_dictionary.set_desired_speed1(pdo.driver1_speed);
+                    //     self.object_dictionary.set_desired_speed2(pdo.driver2_speed);
+                    //     self.state.invalidate_last_received_speed_command_counter();
+                    // } else {
+                    //     defmt::warn!("Malformed RxPDO1 received.");
+                    // }
                 }
                 CANOpenMessage::TxPDO2 => {}
                 CANOpenMessage::RxPDO2 => {}

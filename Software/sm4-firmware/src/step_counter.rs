@@ -10,7 +10,7 @@ pub trait Counter {
 
 pub struct StepCounterEncoder<T> {
     timer: T,
-    // FIXME there should be past position to avoid speed miscalculations when calculating speed on direction change.
+    past_position: Position,
     current_position: Position,
     current_speed: Speed,
     direction: Direction,
@@ -47,17 +47,21 @@ where
     fn reset_position(&mut self) -> Position {
         let past = self.current_position;
         self.current_position = Position::zero(self.resolution);
+        self.past_position = Position::zero(self.resolution);
         self.current_speed = Speed::zero();
         self.timer.reset_value();
         past
     }
 
     fn sample(&mut self) {
-        let past = self.current_position;
+        self.past_position = self.current_position;
         self.update_current_position();
 
-        self.current_speed =
-            Speed::from_positions(&self.current_position, &past, self.sampling_period);
+        self.current_speed = Speed::from_positions(
+            &self.current_position,
+            &self.past_position,
+            self.sampling_period,
+        );
     }
 
     fn notify_direction_changed(&mut self, direction: Direction) {
@@ -99,6 +103,7 @@ macro_rules! counter {
                 Self {
                     timer,
                     direction: Direction::Clockwise,
+                    past_position: Position::zero(resolution),
                     current_position: Position::zero(resolution),
                     current_speed: Speed::zero(),
                     sampling_period,

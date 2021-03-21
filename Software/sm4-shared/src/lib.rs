@@ -11,7 +11,38 @@ pub mod float;
 pub mod hal;
 pub mod tmc2100;
 
-/// This enum represents the direction where the motor is turning when looking at the shaft.
+/// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
+#[derive(Copy, Clone, Debug)]
+pub enum AxisMode {
+    Velocity,
+    Position,
+}
+
+impl Default for AxisMode {
+    fn default() -> Self {
+        Self::Velocity
+    }
+}
+
+impl From<u8> for AxisMode {
+    fn from(raw: u8) -> Self {
+        match raw & 0x01 {
+            1 => AxisMode::Position,
+            _ => AxisMode::Velocity,
+        }
+    }
+}
+
+impl From<AxisMode> for u8 {
+    fn from(raw: AxisMode) -> Self {
+        match raw {
+            AxisMode::Velocity => 0x00,
+            AxisMode::Position => 0x01,
+        }
+    }
+}
+
+/// `Direction` enum represents the direction where the motor is turning when looking at the shaft.
 #[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
     Clockwise,
