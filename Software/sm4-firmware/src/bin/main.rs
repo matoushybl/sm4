@@ -15,11 +15,11 @@ const APP: () = {
         driver: SM4,
     }
 
-    #[init(schedule = [blink, monitoring, sample, failsafe])]
+    #[init(schedule = [blink, monitoring, sample])]
     fn init(cx: init::Context) -> init::LateResources {
         let mut core: rtic::Peripherals = cx.core;
         let device: hal::pac::Peripherals = cx.device;
-        
+
         core.DCB.enable_trace();
         DWT::unlock();
         core.DWT.enable_cycle_counter();

@@ -6,14 +6,14 @@ pub fn fabs(value: f32) -> f32 {
     }
 }
 
-fn fmaxf(a: f32, b: f32) -> f32 {
+pub fn fmaxf(a: f32, b: f32) -> f32 {
     if a > b {
         return a;
     }
     b
 }
 
-fn fminf(a: f32, b: f32) -> f32 {
+pub fn fminf(a: f32, b: f32) -> f32 {
     if b > a {
         return a;
     }

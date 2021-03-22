@@ -13,6 +13,8 @@ mod psd;
 pub mod ramp;
 pub mod tmc2100;
 
+pub use psd::PSDController;
+
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
 #[derive(Copy, Clone, Debug)]
 pub enum AxisMode {
@@ -72,6 +74,16 @@ impl Direction {
         match self {
             Direction::Clockwise => 1,
             Direction::CounterClockwise => -1,
+        }
+    }
+}
+
+impl From<f32> for Direction {
+    fn from(velocity: f32) -> Self {
+        if velocity > 0.0 {
+            Direction::Clockwise
+        } else {
+            Direction::CounterClockwise
         }
     }
 }

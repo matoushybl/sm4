@@ -23,10 +23,11 @@ where
     T: Counter,
 {
     fn update_current_position(&mut self) {
+        let increment = self.timer.get_value();
         self.current_position += if self.direction == Direction::Clockwise {
-            self.timer.get_value() as i32
+            increment as i32
         } else {
-            -(self.timer.get_value() as i32)
+            -(increment as i32)
         };
         self.timer.reset_value();
     }
@@ -54,7 +55,6 @@ where
     }
 
     fn sample(&mut self) {
-        self.past_position = self.current_position;
         self.update_current_position();
 
         self.current_speed = Speed::from_positions(
@@ -62,6 +62,8 @@ where
             &self.past_position,
             self.sampling_period,
         );
+
+        self.past_position = self.current_position;
     }
 
     fn notify_direction_changed(&mut self, direction: Direction) {

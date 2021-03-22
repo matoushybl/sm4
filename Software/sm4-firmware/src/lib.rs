@@ -7,7 +7,6 @@ mod driver;
 pub mod leds;
 pub mod monitoring;
 mod object_dictionary;
-pub mod ramp;
 pub mod step_counter;
 pub mod step_timer;
 pub mod usb;
@@ -22,15 +21,13 @@ use crate::monitoring::Monitoring;
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
 use defmt_rtt as _; // global logger
-use driver::{Driver, DriverState, DualAxisDriver};
+use driver::{DriverState, DualAxisDriver};
 use embedded_time::duration::Microseconds;
 use hal::prelude::*;
 use panic_probe as _;
+use sm4_shared::canopen::TxPDO1;
+use sm4_shared::tmc2100::TMC2100;
 use sm4_shared::StepperDriver;
-use sm4_shared::{
-    canopen::{TxPDO1},
-};
-use sm4_shared::{tmc2100::TMC2100};
 use step_counter::StepCounterEncoder;
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple; // memory layout
@@ -103,12 +100,19 @@ impl SM4 {
         let driver2 = TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, board::SENSE_R);
 
         driver1.set_current(0.4);
-        driver1.set_output_frequency(-0.5);
 
-        let counter_encoder1 = StepCounterEncoder::tim5(device.TIM5, Microseconds(1000), 1000);
-        let counter_encoder2 = StepCounterEncoder::tim2(device.TIM2, Microseconds(1000), 1000);
+        let sampling_period = Microseconds(10000);
 
-        let driver = DualAxisDriver::new(driver1, driver2, counter_encoder1, counter_encoder2);
+        let counter_encoder1 = StepCounterEncoder::tim5(device.TIM5, sampling_period, 16 * 200);
+        let counter_encoder2 = StepCounterEncoder::tim2(device.TIM2, sampling_period, 16 * 200);
+
+        let driver = DualAxisDriver::new(
+            driver1,
+            driver2,
+            counter_encoder1,
+            counter_encoder2,
+            sampling_period,
+        );
 
         defmt::error!("init done");
 
@@ -117,8 +121,8 @@ impl SM4 {
             leds,
             usb,
             monitoring,
-            state: DriverState::new(1000),
-            driver
+            state: DriverState::new(16 * 200),
+            driver,
         }
     }
 
@@ -196,7 +200,7 @@ impl SM4 {
     }
 
     pub const fn sampling_period() -> u32 {
-        SECOND / 1000
+        SECOND / 100
     }
 }
 
