@@ -1,6 +1,7 @@
 #![no_main]
 #![no_std]
 
+use cortex_m::peripheral::DWT;
 use rtic::cyccnt::U32Ext as _;
 use sm4_firmware as _; // global logger + panicking-behavior + memory layout
 
@@ -14,10 +15,14 @@ const APP: () = {
         driver: SM4,
     }
 
-    #[init(schedule = [blink, monitoring, ramping, failsafe])]
+    #[init(schedule = [blink, monitoring, sample, failsafe])]
     fn init(cx: init::Context) -> init::LateResources {
-        let core: rtic::Peripherals = cx.core;
+        let mut core: rtic::Peripherals = cx.core;
         let device: hal::pac::Peripherals = cx.device;
+        
+        core.DCB.enable_trace();
+        DWT::unlock();
+        core.DWT.enable_cycle_counter();
 
         let driver = SM4::init(device, core);
 
@@ -29,19 +34,16 @@ const APP: () = {
             .monitoring(now + SM4::monitoring_period().cycles())
             .unwrap();
         cx.schedule
-            .ramping(now + SM4::ramping_period().cycles())
-            .unwrap();
-        cx.schedule
-            .failsafe(now + SM4::failsafe_period().cycles())
+            .sample(now + SM4::sampling_period().cycles())
             .unwrap();
 
         init::LateResources { driver }
     }
 
     #[idle(resources = [driver])]
-    fn main(mut cx: main::Context) -> ! {
+    fn main(_cx: main::Context) -> ! {
         loop {
-            cx.resources.driver.lock(|driver| driver.run());
+            cortex_m::asm::nop();
         }
     }
 
@@ -68,21 +70,12 @@ const APP: () = {
             .unwrap();
     }
 
-    #[task(resources = [driver], schedule = [ramping])]
-    fn ramping(cx: ramping::Context) {
-        cx.resources.driver.ramp();
+    #[task(resources = [driver], schedule = [sample])]
+    fn sample(cx: sample::Context) {
+        cx.resources.driver.sample();
 
         cx.schedule
-            .ramping(cx.scheduled + SM4::ramping_period().cycles())
-            .unwrap();
-    }
-
-    #[task(resources = [driver], schedule = [failsafe])]
-    fn failsafe(cx: failsafe::Context) {
-        cx.resources.driver.update_failsafe();
-
-        cx.schedule
-            .failsafe(cx.scheduled + SM4::failsafe_period().cycles())
+            .sample(cx.scheduled + SM4::sampling_period().cycles())
             .unwrap();
     }
 

@@ -25,9 +25,9 @@ pub enum Key {
 }
 
 impl Key {
-    pub fn data_len(&self) -> usize {}
-
-    pub fn is_persistent() -> bool {}
+    // pub fn data_len(&self) -> usize {}
+    //
+    // pub fn is_persistent() -> bool {}
 }
 
 impl From<u8> for Key {

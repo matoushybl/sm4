@@ -9,6 +9,8 @@ pub mod canopen;
 pub mod encoder;
 pub mod float;
 pub mod hal;
+mod psd;
+pub mod ramp;
 pub mod tmc2100;
 
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control

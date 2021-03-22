@@ -3,7 +3,7 @@
 pub mod board;
 pub mod can;
 pub mod current_reference;
-pub mod direction;
+mod driver;
 pub mod leds;
 pub mod monitoring;
 mod object_dictionary;
@@ -15,19 +15,23 @@ pub mod usb;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::board::{CurrentRef1Channel, CurrentRef2Channel, Dir1, Dir2, Step1, Step2, GPIO};
-use crate::can::{CANOpen, CANOpenMessage, NMTState};
+use crate::can::{CANOpen, CANOpenMessage};
 use crate::current_reference::{initialize_current_ref, CurrentDACChannel};
 use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
-use cortex_m::peripheral::DWT;
 use defmt_rtt as _; // global logger
+use driver::{Driver, DriverState, DualAxisDriver};
+use embedded_time::duration::Microseconds;
 use hal::prelude::*;
 use panic_probe as _;
-use sm4_shared::canopen::{RxPDO1, TxPDO1};
-use sm4_shared::tmc2100::TMC2100;
 use sm4_shared::StepperDriver;
+use sm4_shared::{
+    canopen::{TxPDO1},
+};
+use sm4_shared::{tmc2100::TMC2100};
+use step_counter::StepCounterEncoder;
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple; // memory layout
 
@@ -37,6 +41,8 @@ type Motor1Driver =
     TMC2100<StepGeneratorTimer<hal::pac::TIM8>, Step1, Dir1, CurrentDACChannel<CurrentRef1Channel>>;
 type Motor2Driver =
     TMC2100<StepGeneratorTimer<hal::pac::TIM1>, Step2, Dir2, CurrentDACChannel<CurrentRef2Channel>>;
+type Motor1Encoder = StepCounterEncoder<hal::pac::TIM5>;
+type Motor2Encoder = StepCounterEncoder<hal::pac::TIM2>;
 
 const SECOND: u32 = 168_000_000;
 
@@ -44,42 +50,13 @@ pub struct SM4 {
     leds: LEDs,
     usb: USBProtocol,
     can: CANOpen,
-    driver1: Motor1Driver,
-    driver2: Motor2Driver,
     monitoring: Monitoring,
-    object_dictionary: ObjectDictionary,
     state: DriverState,
-}
-
-const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
-
-#[derive(Copy, Clone, Default)]
-struct DriverState {
-    nmt_state: NMTState,
-    last_received_speed_command_down_counter: u8,
-}
-
-impl DriverState {
-    pub fn is_movement_blocked(&self) -> bool {
-        self.nmt_state != NMTState::Operational
-            || self.last_received_speed_command_down_counter == 0
-    }
-
-    pub fn decrement_last_received_speed_command_counter(&mut self) {
-        self.last_received_speed_command_down_counter -= 1;
-    }
-
-    pub fn invalidate_last_received_speed_command_counter(&mut self) {
-        self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
-    }
+    driver: DualAxisDriver<Motor1Driver, Motor2Driver, Motor1Encoder, Motor2Encoder>,
 }
 
 impl SM4 {
     pub fn init(device: hal::pac::Peripherals, mut core: rtic::Peripherals) -> Self {
-        core.DCB.enable_trace();
-        DWT::unlock();
-        core.DWT.enable_cycle_counter();
-
         let clocks = device
             .RCC
             .constrain()
@@ -122,40 +99,31 @@ impl SM4 {
         let timer1 = StepGeneratorTimer::init_tim8(device.TIM8, clocks);
         let timer2 = StepGeneratorTimer::init_tim1(device.TIM1, clocks);
 
-        let driver1 = TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, board::SENSE_R);
+        let mut driver1 = TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, board::SENSE_R);
         let driver2 = TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, board::SENSE_R);
 
-        // let counter1 = Counter::tim5(device.TIM5);
-        // let counter2 = Counter::tim2(device.TIM2);
+        driver1.set_current(0.4);
+        driver1.set_output_frequency(-0.5);
+
+        let counter_encoder1 = StepCounterEncoder::tim5(device.TIM5, Microseconds(1000), 1000);
+        let counter_encoder2 = StepCounterEncoder::tim2(device.TIM2, Microseconds(1000), 1000);
+
+        let driver = DualAxisDriver::new(driver1, driver2, counter_encoder1, counter_encoder2);
 
         defmt::error!("init done");
 
         Self {
+            can,
             leds,
             usb,
-            driver1,
-            driver2,
-            can,
             monitoring,
-            object_dictionary: ObjectDictionary::default(),
-            state: DriverState::default(),
+            state: DriverState::new(1000),
+            driver
         }
     }
 
-    pub fn run(&mut self) {
-        if self.state.nmt_state == NMTState::BootUp {
-            self.state.nmt_state = NMTState::PreOperational;
-        }
-        let (speed1, speed2) = if self.state.is_movement_blocked() {
-            (0.0, 0.0)
-        } else {
-            (
-                self.object_dictionary.desired_speed1,
-                self.object_dictionary.desired_speed2,
-            )
-        };
-        self.driver1.set_output_frequency(speed1);
-        self.driver2.set_output_frequency(speed2);
+    pub fn sample(&mut self) {
+        self.driver.sample(&mut self.state);
     }
 
     pub fn blink_leds(&mut self) {
@@ -168,15 +136,6 @@ impl SM4 {
 
     pub fn monitoring_complete(&mut self) {
         self.monitoring.transfer_complete();
-    }
-
-    pub fn update_failsafe(&mut self) {
-        self.state.decrement_last_received_speed_command_counter();
-    }
-
-    pub fn ramp(&mut self) {
-        // self.driver1.update();
-        // self.driver2.update();
     }
 
     pub fn process_usb(&mut self) {
@@ -236,12 +195,8 @@ impl SM4 {
         SECOND / 10
     }
 
-    pub const fn ramping_period() -> u32 {
-        SECOND / 20
-    }
-
-    pub const fn failsafe_period() -> u32 {
-        SECOND / 10
+    pub const fn sampling_period() -> u32 {
+        SECOND / 1000
     }
 }
 

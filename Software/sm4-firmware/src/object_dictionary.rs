@@ -18,8 +18,6 @@ pub struct ObjectDictionary {
     axis2_target_velocity: Speed,
     axis1_actual_velocity: Speed,
     axis2_actual_velocity: Speed,
-    axis1_set_velocity: Speed,
-    axis2_set_velocity: Speed,
     axis1_target_position: Position,
     axis2_target_position: Position,
     axis1_actual_position: Position,
@@ -32,10 +30,22 @@ pub struct ObjectDictionary {
     axis2_constant_velocity_current: f32,
     axis1_acceleration: f32,
     axis2_acceleration: f32,
+    axis1_velocity_p: f32,
+    axis2_velocity_p: f32,
+    axis1_velocity_s: f32,
+    axis2_velocity_s: f32,
+    axis1_velocity_d: f32,
+    axis2_velocity_d: f32,
+    axis1_position_p: f32,
+    axis2_position_p: f32,
+    axis1_position_s: f32,
+    axis2_position_s: f32,
+    axis1_position_d: f32,
+    axis2_position_d: f32,
 }
 
 impl ObjectDictionary {
-    fn new(resolution: u16) -> Self {
+    pub fn new(resolution: u16) -> Self {
         Self {
             axis1_mode: Default::default(),
             axis2_mode: Default::default(),
@@ -45,8 +55,6 @@ impl ObjectDictionary {
             axis2_target_velocity: Speed::zero(),
             axis1_actual_velocity: Speed::zero(),
             axis2_actual_velocity: Speed::zero(),
-            axis1_set_velocity: Speed::zero(),
-            axis2_set_velocity: Speed::zero(),
             axis1_target_position: Position::zero(resolution),
             axis2_target_position: Position::zero(resolution),
             axis1_actual_position: Position::zero(resolution),
@@ -59,6 +67,18 @@ impl ObjectDictionary {
             axis2_constant_velocity_current: DEFAULT_CONSTANT_VELOCITY_CURRENT,
             axis1_acceleration: DEFAULT_ACCELERATING_CURRENT,
             axis2_acceleration: DEFAULT_ACCELERATING_CURRENT,
+            axis1_velocity_p: 0.0,
+            axis2_velocity_p: 0.0,
+            axis1_velocity_s: 0.0,
+            axis2_velocity_s: 0.0,
+            axis1_velocity_d: 0.0,
+            axis2_velocity_d: 0.0,
+            axis1_position_p: 0.0,
+            axis2_position_p: 0.0,
+            axis1_position_s: 0.0,
+            axis2_position_s: 0.0,
+            axis1_position_d: 0.0,
+            axis2_position_d: 0.0,
         }
     }
 
@@ -98,14 +118,6 @@ impl ObjectDictionary {
 
     pub fn axis2_actual_velocity(&self) -> Speed {
         self.axis2_actual_velocity
-    }
-
-    pub fn axis1_set_velocity(&self) -> Speed {
-        self.axis1_set_velocity
-    }
-
-    pub fn axis2_set_velocity(&self) -> Speed {
-        self.axis2_set_velocity
     }
 
     pub fn axis1_target_position(&self) -> Position {
@@ -188,14 +200,6 @@ impl ObjectDictionary {
         self.axis2_actual_velocity = axis2_actual_velocity;
     }
 
-    pub fn set_axis1_set_velocity(&mut self, axis1_set_velocity: Speed) {
-        self.axis1_set_velocity = axis1_set_velocity;
-    }
-
-    pub fn set_axis2_set_velocity(&mut self, axis2_set_velocity: Speed) {
-        self.axis2_set_velocity = axis2_set_velocity;
-    }
-
     pub fn set_axis1_target_position(&mut self, axis1_target_position: Position) {
         self.axis1_target_position = axis1_target_position;
     }
@@ -242,5 +246,101 @@ impl ObjectDictionary {
 
     pub fn set_axis2_acceleration(&mut self, axis2_acceleration: f32) {
         self.axis2_acceleration = axis2_acceleration;
+    }
+
+    pub fn axis1_velocity_p(&self) -> f32 {
+        self.axis1_velocity_p
+    }
+
+    pub fn axis2_velocity_p(&self) -> f32 {
+        self.axis2_velocity_p
+    }
+
+    pub fn axis1_velocity_s(&self) -> f32 {
+        self.axis1_velocity_s
+    }
+
+    pub fn axis2_velocity_s(&self) -> f32 {
+        self.axis2_velocity_s
+    }
+
+    pub fn axis1_velocity_d(&self) -> f32 {
+        self.axis1_velocity_d
+    }
+
+    pub fn axis2_velocity_d(&self) -> f32 {
+        self.axis2_velocity_d
+    }
+
+    pub fn axis1_position_p(&self) -> f32 {
+        self.axis1_position_p
+    }
+
+    pub fn axis2_position_p(&self) -> f32 {
+        self.axis2_position_p
+    }
+
+    pub fn axis1_position_s(&self) -> f32 {
+        self.axis1_position_s
+    }
+
+    pub fn axis2_position_s(&self) -> f32 {
+        self.axis2_position_s
+    }
+
+    pub fn axis1_position_d(&self) -> f32 {
+        self.axis1_position_d
+    }
+
+    pub fn axis2_position_d(&self) -> f32 {
+        self.axis2_position_d
+    }
+
+    pub fn set_axis1_velocity_p(&mut self, axis1_velocity_p: f32) {
+        self.axis1_velocity_p = axis1_velocity_p;
+    }
+
+    pub fn set_axis2_velocity_p(&mut self, axis2_velocity_p: f32) {
+        self.axis2_velocity_p = axis2_velocity_p;
+    }
+
+    pub fn set_axis1_velocity_s(&mut self, axis1_velocity_s: f32) {
+        self.axis1_velocity_s = axis1_velocity_s;
+    }
+
+    pub fn set_axis2_velocity_s(&mut self, axis2_velocity_s: f32) {
+        self.axis2_velocity_s = axis2_velocity_s;
+    }
+
+    pub fn set_axis1_velocity_d(&mut self, axis1_velocity_d: f32) {
+        self.axis1_velocity_d = axis1_velocity_d;
+    }
+
+    pub fn set_axis2_velocity_d(&mut self, axis2_velocity_d: f32) {
+        self.axis2_velocity_d = axis2_velocity_d;
+    }
+
+    pub fn set_axis1_position_p(&mut self, axis1_position_p: f32) {
+        self.axis1_position_p = axis1_position_p;
+    }
+
+    pub fn set_axis2_position_p(&mut self, axis2_position_p: f32) {
+        self.axis2_position_p = axis2_position_p;
+    }
+
+    pub fn set_axis1_position_s(&mut self, axis1_position_s: f32) {
+        self.axis1_position_s = axis1_position_s;
+    }
+
+    pub fn set_axis2_position_s(&mut self, axis2_position_s: f32) {
+        self.axis2_position_s = axis2_position_s;
+    }
+
+    pub fn set_axis1_position_d(&mut self, axis1_position_d: f32) {
+        self.axis1_position_d = axis1_position_d;
+    }
+
+    pub fn set_axis2_position_d(&mut self, axis2_position_d: f32) {
+        self.axis2_position_d = axis2_position_d;
     }
 }
