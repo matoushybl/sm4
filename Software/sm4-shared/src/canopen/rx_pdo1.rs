@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let valid_raw_data = [0u8; 8];
+        let valid_raw_data = [0u8; 2];
         assert!(RxPDO1::try_from(valid_raw_data.as_ref()).is_ok());
 
         let invalid_raw_data = [0u8; 4];

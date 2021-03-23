@@ -21,19 +21,21 @@ impl PSDController {
         &mut self,
         desired: &f32,
         actual: &f32,
-        p: &f32,
-        s: &f32,
-        d: &f32,
+        p_gain: &f32,
+        s_gain: &f32,
+        d_gain: &f32,
         limit: &f32,
     ) -> f32 {
-        let e = desired - actual;
+        let error = desired - actual;
 
-        self.sum += e * self.sampling_period;
+        self.sum += error * self.sampling_period;
         self.sum = float::fmaxf(float::fminf(self.sum, *limit), -*limit);
 
-        let x = e * p + d * (e - self.previous) / self.sampling_period + s * self.sum;
-        self.previous = e;
+        let action = error * p_gain
+            + d_gain * (error - self.previous) / self.sampling_period
+            + s_gain * self.sum;
+        self.previous = error;
 
-        float::fmaxf(float::fminf(x, *limit), -*limit)
+        float::fmaxf(float::fminf(action, *limit), -*limit)
     }
 }

@@ -5,7 +5,6 @@ use sm4_shared::{
 
 use crate::object_dictionary::ObjectDictionary;
 use embedded_time::duration::Microseconds;
-use sm4_shared::encoder::Position;
 use sm4_shared::ramp::TrapRampGen;
 
 const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
@@ -34,6 +33,18 @@ impl DriverState {
         if self.nmt_state == NMTState::BootUp {
             self.nmt_state = NMTState::PreOperational;
         }
+    }
+
+    pub fn go_to_operational(&mut self) {
+        self.nmt_state = NMTState::Operational;
+    }
+
+    pub fn go_to_stopped(&mut self) {
+        self.nmt_state = NMTState::Stopped;
+    }
+
+    pub fn go_to_preoperational(&mut self) {
+        self.nmt_state = NMTState::PreOperational;
     }
 
     pub fn is_movement_blocked(&self) -> bool {
@@ -144,8 +155,10 @@ impl<D1: StepperDriver, D2: StepperDriver, E1: Encoder, E2: Encoder>
             &state.object_dictionary().axis1_velocity_p(),
             &state.object_dictionary().axis1_velocity_s(),
             &state.object_dictionary().axis1_velocity_d(),
-            &state.object_dictionary.axis1_acceleration(),
-            false,
+            &state.object_dictionary().axis1_acceleration(),
+            state
+                .object_dictionary()
+                .axis1_velocity_feedback_control_enable(),
         );
 
         Self::update_axis(
@@ -160,12 +173,15 @@ impl<D1: StepperDriver, D2: StepperDriver, E1: Encoder, E2: Encoder>
             &state.object_dictionary().axis2_velocity_p(),
             &state.object_dictionary().axis2_velocity_s(),
             &state.object_dictionary().axis2_velocity_d(),
-            &state.object_dictionary.axis2_acceleration(),
-            false,
+            &state.object_dictionary().axis2_acceleration(),
+            state
+                .object_dictionary()
+                .axis2_velocity_feedback_control_enable(),
         );
     }
 
     // TODO add current manipulation
+    // TODO add position control
     pub fn update_axis(
         encoder: &mut dyn Encoder,
         driver: &mut dyn StepperDriver,
@@ -183,7 +199,7 @@ impl<D1: StepperDriver, D2: StepperDriver, E1: Encoder, E2: Encoder>
     ) {
         let target_velocity = match mode {
             AxisMode::Velocity => *target_velocity,
-            AxisMode::Position => {}
+            AxisMode::Position => Speed::zero(),
         };
 
         let axis_velocity_action = if velocity_feedback_control_enabled {

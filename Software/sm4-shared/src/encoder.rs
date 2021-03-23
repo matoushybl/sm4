@@ -160,7 +160,7 @@ impl AddAssign<i32> for Position {
 
         if new_angle.abs() as i32 >= self.resolution as i32 {
             new_revolutions += new_angle.signum();
-            new_angle = new_angle % self.resolution as i32;
+            new_angle %= self.resolution as i32;
         }
 
         if new_angle < 0 {

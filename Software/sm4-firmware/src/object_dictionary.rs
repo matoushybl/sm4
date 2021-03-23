@@ -36,6 +36,8 @@ pub struct ObjectDictionary {
     axis2_velocity_s: f32,
     axis1_velocity_d: f32,
     axis2_velocity_d: f32,
+    axis1_velocity_feedback_control_enable: bool,
+    axis2_velocity_feedback_control_enable: bool,
     axis1_position_p: f32,
     axis2_position_p: f32,
     axis1_position_s: f32,
@@ -73,6 +75,8 @@ impl ObjectDictionary {
             axis2_velocity_s: 1.0,
             axis1_velocity_d: 0.0,
             axis2_velocity_d: 0.0,
+            axis1_velocity_feedback_control_enable: false,
+            axis2_velocity_feedback_control_enable: false,
             axis1_position_p: 1.0,
             axis2_position_p: 1.0,
             axis1_position_s: 0.0,
@@ -342,5 +346,11 @@ impl ObjectDictionary {
 
     pub fn set_axis2_position_d(&mut self, axis2_position_d: f32) {
         self.axis2_position_d = axis2_position_d;
+    }
+    pub fn axis1_velocity_feedback_control_enable(&self) -> bool {
+        self.axis1_velocity_feedback_control_enable
+    }
+    pub fn axis2_velocity_feedback_control_enable(&self) -> bool {
+        self.axis2_velocity_feedback_control_enable
     }
 }

@@ -20,17 +20,21 @@ use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
+use core::convert::TryFrom;
 use defmt_rtt as _; // global logger
 use driver::{DriverState, DualAxisDriver};
 use embedded_time::duration::Microseconds;
 use hal::prelude::*;
 use panic_probe as _;
-use sm4_shared::canopen::TxPDO1;
+use sm4_shared::canopen::*;
+use sm4_shared::encoder::{Position, Speed};
 use sm4_shared::tmc2100::TMC2100;
 use sm4_shared::StepperDriver;
 use step_counter::StepCounterEncoder;
 use stm32f4xx_hal as hal;
 use stm32f4xx_hal::dma::StreamsTuple; // memory layout
+
+const ENCODER_RESOLUTION: u16 = 16 * 200;
 
 const CAN_ID: u8 = 0x01;
 
@@ -103,8 +107,10 @@ impl SM4 {
 
         let sampling_period = Microseconds(10000);
 
-        let counter_encoder1 = StepCounterEncoder::tim5(device.TIM5, sampling_period, 16 * 200);
-        let counter_encoder2 = StepCounterEncoder::tim2(device.TIM2, sampling_period, 16 * 200);
+        let counter_encoder1 =
+            StepCounterEncoder::tim5(device.TIM5, sampling_period, ENCODER_RESOLUTION);
+        let counter_encoder2 =
+            StepCounterEncoder::tim2(device.TIM2, sampling_period, ENCODER_RESOLUTION);
 
         let driver = DualAxisDriver::new(
             driver1,
@@ -146,12 +152,44 @@ impl SM4 {
         self.usb.process_interrupt();
     }
 
+    // TODO send NMT heartbeat
     pub fn process_can(&mut self) {
         if let Some((message, frame)) = self.can.process_incoming_frame() {
             match message {
-                CANOpenMessage::NMTNodeControl => {}
+                CANOpenMessage::NMTNodeControl => {
+                    if frame.dlc() != 2 {
+                        defmt::error!("Malformed NMT node control data received.");
+                        return;
+                    }
+                    if frame.data().unwrap()[1] != CAN_ID {
+                        return;
+                    }
+                    match NMTRequestedState::try_from(frame.data().unwrap()[0]) {
+                        Ok(state) => match state {
+                            NMTRequestedState::Operational => {
+                                self.state.go_to_operational();
+                            }
+                            NMTRequestedState::Stopped => {
+                                self.state.go_to_stopped();
+                            }
+                            NMTRequestedState::PreOperational => {
+                                self.state.go_to_preoperational();
+                            }
+                            NMTRequestedState::ResetNode => {
+                                unimplemented!()
+                            }
+                            NMTRequestedState::ResetCommunication => {
+                                unimplemented!()
+                            }
+                        },
+                        Err(_) => {
+                            defmt::error!("Invalid NMT requested state received.");
+                        }
+                    }
+                }
                 CANOpenMessage::GlobalFailsafeCommand => {}
                 CANOpenMessage::Sync => {
+                    // TODO move monitoring values to object dictionary as well
                     let pdo = TxPDO1 {
                         battery_voltage: (self.monitoring.get_battery_voltage() * 1000.0) as u16,
                         temperature: (self.monitoring.get_temperature() * 10.0) as u16,
@@ -159,34 +197,130 @@ impl SM4 {
                     let mut buffer = [0u8; 8];
                     let size = pdo.to_raw(&mut buffer).unwrap();
                     self.can.send(CANOpenMessage::TxPDO1, &buffer[..size]);
+
+                    let pdo = TxPDO2 {
+                        axis1_velocity: self
+                            .state
+                            .object_dictionary()
+                            .axis1_actual_velocity()
+                            .get_rps(),
+                        axis2_velocity: self
+                            .state
+                            .object_dictionary()
+                            .axis2_actual_velocity()
+                            .get_rps(),
+                    };
+                    let size = pdo.to_raw(&mut buffer).unwrap();
+                    self.can.send(CANOpenMessage::TxPDO2, &buffer[..size]);
+
+                    let pdo = TxPDO3 {
+                        revolutions: self
+                            .state
+                            .object_dictionary()
+                            .axis1_actual_position()
+                            .get_revolutions(),
+                        angle: self
+                            .state
+                            .object_dictionary()
+                            .axis1_actual_position()
+                            .get_angle() as u32,
+                    };
+                    let size = pdo.to_raw(&mut buffer).unwrap();
+                    self.can.send(CANOpenMessage::TxPDO3, &buffer[..size]);
+
+                    let pdo = TxPDO4 {
+                        revolutions: self
+                            .state
+                            .object_dictionary()
+                            .axis2_actual_position()
+                            .get_revolutions(),
+                        angle: self
+                            .state
+                            .object_dictionary()
+                            .axis2_actual_position()
+                            .get_angle() as u32,
+                    };
+                    let size = pdo.to_raw(&mut buffer).unwrap();
+                    self.can.send(CANOpenMessage::TxPDO4, &buffer[..size]);
+
                     defmt::error!("sync received");
                 }
                 CANOpenMessage::Emergency => {}
                 CANOpenMessage::TimeStamp => {}
-                CANOpenMessage::TxPDO1 => {}
                 CANOpenMessage::RxPDO1 => {
-                    // if frame.data().is_none() {
-                    //     defmt::warn!("Invalid RxPDO1 received.");
-                    //     return;
-                    // }
-                    // if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
-                    //     defmt::error!("speed: {:?}", pdo.);
-                    //     self.object_dictionary.set_desired_speed1(pdo.driver1_speed);
-                    //     self.object_dictionary.set_desired_speed2(pdo.driver2_speed);
-                    //     self.state.invalidate_last_received_speed_command_counter();
-                    // } else {
-                    //     defmt::warn!("Malformed RxPDO1 received.");
-                    // }
+                    if frame.data().is_none() {
+                        defmt::warn!("Invalid RxPDO1 received.");
+                        return;
+                    }
+                    if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
+                        self.state
+                            .object_dictionary()
+                            .set_axis1_mode(pdo.axis1_mode);
+                        self.state
+                            .object_dictionary()
+                            .set_axis2_mode(pdo.axis2_mode);
+                        self.state
+                            .object_dictionary()
+                            .set_axis2_enabled(pdo.axis1_enabled);
+                        self.state
+                            .object_dictionary()
+                            .set_axis2_enabled(pdo.axis2_enabled);
+                    } else {
+                        defmt::warn!("Malformed RxPDO1 received.");
+                    }
                 }
-                CANOpenMessage::TxPDO2 => {}
-                CANOpenMessage::RxPDO2 => {}
-                CANOpenMessage::TxPDO3 => {}
-                CANOpenMessage::RxPDO3 => {}
-                CANOpenMessage::TxPDO4 => {}
-                CANOpenMessage::RxPDO4 => {}
-                CANOpenMessage::TxSDO => {}
+                CANOpenMessage::RxPDO2 => {
+                    if frame.data().is_none() {
+                        defmt::warn!("Invalid RxPDO2 received.");
+                        return;
+                    }
+                    if let Ok(pdo) = RxPDO2::try_from(frame.data().unwrap().as_ref()) {
+                        self.state
+                            .object_dictionary()
+                            .set_axis1_target_velocity(Speed::new(pdo.axis1_velocity));
+                        self.state
+                            .object_dictionary()
+                            .set_axis2_target_velocity(Speed::new(pdo.axis2_velocity));
+                    } else {
+                        defmt::warn!("Malformed RxPDO2 received.");
+                    }
+                }
+                CANOpenMessage::RxPDO3 => {
+                    if frame.data().is_none() {
+                        defmt::warn!("Invalid RxPDO1 received.");
+                        return;
+                    }
+                    if let Ok(pdo) = RxPDO3::try_from(frame.data().unwrap().as_ref()) {
+                        self.state
+                            .object_dictionary()
+                            .set_axis1_target_position(Position::new(
+                                ENCODER_RESOLUTION,
+                                pdo.revolutions,
+                                pdo.angle as u16,
+                            ));
+                    } else {
+                        defmt::warn!("Malformed RxPDO3 received.");
+                    }
+                }
+                CANOpenMessage::RxPDO4 => {
+                    if frame.data().is_none() {
+                        defmt::warn!("Invalid RxPDO4 received.");
+                        return;
+                    }
+                    if let Ok(pdo) = RxPDO4::try_from(frame.data().unwrap().as_ref()) {
+                        self.state
+                            .object_dictionary()
+                            .set_axis2_target_position(Position::new(
+                                ENCODER_RESOLUTION,
+                                pdo.revolutions,
+                                pdo.angle as u16,
+                            ));
+                    } else {
+                        defmt::warn!("Malformed RxPDO4 received.");
+                    }
+                }
                 CANOpenMessage::RxSDO => {}
-                CANOpenMessage::NMTNodeMonitoring => {}
+                _ => {}
             }
         }
     }
