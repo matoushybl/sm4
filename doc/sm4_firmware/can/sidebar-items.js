@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["CANOpenMessage",""],["NMTRequestedState",""],["NMTState",""],["PDO",""]],"struct":[["CANOpen",""]],"trait":[["CANOpenFrame",""]],"type":[["BUS",""]]});
+initSidebarItems({"enum":[["CANOpenMessage",""]],"struct":[["CANOpen",""]],"trait":[["CANOpenFrame",""]],"type":[["BUS",""]]});

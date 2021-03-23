@@ -305,16 +305,67 @@
 <span id="302">302</span>
 <span id="303">303</span>
 <span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">board</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">can</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">current_reference</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direction</span>;
+<span class="kw">mod</span> <span class="ident">driver</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">leds</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">monitoring</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ramp</span>;
+<span class="kw">mod</span> <span class="ident">object_dictionary</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">step_counter</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">step_timer</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">usb</span>;
@@ -322,22 +373,27 @@
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::{<span class="ident">CurrentRef1Channel</span>, <span class="ident">CurrentRef2Channel</span>, <span class="ident">Dir1</span>, <span class="ident">Dir2</span>, <span class="ident">Step1</span>, <span class="ident">Step2</span>, <span class="ident">GPIO</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>, <span class="ident">NMTState</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">current_reference</span>::{<span class="ident">initialize_current_ref</span>, <span class="ident">CurrentDACChannel</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">leds</span>::<span class="ident">LEDs</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">monitoring</span>::<span class="ident">Monitoring</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">step_timer</span>::<span class="ident">StepGeneratorTimer</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">usb</span>::<span class="ident">USBProtocol</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
-<span class="kw">use</span> <span class="ident">cortex_m</span>::<span class="ident">peripheral</span>::<span class="ident">DWT</span>;
 <span class="kw">use</span> <span class="ident">defmt_rtt</span> <span class="kw">as</span> <span class="kw">_</span>; <span class="comment">// global logger</span>
+<span class="kw">use</span> <span class="ident">driver</span>::{<span class="ident">DriverState</span>, <span class="ident">DualAxisDriver</span>};
+<span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
 <span class="kw">use</span> <span class="ident">hal</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">panic_probe</span> <span class="kw">as</span> <span class="kw">_</span>;
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">canopen</span>::{<span class="ident">RxPDO1</span>, <span class="ident">TxPDO1</span>};
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">canopen</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">encoder</span>::{<span class="ident">Position</span>, <span class="ident">Speed</span>};
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">tmc2100</span>::<span class="ident">TMC2100</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">StepperDriver</span>;
+<span class="kw">use</span> <span class="ident">step_counter</span>::<span class="ident">StepCounterEncoder</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">dma</span>::<span class="ident">StreamsTuple</span>; <span class="comment">// memory layout</span>
+
+<span class="kw">const</span> <span class="ident">ENCODER_RESOLUTION</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">16</span> <span class="op">*</span> <span class="number">200</span>;
 
 <span class="kw">const</span> <span class="ident">CAN_ID</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x01</span>;
 
@@ -345,91 +401,22 @@
     <span class="ident">TMC2100</span><span class="op">&lt;</span><span class="ident">StepGeneratorTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM8</span><span class="op">&gt;</span>, <span class="ident">Step1</span>, <span class="ident">Dir1</span>, <span class="ident">CurrentDACChannel</span><span class="op">&lt;</span><span class="ident">CurrentRef1Channel</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 <span class="kw">type</span> <span class="ident">Motor2Driver</span> <span class="op">=</span>
     <span class="ident">TMC2100</span><span class="op">&lt;</span><span class="ident">StepGeneratorTimer</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM1</span><span class="op">&gt;</span>, <span class="ident">Step2</span>, <span class="ident">Dir2</span>, <span class="ident">CurrentDACChannel</span><span class="op">&lt;</span><span class="ident">CurrentRef2Channel</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">Motor1Encoder</span> <span class="op">=</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM5</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">Motor2Encoder</span> <span class="op">=</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">TIM2</span><span class="op">&gt;</span>;
 
 <span class="kw">const</span> <span class="ident">SECOND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">168_000_000</span>;
-
-<span class="doccomment">/// The object dictionary struct represents the global state of the driver</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectDictionary</span> {
-    <span class="ident">desired_speed1</span>: <span class="ident">f32</span>,
-    <span class="ident">desired_speed2</span>: <span class="ident">f32</span>,
-    <span class="ident">standstill_current</span>: <span class="ident">f32</span>,
-    <span class="ident">acceleration_current</span>: <span class="ident">f32</span>,
-    <span class="ident">constant_speed_current</span>: <span class="ident">f32</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ObjectDictionary</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">desired_speed1</span>: <span class="number">0.0</span>,
-            <span class="ident">desired_speed2</span>: <span class="number">0.0</span>,
-            <span class="ident">standstill_current</span>: <span class="number">0.2</span>,
-            <span class="ident">acceleration_current</span>: <span class="number">0.7</span>,
-            <span class="ident">constant_speed_current</span>: <span class="number">0.4</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">ObjectDictionary</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_desired_speed1</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {
-        <span class="self">self</span>.<span class="ident">desired_speed1</span> <span class="op">=</span> <span class="ident">speed</span>;
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_desired_speed2</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">speed</span>: <span class="ident">f32</span>) {
-        <span class="self">self</span>.<span class="ident">desired_speed2</span> <span class="op">=</span> <span class="ident">speed</span>;
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_standstill_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">standstill_current</span>: <span class="ident">f32</span>) {
-        <span class="self">self</span>.<span class="ident">standstill_current</span> <span class="op">=</span> <span class="ident">standstill_current</span>;
-    }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_acceleration_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">acceleration_current</span>: <span class="ident">f32</span>) {
-        <span class="self">self</span>.<span class="ident">acceleration_current</span> <span class="op">=</span> <span class="ident">acceleration_current</span>;
-    }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_constant_speed_current</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">constant_speed_current</span>: <span class="ident">f32</span>) {
-        <span class="self">self</span>.<span class="ident">constant_speed_current</span> <span class="op">=</span> <span class="ident">constant_speed_current</span>;
-    }
-}
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SM4</span> {
     <span class="ident">leds</span>: <span class="ident">LEDs</span>,
     <span class="ident">usb</span>: <span class="ident">USBProtocol</span>,
     <span class="ident">can</span>: <span class="ident">CANOpen</span>,
-    <span class="ident">driver1</span>: <span class="ident">Motor1Driver</span>,
-    <span class="ident">driver2</span>: <span class="ident">Motor2Driver</span>,
     <span class="ident">monitoring</span>: <span class="ident">Monitoring</span>,
-    <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>,
     <span class="ident">state</span>: <span class="ident">DriverState</span>,
-}
-
-<span class="kw">const</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">10</span>; <span class="comment">// ticks of a failsafe timer</span>
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">struct</span> <span class="ident">DriverState</span> {
-    <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>,
-    <span class="ident">last_received_speed_command_down_counter</span>: <span class="ident">u8</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">DriverState</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_movement_blocked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">nmt_state</span> <span class="op">!</span><span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">Operational</span>
-            <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decrement_last_received_speed_command_counter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">invalidate_last_received_speed_command_counter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">=</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>;
-    }
+    <span class="ident">driver</span>: <span class="ident">DualAxisDriver</span><span class="op">&lt;</span><span class="ident">Motor1Driver</span>, <span class="ident">Motor2Driver</span>, <span class="ident">Motor1Encoder</span>, <span class="ident">Motor2Encoder</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">SM4</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">device</span>: <span class="ident">hal</span>::<span class="ident">pac</span>::<span class="ident">Peripherals</span>, <span class="kw-2">mut</span> <span class="ident">core</span>: <span class="ident">rtic</span>::<span class="ident">Peripherals</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">core</span>.<span class="ident">DCB</span>.<span class="ident">enable_trace</span>();
-        <span class="ident">DWT</span>::<span class="ident">unlock</span>();
-        <span class="ident">core</span>.<span class="ident">DWT</span>.<span class="ident">enable_cycle_counter</span>();
-
         <span class="kw">let</span> <span class="ident">clocks</span> <span class="op">=</span> <span class="ident">device</span>
             .<span class="ident">RCC</span>
             .<span class="ident">constrain</span>()
@@ -472,40 +459,40 @@
         <span class="kw">let</span> <span class="ident">timer1</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim8</span>(<span class="ident">device</span>.<span class="ident">TIM8</span>, <span class="ident">clocks</span>);
         <span class="kw">let</span> <span class="ident">timer2</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim1</span>(<span class="ident">device</span>.<span class="ident">TIM1</span>, <span class="ident">clocks</span>);
 
-        <span class="kw">let</span> <span class="ident">driver1</span> <span class="op">=</span> <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">gpio</span>.<span class="ident">step1</span>, <span class="ident">gpio</span>.<span class="ident">dir1</span>, <span class="ident">ref1</span>, <span class="ident">board</span>::<span class="ident">SENSE_R</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">driver1</span> <span class="op">=</span> <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">gpio</span>.<span class="ident">step1</span>, <span class="ident">gpio</span>.<span class="ident">dir1</span>, <span class="ident">ref1</span>, <span class="ident">board</span>::<span class="ident">SENSE_R</span>);
         <span class="kw">let</span> <span class="ident">driver2</span> <span class="op">=</span> <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer2</span>, <span class="ident">gpio</span>.<span class="ident">step2</span>, <span class="ident">gpio</span>.<span class="ident">dir2</span>, <span class="ident">ref2</span>, <span class="ident">board</span>::<span class="ident">SENSE_R</span>);
 
-        <span class="comment">// let counter1 = Counter::tim5(device.TIM5);</span>
-        <span class="comment">// let counter2 = Counter::tim2(device.TIM2);</span>
+        <span class="ident">driver1</span>.<span class="ident">set_current</span>(<span class="number">0.4</span>);
+
+        <span class="kw">let</span> <span class="ident">sampling_period</span> <span class="op">=</span> <span class="ident">Microseconds</span>(<span class="number">10000</span>);
+
+        <span class="kw">let</span> <span class="ident">counter_encoder1</span> <span class="op">=</span>
+            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim5</span>(<span class="ident">device</span>.<span class="ident">TIM5</span>, <span class="ident">sampling_period</span>, <span class="ident">ENCODER_RESOLUTION</span>);
+        <span class="kw">let</span> <span class="ident">counter_encoder2</span> <span class="op">=</span>
+            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim2</span>(<span class="ident">device</span>.<span class="ident">TIM2</span>, <span class="ident">sampling_period</span>, <span class="ident">ENCODER_RESOLUTION</span>);
+
+        <span class="kw">let</span> <span class="ident">driver</span> <span class="op">=</span> <span class="ident">DualAxisDriver</span>::<span class="ident">new</span>(
+            <span class="ident">driver1</span>,
+            <span class="ident">driver2</span>,
+            <span class="ident">counter_encoder1</span>,
+            <span class="ident">counter_encoder2</span>,
+            <span class="ident">sampling_period</span>,
+        );
 
         <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;init done&quot;</span>);
 
         <span class="self">Self</span> {
+            <span class="ident">can</span>,
             <span class="ident">leds</span>,
             <span class="ident">usb</span>,
-            <span class="ident">driver1</span>,
-            <span class="ident">driver2</span>,
-            <span class="ident">can</span>,
             <span class="ident">monitoring</span>,
-            <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>::<span class="ident">default</span>(),
-            <span class="ident">state</span>: <span class="ident">DriverState</span>::<span class="ident">default</span>(),
+            <span class="ident">state</span>: <span class="ident">DriverState</span>::<span class="ident">new</span>(<span class="number">16</span> <span class="op">*</span> <span class="number">200</span>),
+            <span class="ident">driver</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">nmt_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">BootUp</span> {
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">nmt_state</span> <span class="op">=</span> <span class="ident">NMTState</span>::<span class="ident">PreOperational</span>;
-        }
-        <span class="kw">let</span> (<span class="ident">speed1</span>, <span class="ident">speed2</span>) <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>() {
-            (<span class="number">0.0</span>, <span class="number">0.0</span>)
-        } <span class="kw">else</span> {
-            (
-                <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">desired_speed1</span>,
-                <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">desired_speed2</span>,
-            )
-        };
-        <span class="self">self</span>.<span class="ident">driver1</span>.<span class="ident">set_output_frequency</span>(<span class="ident">speed1</span>);
-        <span class="self">self</span>.<span class="ident">driver2</span>.<span class="ident">set_output_frequency</span>(<span class="ident">speed2</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sample</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">driver</span>.<span class="ident">sample</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>);
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">blink_leds</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -520,25 +507,48 @@
         <span class="self">self</span>.<span class="ident">monitoring</span>.<span class="ident">transfer_complete</span>();
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_failsafe</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">decrement_last_received_speed_command_counter</span>();
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ramp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="comment">// self.driver1.update();</span>
-        <span class="comment">// self.driver2.update();</span>
-    }
-
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_usb</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">usb</span>.<span class="ident">process_interrupt</span>();
     }
 
+    <span class="comment">// TODO send NMT heartbeat</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_can</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">message</span>, <span class="ident">frame</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">process_incoming_frame</span>() {
             <span class="kw">match</span> <span class="ident">message</span> {
-                <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeControl</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeControl</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">dlc</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
+                        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Malformed NMT node control data received.&quot;</span>);
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>()[<span class="number">1</span>] <span class="op">!</span><span class="op">=</span> <span class="ident">CAN_ID</span> {
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">match</span> <span class="ident">NMTRequestedState</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>()[<span class="number">0</span>]) {
+                        <span class="prelude-val">Ok</span>(<span class="ident">state</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">state</span> {
+                            <span class="ident">NMTRequestedState</span>::<span class="ident">Operational</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">go_to_operational</span>();
+                            }
+                            <span class="ident">NMTRequestedState</span>::<span class="ident">Stopped</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">go_to_stopped</span>();
+                            }
+                            <span class="ident">NMTRequestedState</span>::<span class="ident">PreOperational</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">go_to_preoperational</span>();
+                            }
+                            <span class="ident">NMTRequestedState</span>::<span class="ident">ResetNode</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="macro">unimplemented</span><span class="macro">!</span>()
+                            }
+                            <span class="ident">NMTRequestedState</span>::<span class="ident">ResetCommunication</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="macro">unimplemented</span><span class="macro">!</span>()
+                            }
+                        },
+                        <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Invalid NMT requested state received.&quot;</span>);
+                        }
+                    }
+                }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">GlobalFailsafeCommand</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">Sync</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="comment">// TODO move monitoring values to object dictionary as well</span>
                     <span class="kw">let</span> <span class="ident">pdo</span> <span class="op">=</span> <span class="ident">TxPDO1</span> {
                         <span class="ident">battery_voltage</span>: (<span class="self">self</span>.<span class="ident">monitoring</span>.<span class="ident">get_battery_voltage</span>() <span class="op">*</span> <span class="number">1000.0</span>) <span class="kw">as</span> <span class="ident">u16</span>,
                         <span class="ident">temperature</span>: (<span class="self">self</span>.<span class="ident">monitoring</span>.<span class="ident">get_temperature</span>() <span class="op">*</span> <span class="number">10.0</span>) <span class="kw">as</span> <span class="ident">u16</span>,
@@ -546,34 +556,130 @@
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">8</span>];
                     <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">pdo</span>.<span class="ident">to_raw</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>();
                     <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">send</span>(<span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO1</span>, <span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">size</span>]);
+
+                    <span class="kw">let</span> <span class="ident">pdo</span> <span class="op">=</span> <span class="ident">TxPDO2</span> {
+                        <span class="ident">axis1_velocity</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis1_actual_velocity</span>()
+                            .<span class="ident">get_rps</span>(),
+                        <span class="ident">axis2_velocity</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis2_actual_velocity</span>()
+                            .<span class="ident">get_rps</span>(),
+                    };
+                    <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">pdo</span>.<span class="ident">to_raw</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>();
+                    <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">send</span>(<span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO2</span>, <span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">size</span>]);
+
+                    <span class="kw">let</span> <span class="ident">pdo</span> <span class="op">=</span> <span class="ident">TxPDO3</span> {
+                        <span class="ident">revolutions</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis1_actual_position</span>()
+                            .<span class="ident">get_revolutions</span>(),
+                        <span class="ident">angle</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis1_actual_position</span>()
+                            .<span class="ident">get_angle</span>() <span class="kw">as</span> <span class="ident">u32</span>,
+                    };
+                    <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">pdo</span>.<span class="ident">to_raw</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>();
+                    <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">send</span>(<span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO3</span>, <span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">size</span>]);
+
+                    <span class="kw">let</span> <span class="ident">pdo</span> <span class="op">=</span> <span class="ident">TxPDO4</span> {
+                        <span class="ident">revolutions</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis2_actual_position</span>()
+                            .<span class="ident">get_revolutions</span>(),
+                        <span class="ident">angle</span>: <span class="self">self</span>
+                            .<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">axis2_actual_position</span>()
+                            .<span class="ident">get_angle</span>() <span class="kw">as</span> <span class="ident">u32</span>,
+                    };
+                    <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">pdo</span>.<span class="ident">to_raw</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap</span>();
+                    <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">send</span>(<span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO4</span>, <span class="kw-2">&amp;</span><span class="ident">buffer</span>[..<span class="ident">size</span>]);
+
                     <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;sync received&quot;</span>);
                 }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">Emergency</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">TimeStamp</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">is_none</span>() {
                         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Invalid RxPDO1 received.&quot;</span>);
                         <span class="kw">return</span>;
                     }
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">pdo</span>) <span class="op">=</span> <span class="ident">RxPDO1</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>()) {
-                        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;speed: {:?}&quot;</span>, <span class="ident">pdo</span>.<span class="ident">driver1_speed</span>);
-                        <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">set_desired_speed1</span>(<span class="ident">pdo</span>.<span class="ident">driver1_speed</span>);
-                        <span class="self">self</span>.<span class="ident">object_dictionary</span>.<span class="ident">set_desired_speed2</span>(<span class="ident">pdo</span>.<span class="ident">driver2_speed</span>);
-                        <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis1_mode</span>(<span class="ident">pdo</span>.<span class="ident">axis1_mode</span>);
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis2_mode</span>(<span class="ident">pdo</span>.<span class="ident">axis2_mode</span>);
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis2_enabled</span>(<span class="ident">pdo</span>.<span class="ident">axis1_enabled</span>);
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis2_enabled</span>(<span class="ident">pdo</span>.<span class="ident">axis2_enabled</span>);
                     } <span class="kw">else</span> {
                         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO1 received.&quot;</span>);
                     }
                 }
-                <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO3</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO3</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">TxPDO4</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO4</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">TxSDO</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">is_none</span>() {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Invalid RxPDO2 received.&quot;</span>);
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">pdo</span>) <span class="op">=</span> <span class="ident">RxPDO2</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>()) {
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis1_target_velocity</span>(<span class="ident">Speed</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">axis1_velocity</span>));
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis2_target_velocity</span>(<span class="ident">Speed</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">axis2_velocity</span>));
+                    } <span class="kw">else</span> {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO2 received.&quot;</span>);
+                    }
+                }
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO3</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">is_none</span>() {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Invalid RxPDO1 received.&quot;</span>);
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">pdo</span>) <span class="op">=</span> <span class="ident">RxPDO3</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>()) {
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis1_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(
+                                <span class="ident">ENCODER_RESOLUTION</span>,
+                                <span class="ident">pdo</span>.<span class="ident">revolutions</span>,
+                                <span class="ident">pdo</span>.<span class="ident">angle</span> <span class="kw">as</span> <span class="ident">u16</span>,
+                            ));
+                    } <span class="kw">else</span> {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO3 received.&quot;</span>);
+                    }
+                }
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO4</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">is_none</span>() {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Invalid RxPDO4 received.&quot;</span>);
+                        <span class="kw">return</span>;
+                    }
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">pdo</span>) <span class="op">=</span> <span class="ident">RxPDO4</span>::<span class="ident">try_from</span>(<span class="ident">frame</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">as_ref</span>()) {
+                        <span class="self">self</span>.<span class="ident">state</span>
+                            .<span class="ident">object_dictionary</span>()
+                            .<span class="ident">set_axis2_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(
+                                <span class="ident">ENCODER_RESOLUTION</span>,
+                                <span class="ident">pdo</span>.<span class="ident">revolutions</span>,
+                                <span class="ident">pdo</span>.<span class="ident">angle</span> <span class="kw">as</span> <span class="ident">u16</span>,
+                            ));
+                    } <span class="kw">else</span> {
+                        <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO4 received.&quot;</span>);
+                    }
+                }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">RxSDO</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeMonitoring</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
             }
         }
     }
@@ -586,12 +692,8 @@
         <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">10</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ramping_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">20</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">failsafe_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">10</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">sampling_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">100</span>
     }
 }
 
