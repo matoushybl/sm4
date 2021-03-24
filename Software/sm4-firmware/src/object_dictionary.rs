@@ -10,6 +10,8 @@ const DEFAULT_CONSTANT_VELOCITY_CURRENT: f32 = 0.6;
 /// The object dictionary struct represents the global state of the driver
 #[derive(Copy, Clone)]
 pub struct ObjectDictionary {
+    battery_voltage: f32,
+    temperature: f32,
     axis1_mode: AxisMode,
     axis2_mode: AxisMode,
     axis1_enabled: bool,
@@ -49,6 +51,8 @@ pub struct ObjectDictionary {
 impl ObjectDictionary {
     pub fn new(resolution: u16) -> Self {
         Self {
+            battery_voltage: 0.0,
+            temperature: 0.0,
             axis1_mode: Default::default(),
             axis2_mode: Default::default(),
             axis1_enabled: false,
@@ -347,10 +351,42 @@ impl ObjectDictionary {
     pub fn set_axis2_position_d(&mut self, axis2_position_d: f32) {
         self.axis2_position_d = axis2_position_d;
     }
+
     pub fn axis1_velocity_feedback_control_enable(&self) -> bool {
         self.axis1_velocity_feedback_control_enable
     }
+
     pub fn axis2_velocity_feedback_control_enable(&self) -> bool {
         self.axis2_velocity_feedback_control_enable
+    }
+
+    pub fn battery_voltage(&self) -> f32 {
+        self.battery_voltage
+    }
+
+    pub fn temperature(&self) -> f32 {
+        self.temperature
+    }
+
+    pub fn set_battery_voltage(&mut self, battery_voltage: f32) {
+        self.battery_voltage = battery_voltage;
+    }
+
+    pub fn set_temperature(&mut self, temperature: f32) {
+        self.temperature = temperature;
+    }
+
+    pub fn set_axis1_velocity_feedback_control_enable(
+        &mut self,
+        axis1_velocity_feedback_control_enable: bool,
+    ) {
+        self.axis1_velocity_feedback_control_enable = axis1_velocity_feedback_control_enable;
+    }
+
+    pub fn set_axis2_velocity_feedback_control_enable(
+        &mut self,
+        axis2_velocity_feedback_control_enable: bool,
+    ) {
+        self.axis2_velocity_feedback_control_enable = axis2_velocity_feedback_control_enable;
     }
 }

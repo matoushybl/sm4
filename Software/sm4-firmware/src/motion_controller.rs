@@ -53,11 +53,11 @@ impl DriverState {
     }
 
     pub fn axis1_target_velocity(&self) -> Speed {
-        // if self.is_movement_blocked() || !self.object_dictionary.axis1_enabled() {
-        //     Speed::zero()
-        // } else {
-        self.object_dictionary.axis1_target_velocity()
-        // }
+        if self.is_movement_blocked() || !self.object_dictionary.axis1_enabled() {
+            Speed::zero()
+        } else {
+            self.object_dictionary.axis1_target_velocity()
+        }
     }
 
     pub fn axis2_target_velocity(&self) -> Speed {

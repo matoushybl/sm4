@@ -15,6 +15,13 @@ pub mod tmc2100;
 
 pub use psd::PSDController;
 
+pub mod prelude {
+    pub use crate::canopen::*;
+    pub use crate::encoder::*;
+    pub use crate::tmc2100::TMC2100;
+    pub use crate::StepperDriver;
+}
+
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
 #[derive(Copy, Clone, Debug)]
 pub enum AxisMode {
