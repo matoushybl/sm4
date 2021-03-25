@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["CAN_ID",""],["ENCODER_RESOLUTION",""],["SECOND",""],["SPEED_COMMAND_RESET_INTERVAL",""]],"struct":[["DriverState",""],["SM4",""]],"type":[["Axis1",""],["Axis1Driver",""],["Axis1Encoder",""],["Axis2",""],["Axis2Driver",""],["Axis2Encoder",""]]});
+initSidebarItems({"constant":[["SECOND",""]],"struct":[["SM4",""]]});

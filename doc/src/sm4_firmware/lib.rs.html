@@ -36,26 +36,34 @@
 <span id="33">33</span>
 <span id="34">34</span>
 <span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
 
-<span class="kw">mod</span> <span class="ident">board</span>;
-<span class="kw">mod</span> <span class="ident">can</span>;
-<span class="kw">mod</span> <span class="ident">current_reference</span>;
-<span class="kw">mod</span> <span class="ident">leds</span>;
-<span class="kw">mod</span> <span class="ident">monitoring</span>;
-<span class="kw">mod</span> <span class="ident">object_dictionary</span>;
-<span class="kw">mod</span> <span class="ident">sm4</span>;
-<span class="kw">mod</span> <span class="ident">step_counter</span>;
-<span class="kw">mod</span> <span class="ident">step_timer</span>;
-<span class="kw">mod</span> <span class="ident">usb</span>;
-
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
-<span class="kw">use</span> <span class="ident">defmt_rtt</span> <span class="kw">as</span> <span class="kw">_</span>; <span class="comment">// global logger</span>
+<span class="kw">use</span> <span class="ident">defmt_rtt</span> <span class="kw">as</span> <span class="kw">_</span>;
+<span class="comment">// global logger</span>
 <span class="kw">use</span> <span class="ident">panic_probe</span> <span class="kw">as</span> <span class="kw">_</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sm4</span>::<span class="ident">SM4</span>;
+
+<span class="kw">mod</span> <span class="ident">blocks</span>;
+<span class="kw">mod</span> <span class="ident">board</span>;
+<span class="kw">mod</span> <span class="ident">can</span>;
+<span class="kw">mod</span> <span class="ident">object_dictionary</span>;
+<span class="kw">mod</span> <span class="ident">sm4</span>;
+<span class="kw">mod</span> <span class="ident">state</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">blocks</span>::<span class="kw-2">*</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::<span class="kw-2">*</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">object_dictionary</span>::<span class="ident">ObjectDictionary</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">state</span>::<span class="ident">DriverState</span>;
+}
 
 <span class="comment">// same panicking *behavior* as `panic-probe` but doesn&#39;t print a panic message</span>
 <span class="comment">// this prevents the panic message being printed *twice* when `defmt::panic` is invoked</span>

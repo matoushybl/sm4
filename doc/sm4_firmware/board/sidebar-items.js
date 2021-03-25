@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["MICROSTEPS",""],["SENSE_R",""]],"mod":[["prelude",""]],"struct":[["GPIO",""]],"type":[["BatteryVoltage",""],["CANRx",""],["CANTx",""],["CurrentRef1Channel",""],["CurrentRef1Pin",""],["CurrentRef2Channel",""],["CurrentRef2Pin",""],["Dir1",""],["Dir2",""],["En1",""],["En2",""],["Err1",""],["Err2",""],["ErrorLED",""],["Mode1",""],["Mode2",""],["SCL",""],["SDA",""],["StatusLED",""],["Step1",""],["Step2",""],["USBDMinus",""],["USBDPlus",""]]});
+initSidebarItems({"mod":[["config",""],["definitions",""]]});
