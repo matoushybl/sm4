@@ -1,6 +1,5 @@
 use crate::float::fabs;
-use crate::hal::{DACChannel, StepGenerator};
-use crate::StepperDriver;
+use crate::hal::{DACChannel, StepGenerator, StepperDriver};
 use embedded_time::rate::Hertz;
 
 const V_FS: f32 = 0.32; // V

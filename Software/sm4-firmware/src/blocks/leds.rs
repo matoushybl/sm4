@@ -1,4 +1,4 @@
-use crate::board::prelude::*;
+use crate::board::definitions::{ErrorLED, StatusLED};
 use blinq::Blinq;
 
 pub struct LEDs {

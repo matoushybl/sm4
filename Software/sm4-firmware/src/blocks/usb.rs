@@ -1,7 +1,7 @@
 use stm32f4xx_hal::otg_fs::*;
 use stm32f4xx_hal::stm32;
 
-use crate::board::{USBDMinus, USBDPlus};
+use crate::board::definitions::{USBDMinus, USBDPlus};
 use stm32f4xx_hal::rcc::Clocks;
 use usb_device::class_prelude::UsbBusAllocator;
 use usb_device::prelude::*;

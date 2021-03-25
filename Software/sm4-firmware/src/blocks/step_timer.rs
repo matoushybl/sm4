@@ -1,5 +1,5 @@
 use embedded_time::rate::Hertz;
-use sm4_shared::hal::StepGenerator;
+use sm4_shared::prelude::StepGenerator;
 use stm32f4xx_hal::rcc::Clocks;
 use stm32f4xx_hal::stm32::TIM8;
 use stm32f4xx_hal::{stm32, stm32::TIM1};

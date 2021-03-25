@@ -24,7 +24,7 @@ const APP: () = {
         DWT::unlock();
         core.DWT.enable_cycle_counter();
 
-        let driver = SM4::init(device, core);
+        let driver = SM4::init(device);
 
         let now = cx.start;
         cx.schedule

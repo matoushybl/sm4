@@ -1,12 +1,8 @@
-use crate::board::*;
 use crate::can::{CANOpen, CANOpenMessage};
-use crate::current_reference::{initialize_current_ref, CurrentDACChannel};
-use crate::leds::LEDs;
-use crate::monitoring::Monitoring;
-use crate::object_dictionary::ObjectDictionary;
-use crate::step_counter::StepCounterEncoder;
-use crate::step_timer::StepGeneratorTimer;
-use crate::usb::USBProtocol;
+use crate::prelude::config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R};
+use crate::prelude::definitions::{Axis1, Axis2};
+use crate::prelude::*;
+use crate::state::DriverState;
 use core::convert::TryFrom;
 use embedded_time::duration::Microseconds;
 use hal::dma::StreamsTuple;
@@ -14,77 +10,7 @@ use hal::prelude::*;
 use sm4_shared::prelude::*;
 use stm32f4xx_hal as hal;
 
-const ENCODER_RESOLUTION: u16 = 16 * 200;
-
-const CAN_ID: u8 = 0x01;
-
-type Axis1Driver =
-    TMC2100<StepGeneratorTimer<hal::pac::TIM8>, Step1, Dir1, CurrentDACChannel<CurrentRef1Channel>>;
-type Axis2Driver =
-    TMC2100<StepGeneratorTimer<hal::pac::TIM1>, Step2, Dir2, CurrentDACChannel<CurrentRef2Channel>>;
-type Axis1Encoder = StepCounterEncoder<hal::pac::TIM5>;
-type Axis2Encoder = StepCounterEncoder<hal::pac::TIM2>;
-
-type Axis1 = AxisMotionController<Axis1Driver, Axis1Encoder>;
-type Axis2 = AxisMotionController<Axis2Driver, Axis2Encoder>;
-
 const SECOND: u32 = 168_000_000;
-
-const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
-
-#[derive(Copy, Clone)]
-pub struct DriverState {
-    nmt_state: NMTState,
-    object_dictionary: ObjectDictionary,
-    last_received_speed_command_down_counter: u8,
-}
-
-impl DriverState {
-    pub fn new(encoder_resolution: u16) -> Self {
-        Self {
-            nmt_state: NMTState::default(),
-            object_dictionary: ObjectDictionary::new(encoder_resolution),
-            last_received_speed_command_down_counter: 0,
-        }
-    }
-
-    pub fn go_to_preoperational_if_needed(&mut self) {
-        if self.nmt_state == NMTState::BootUp {
-            self.nmt_state = NMTState::PreOperational;
-        }
-    }
-
-    pub fn go_to_operational(&mut self) {
-        self.nmt_state = NMTState::Operational;
-    }
-
-    pub fn go_to_stopped(&mut self) {
-        self.nmt_state = NMTState::Stopped;
-    }
-
-    pub fn go_to_preoperational(&mut self) {
-        self.nmt_state = NMTState::PreOperational;
-    }
-
-    pub fn is_movement_blocked(&self) -> bool {
-        self.nmt_state != NMTState::Operational
-            || self.last_received_speed_command_down_counter == 0
-    }
-
-    pub fn decrement_last_received_speed_command_counter(&mut self) {
-        if self.last_received_speed_command_down_counter != 0 {
-            self.last_received_speed_command_down_counter -= 1;
-        }
-    }
-
-    pub fn invalidate_last_received_speed_command_counter(&mut self) {
-        self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
-    }
-
-    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary {
-        &mut self.object_dictionary
-    }
-}
 
 pub struct SM4 {
     leds: LEDs,
@@ -97,7 +23,7 @@ pub struct SM4 {
 }
 
 impl SM4 {
-    pub fn init(device: hal::pac::Peripherals, mut core: rtic::Peripherals) -> Self {
+    pub fn init(device: hal::pac::Peripherals) -> Self {
         let clocks = device
             .RCC
             .constrain()
@@ -170,11 +96,11 @@ impl SM4 {
     pub fn sample(&mut self) {
         self.axis1.control(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary.axis1_mut(),
+            self.state.object_dictionary().axis1_mut(),
         );
         self.axis2.control(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary.axis2_mut(),
+            self.state.object_dictionary().axis2_mut(),
         );
     }
 

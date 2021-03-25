@@ -1,5 +1,5 @@
-use crate::board::{CurrentRef1Channel, CurrentRef1Pin, CurrentRef2Channel, CurrentRef2Pin};
-use sm4_shared::hal::DACChannel;
+use crate::board::definitions::*;
+use sm4_shared::prelude::DACChannel;
 use stm32f4xx_hal::dac::{DacOut, DacPin};
 use stm32f4xx_hal::stm32;
 

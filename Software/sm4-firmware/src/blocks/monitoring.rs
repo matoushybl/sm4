@@ -1,4 +1,4 @@
-use crate::board::BatteryVoltage;
+use crate::board::definitions::BatteryVoltage;
 use stm32f4xx_hal::adc::config::{AdcConfig, Dma, SampleTime, Scan, Sequence};
 use stm32f4xx_hal::adc::{Adc, Temperature};
 use stm32f4xx_hal::dma::config::DmaConfig;

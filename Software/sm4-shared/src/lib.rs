@@ -5,24 +5,24 @@
 
 #![cfg_attr(not(test), no_std)]
 
-pub mod canopen;
-pub mod encoder;
-pub mod float;
-pub mod hal;
-pub mod motion_controller;
+mod canopen;
+mod encoder;
+mod float;
+mod hal;
+mod motion_controller;
 mod psd;
-pub mod ramp;
-pub mod tmc2100;
+mod ramp;
+mod tmc2100;
 
 pub mod prelude {
     pub use crate::canopen::*;
     pub use crate::encoder::*;
+    pub use crate::hal::*;
     pub use crate::motion_controller::AxisMotionController;
     pub use crate::psd::PSDController;
     pub use crate::ramp::TrapRampGen;
     pub use crate::tmc2100::TMC2100;
     pub use crate::AxisMode;
-    pub use crate::StepperDriver;
 }
 
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
@@ -54,21 +54,4 @@ impl From<AxisMode> for u8 {
             AxisMode::Position => 0x01,
         }
     }
-}
-
-/// This trait is an abstraction over stepper drivers.
-/// Generally the drivers have two functions - generate steps and set output current.
-pub trait StepperDriver {
-    /// Sets output frequency of the driver.
-    /// this shall be the angular frequency of the output shaft in revolutions per second.
-    ///
-    /// # Arguments
-    /// * `frequency` - frequency of the output motor shaft in revolutions per second
-    fn set_output_frequency(&mut self, frequency: f32);
-
-    /// Sets the target current the driver shall drive the stepper motor with.
-    ///
-    /// # Arguments
-    /// * `current` - the desired current in Amps
-    fn set_current(&mut self, current: f32);
 }

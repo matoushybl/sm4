@@ -1,22 +1,26 @@
 #![no_std]
 
-mod board;
-mod can;
-mod current_reference;
-mod leds;
-mod monitoring;
-mod object_dictionary;
-mod sm4;
-mod step_counter;
-mod step_timer;
-mod usb;
-
 use core::sync::atomic::{AtomicUsize, Ordering};
 
-use defmt_rtt as _; // global logger
+use defmt_rtt as _;
+// global logger
 use panic_probe as _;
 
 pub use sm4::SM4;
+
+mod blocks;
+mod board;
+mod can;
+mod object_dictionary;
+mod sm4;
+mod state;
+
+pub mod prelude {
+    pub use crate::blocks::*;
+    pub use crate::board::*;
+    pub use crate::object_dictionary::ObjectDictionary;
+    pub use crate::state::DriverState;
+}
 
 // same panicking *behavior* as `panic-probe` but doesn't print a panic message
 // this prevents the panic message being printed *twice* when `defmt::panic` is invoked
