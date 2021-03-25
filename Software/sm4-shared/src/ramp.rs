@@ -1,3 +1,4 @@
+use embedded_time::duration::Microseconds;
 use num_traits::Float;
 
 pub struct TrapRampGen {
@@ -6,10 +7,10 @@ pub struct TrapRampGen {
 }
 
 impl TrapRampGen {
-    pub fn new(frequency: f32) -> Self {
+    pub fn new(period: Microseconds) -> Self {
         Self {
             current_speed: 0.0,
-            generation_frequency: frequency,
+            generation_frequency: 1.0 / (period.0 as f32 / 1_000_000.0),
         }
     }
     pub fn generate(&mut self, target_speed: f32, target_acceleration: f32) -> f32 {

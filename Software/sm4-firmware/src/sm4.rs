@@ -3,28 +3,88 @@ use crate::can::{CANOpen, CANOpenMessage};
 use crate::current_reference::{initialize_current_ref, CurrentDACChannel};
 use crate::leds::LEDs;
 use crate::monitoring::Monitoring;
-use crate::motion_controller::{DriverState, DualAxisDriver};
+use crate::object_dictionary::ObjectDictionary;
 use crate::step_counter::StepCounterEncoder;
 use crate::step_timer::StepGeneratorTimer;
 use crate::usb::USBProtocol;
 use core::convert::TryFrom;
 use embedded_time::duration::Microseconds;
+use hal::dma::StreamsTuple;
+use hal::prelude::*;
 use sm4_shared::prelude::*;
-use stm32f4xx_hal::dma::StreamsTuple;
-use stm32f4xx_hal::prelude::*;
+use stm32f4xx_hal as hal;
 
 const ENCODER_RESOLUTION: u16 = 16 * 200;
 
 const CAN_ID: u8 = 0x01;
 
-type Motor1Driver =
+type Axis1Driver =
     TMC2100<StepGeneratorTimer<hal::pac::TIM8>, Step1, Dir1, CurrentDACChannel<CurrentRef1Channel>>;
-type Motor2Driver =
+type Axis2Driver =
     TMC2100<StepGeneratorTimer<hal::pac::TIM1>, Step2, Dir2, CurrentDACChannel<CurrentRef2Channel>>;
-type Motor1Encoder = StepCounterEncoder<hal::pac::TIM5>;
-type Motor2Encoder = StepCounterEncoder<hal::pac::TIM2>;
+type Axis1Encoder = StepCounterEncoder<hal::pac::TIM5>;
+type Axis2Encoder = StepCounterEncoder<hal::pac::TIM2>;
+
+type Axis1 = AxisMotionController<Axis1Driver, Axis1Encoder>;
+type Axis2 = AxisMotionController<Axis2Driver, Axis2Encoder>;
 
 const SECOND: u32 = 168_000_000;
+
+const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
+
+#[derive(Copy, Clone)]
+pub struct DriverState {
+    nmt_state: NMTState,
+    object_dictionary: ObjectDictionary,
+    last_received_speed_command_down_counter: u8,
+}
+
+impl DriverState {
+    pub fn new(encoder_resolution: u16) -> Self {
+        Self {
+            nmt_state: NMTState::default(),
+            object_dictionary: ObjectDictionary::new(encoder_resolution),
+            last_received_speed_command_down_counter: 0,
+        }
+    }
+
+    pub fn go_to_preoperational_if_needed(&mut self) {
+        if self.nmt_state == NMTState::BootUp {
+            self.nmt_state = NMTState::PreOperational;
+        }
+    }
+
+    pub fn go_to_operational(&mut self) {
+        self.nmt_state = NMTState::Operational;
+    }
+
+    pub fn go_to_stopped(&mut self) {
+        self.nmt_state = NMTState::Stopped;
+    }
+
+    pub fn go_to_preoperational(&mut self) {
+        self.nmt_state = NMTState::PreOperational;
+    }
+
+    pub fn is_movement_blocked(&self) -> bool {
+        self.nmt_state != NMTState::Operational
+            || self.last_received_speed_command_down_counter == 0
+    }
+
+    pub fn decrement_last_received_speed_command_counter(&mut self) {
+        if self.last_received_speed_command_down_counter != 0 {
+            self.last_received_speed_command_down_counter -= 1;
+        }
+    }
+
+    pub fn invalidate_last_received_speed_command_counter(&mut self) {
+        self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
+    }
+
+    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary {
+        &mut self.object_dictionary
+    }
+}
 
 pub struct SM4 {
     leds: LEDs,
@@ -32,7 +92,8 @@ pub struct SM4 {
     can: CANOpen,
     monitoring: Monitoring,
     state: DriverState,
-    driver: DualAxisDriver<Motor1Driver, Motor2Driver, Motor1Encoder, Motor2Encoder>,
+    axis1: Axis1,
+    axis2: Axis2,
 }
 
 impl SM4 {
@@ -79,28 +140,42 @@ impl SM4 {
 
         let sampling_period = Microseconds(10000);
 
-        let driver = DualAxisDriver::new(
+        let axis1 = AxisMotionController::new(
             TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, SENSE_R),
-            TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, SENSE_R),
             StepCounterEncoder::tim5(device.TIM5, sampling_period, ENCODER_RESOLUTION),
+            sampling_period,
+        );
+        let axis2 = AxisMotionController::new(
+            TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, SENSE_R),
             StepCounterEncoder::tim2(device.TIM2, sampling_period, ENCODER_RESOLUTION),
             sampling_period,
         );
 
         defmt::error!("init done");
 
+        let mut state = DriverState::new(ENCODER_RESOLUTION);
+        state.go_to_preoperational_if_needed();
+
         Self {
             can,
             leds,
             usb,
             monitoring: Monitoring::new(device.ADC1, gpio.battery_voltage, dma2.0),
-            state: DriverState::new(ENCODER_RESOLUTION),
-            driver,
+            state,
+            axis1,
+            axis2,
         }
     }
 
     pub fn sample(&mut self) {
-        self.driver.sample(&mut self.state);
+        self.axis1.control(
+            self.state.is_movement_blocked(),
+            self.state.object_dictionary.axis1_mut(),
+        );
+        self.axis2.control(
+            self.state.is_movement_blocked(),
+            self.state.object_dictionary.axis2_mut(),
+        );
     }
 
     pub fn blink_leds(&mut self) {
@@ -175,12 +250,14 @@ impl SM4 {
                         axis1_velocity: self
                             .state
                             .object_dictionary()
-                            .axis1_actual_velocity()
+                            .axis1()
+                            .actual_velocity()
                             .get_rps(),
                         axis2_velocity: self
                             .state
                             .object_dictionary()
-                            .axis2_actual_velocity()
+                            .axis2()
+                            .actual_velocity()
                             .get_rps(),
                     };
                     let size = pdo.to_raw(&mut buffer).unwrap();
@@ -190,12 +267,14 @@ impl SM4 {
                         revolutions: self
                             .state
                             .object_dictionary()
-                            .axis1_actual_position()
+                            .axis1()
+                            .actual_position()
                             .get_revolutions(),
                         angle: self
                             .state
                             .object_dictionary()
-                            .axis1_actual_position()
+                            .axis1()
+                            .actual_position()
                             .get_angle() as u32,
                     };
                     let size = pdo.to_raw(&mut buffer).unwrap();
@@ -205,12 +284,14 @@ impl SM4 {
                         revolutions: self
                             .state
                             .object_dictionary()
-                            .axis2_actual_position()
+                            .axis2()
+                            .actual_position()
                             .get_revolutions(),
                         angle: self
                             .state
                             .object_dictionary()
-                            .axis2_actual_position()
+                            .axis2()
+                            .actual_position()
                             .get_angle() as u32,
                     };
                     let size = pdo.to_raw(&mut buffer).unwrap();
@@ -228,16 +309,20 @@ impl SM4 {
                     if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
                         self.state
                             .object_dictionary()
-                            .set_axis1_mode(pdo.axis1_mode);
+                            .axis1_mut()
+                            .set_mode(pdo.axis1_mode);
                         self.state
                             .object_dictionary()
-                            .set_axis2_mode(pdo.axis2_mode);
+                            .axis2_mut()
+                            .set_mode(pdo.axis2_mode);
                         self.state
                             .object_dictionary()
-                            .set_axis2_enabled(pdo.axis1_enabled);
+                            .axis1_mut()
+                            .set_enabled(pdo.axis1_enabled);
                         self.state
                             .object_dictionary()
-                            .set_axis2_enabled(pdo.axis2_enabled);
+                            .axis2_mut()
+                            .set_enabled(pdo.axis2_enabled);
                     } else {
                         defmt::warn!("Malformed RxPDO1 received.");
                     }
@@ -250,10 +335,12 @@ impl SM4 {
                     if let Ok(pdo) = RxPDO2::try_from(frame.data().unwrap().as_ref()) {
                         self.state
                             .object_dictionary()
-                            .set_axis1_target_velocity(Speed::new(pdo.axis1_velocity));
+                            .axis1_mut()
+                            .set_target_velocity(Velocity::new(pdo.axis1_velocity));
                         self.state
                             .object_dictionary()
-                            .set_axis2_target_velocity(Speed::new(pdo.axis2_velocity));
+                            .axis2_mut()
+                            .set_target_velocity(Velocity::new(pdo.axis2_velocity));
                     } else {
                         defmt::warn!("Malformed RxPDO2 received.");
                     }
@@ -266,7 +353,8 @@ impl SM4 {
                     if let Ok(pdo) = RxPDO3::try_from(frame.data().unwrap().as_ref()) {
                         self.state
                             .object_dictionary()
-                            .set_axis1_target_position(Position::new(
+                            .axis1_mut()
+                            .set_target_position(Position::new(
                                 ENCODER_RESOLUTION,
                                 pdo.revolutions,
                                 pdo.angle as u16,
@@ -283,7 +371,8 @@ impl SM4 {
                     if let Ok(pdo) = RxPDO4::try_from(frame.data().unwrap().as_ref()) {
                         self.state
                             .object_dictionary()
-                            .set_axis2_target_position(Position::new(
+                            .axis2_mut()
+                            .set_target_position(Position::new(
                                 ENCODER_RESOLUTION,
                                 pdo.revolutions,
                                 pdo.angle as u16,

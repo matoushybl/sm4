@@ -1,5 +1,5 @@
 use embedded_time::duration::Microseconds;
-use sm4_shared::{encoder::*, Direction};
+use sm4_shared::prelude::*;
 use stm32f4xx_hal::stm32;
 use stm32f4xx_hal::stm32::{TIM2, TIM5};
 
@@ -12,7 +12,7 @@ pub struct StepCounterEncoder<T> {
     timer: T,
     past_position: Position,
     current_position: Position,
-    current_speed: Speed,
+    current_velocity: Velocity,
     direction: Direction,
     sampling_period: Microseconds,
     resolution: u16,
@@ -37,8 +37,8 @@ impl<T> Encoder for StepCounterEncoder<T>
 where
     T: Counter,
 {
-    fn get_speed(&self) -> Speed {
-        self.current_speed
+    fn get_velocity(&self) -> Velocity {
+        self.current_velocity
     }
 
     fn get_position(&self) -> Position {
@@ -49,7 +49,7 @@ where
         let past = self.current_position;
         self.current_position = Position::zero(self.resolution);
         self.past_position = Position::zero(self.resolution);
-        self.current_speed = Speed::zero();
+        self.current_velocity = Velocity::zero();
         self.timer.reset_value();
         past
     }
@@ -57,7 +57,7 @@ where
     fn sample(&mut self) {
         self.update_current_position();
 
-        self.current_speed = Speed::from_positions(
+        self.current_velocity = Velocity::from_positions(
             &self.current_position,
             &self.past_position,
             self.sampling_period,
@@ -107,7 +107,7 @@ macro_rules! counter {
                     direction: Direction::Clockwise,
                     past_position: Position::zero(resolution),
                     current_position: Position::zero(resolution),
-                    current_speed: Speed::zero(),
+                    current_velocity: Velocity::zero(),
                     sampling_period,
                     resolution,
                 }

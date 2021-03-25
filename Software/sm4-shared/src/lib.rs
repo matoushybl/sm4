@@ -9,16 +9,19 @@ pub mod canopen;
 pub mod encoder;
 pub mod float;
 pub mod hal;
+pub mod motion_controller;
 mod psd;
 pub mod ramp;
 pub mod tmc2100;
 
-pub use psd::PSDController;
-
 pub mod prelude {
     pub use crate::canopen::*;
     pub use crate::encoder::*;
+    pub use crate::motion_controller::AxisMotionController;
+    pub use crate::psd::PSDController;
+    pub use crate::ramp::TrapRampGen;
     pub use crate::tmc2100::TMC2100;
+    pub use crate::AxisMode;
     pub use crate::StepperDriver;
 }
 
@@ -49,48 +52,6 @@ impl From<AxisMode> for u8 {
         match raw {
             AxisMode::Velocity => 0x00,
             AxisMode::Position => 0x01,
-        }
-    }
-}
-
-/// `Direction` enum represents the direction where the motor is turning when looking at the shaft.
-#[derive(Copy, Clone, PartialEq)]
-pub enum Direction {
-    Clockwise,
-    CounterClockwise,
-}
-
-impl Default for Direction {
-    fn default() -> Self {
-        Self::Clockwise
-    }
-}
-
-impl Direction {
-    /// Returns the opposite direction. `CounterClockwise` when `Clockwise` is selected and vice-versa.
-    pub fn opposite(&self) -> Self {
-        match self {
-            Direction::Clockwise => Direction::CounterClockwise,
-            Direction::CounterClockwise => Direction::Clockwise,
-        }
-    }
-
-    /// In motor control the direction of rotation is usually denoted by a positive or negative number.
-    /// This method returns `1` for `Clockwise` and `-1` for `CounterClockwise`
-    pub fn multiplier(&self) -> i32 {
-        match self {
-            Direction::Clockwise => 1,
-            Direction::CounterClockwise => -1,
-        }
-    }
-}
-
-impl From<f32> for Direction {
-    fn from(velocity: f32) -> Self {
-        if velocity > 0.0 {
-            Direction::Clockwise
-        } else {
-            Direction::CounterClockwise
         }
     }
 }

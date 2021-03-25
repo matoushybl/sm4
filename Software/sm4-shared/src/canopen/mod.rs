@@ -11,7 +11,7 @@ mod velocity_pdo;
 pub use pdos::{RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2, TxPDO3, TxPDO4};
 
 use core::convert::TryFrom;
-pub use object_dictionary::Key;
+pub use object_dictionary::{AxisDictionary, Key};
 
 mod pdos {
     use crate::canopen::position_pdo::PositionPDO;

@@ -5,7 +5,6 @@ mod can;
 mod current_reference;
 mod leds;
 mod monitoring;
-mod motion_controller;
 mod object_dictionary;
 mod sm4;
 mod step_counter;

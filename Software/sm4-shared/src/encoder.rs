@@ -6,17 +6,58 @@
 //! was based on the following requirements:
 //!
 //! # Requirements
-//! * We want an abstraction that provides us with the current measured speed and position.
+//! * We want an abstraction that provides us with the current measured velocity and position.
 //! * The abstraction is periodically awaken to sample.
 //! * The position should be precise.
-//! * The measured speed is in generally measured from position difference in two samples.
+//! * The measured velocity is in generally measured from position difference in two samples.
 //! * The encoder shall store information about the total position.
 //! * The total position shall be resettable.
 //! * For non-quadrature encoders a method that indicates change of motor rotation shall be implemented.
-use crate::Direction;
 use core::ops::{AddAssign, SubAssign};
 use embedded_time::duration::Microseconds;
 use embedded_time::fixed_point::FixedPoint;
+
+/// `Direction` enum represents the direction where the motor is turning when looking at the shaft.
+#[derive(Copy, Clone, PartialEq)]
+pub enum Direction {
+    Clockwise,
+    CounterClockwise,
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Self::Clockwise
+    }
+}
+
+impl Direction {
+    /// Returns the opposite direction. `CounterClockwise` when `Clockwise` is selected and vice-versa.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Direction::Clockwise => Direction::CounterClockwise,
+            Direction::CounterClockwise => Direction::Clockwise,
+        }
+    }
+
+    /// In motor control the direction of rotation is usually denoted by a positive or negative number.
+    /// This method returns `1` for `Clockwise` and `-1` for `CounterClockwise`
+    pub fn multiplier(&self) -> i32 {
+        match self {
+            Direction::Clockwise => 1,
+            Direction::CounterClockwise => -1,
+        }
+    }
+}
+
+impl From<f32> for Direction {
+    fn from(velocity: f32) -> Self {
+        if velocity > 0.0 {
+            Direction::Clockwise
+        } else {
+            Direction::CounterClockwise
+        }
+    }
+}
 
 /// `Position` represents the total "distance" ridden by the motor.
 /// For maximal precision, it is split into the counter of revolutions and the current angle.
@@ -179,27 +220,27 @@ impl SubAssign<i32> for Position {
     }
 }
 
-/// Represents speed measured by the encoder
+/// Represents velocity measured by the encoder
 #[derive(Copy, Clone)]
-pub struct Speed {
+pub struct Velocity {
     /// revolutions per second
     rps: f32,
 }
 
-impl Speed {
-    /// Constructs a `Speed` object with internal revolutions per second set to zero.
+impl Velocity {
+    /// Constructs a `Velocity` object with internal revolutions per second set to zero.
     pub fn zero() -> Self {
         Self { rps: 0.0 }
     }
 
-    /// Constructs a `Speed` object with internal revolutions per second set to provided argument.
+    /// Constructs a `Velocity` object with internal revolutions per second set to provided argument.
     /// # Arguments
-    /// * `rps` - the target RPS to be set as the speed.
+    /// * `rps` - the target RPS to be set as the velocity.
     pub fn new(rps: f32) -> Self {
         Self { rps }
     }
 
-    /// Calculates the speed using two sampled positions and the time between those samples.
+    /// Calculates the velocity using two sampled positions and the time between those samples.
     pub fn from_positions(current: &Position, past: &Position, period: Microseconds) -> Self {
         let resolution = current.resolution as f32;
         let diff = (current.get_increments() - past.get_increments()) as f32;
@@ -207,7 +248,7 @@ impl Speed {
         Self { rps }
     }
 
-    /// Returns the speed in revolutions per second.
+    /// Returns the velocity in revolutions per second.
     pub fn get_rps(&self) -> f32 {
         self.rps
     }
@@ -216,11 +257,11 @@ impl Speed {
 /// A trait abstracting common encoder functionality.
 /// It is suitable for both incremental and absolute encoders.
 /// It is designed so its [`Self::sample()`] shall be periodically called with known fixed period,
-/// which allows for speed calculations.
+/// which allows for velocity calculations.
 pub trait Encoder {
-    /// Returns the speed measured by the encoder.
+    /// Returns the velocity measured by the encoder.
     /// This value is generally calculated from consecutive position readings.
-    fn get_speed(&self) -> Speed;
+    fn get_velocity(&self) -> Velocity;
 
     /// Returns the current position of the shaft.
     fn get_position(&self) -> Position;
@@ -231,7 +272,7 @@ pub trait Encoder {
     fn reset_position(&mut self) -> Position;
 
     /// This functions shall be periodically called to sample the encoder.
-    /// Sampled values are used for position and speed readings.
+    /// Sampled values are used for position and velocity readings.
     fn sample(&mut self);
 
     /// This method shall be called with non-directional encoders whenever there is a change of rotation direction.
@@ -240,7 +281,7 @@ pub trait Encoder {
     fn notify_direction_changed(&mut self, direction: Direction);
 }
 
-// #[cfg(test)]
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -248,7 +289,7 @@ mod tests {
 
     struct MockEncoder {
         current_position: Position,
-        current_speed: Speed,
+        current_velocity: Velocity,
         direction: Direction,
         sampling_period: Microseconds,
     }
@@ -257,7 +298,7 @@ mod tests {
         fn new() -> Self {
             Self {
                 current_position: Position::zero(ENCODER_RESOLUTION),
-                current_speed: Speed::zero(),
+                current_velocity: Velocity::zero(),
                 direction: Direction::Clockwise,
                 sampling_period: Microseconds(1000),
             }
@@ -265,8 +306,8 @@ mod tests {
     }
 
     impl Encoder for MockEncoder {
-        fn get_speed(&self) -> Speed {
-            self.current_speed
+        fn get_velocity(&self) -> Velocity {
+            self.current_velocity
         }
 
         fn get_position(&self) -> Position {
@@ -276,7 +317,7 @@ mod tests {
         fn reset_position(&mut self) -> Position {
             let past = self.current_position;
             self.current_position = Position::zero(ENCODER_RESOLUTION);
-            self.current_speed = Speed::zero();
+            self.current_velocity = Velocity::zero();
             past
         }
 
@@ -288,8 +329,8 @@ mod tests {
                 -1
             };
 
-            self.current_speed =
-                Speed::from_positions(&self.current_position, &past, self.sampling_period);
+            self.current_velocity =
+                Velocity::from_positions(&self.current_position, &past, self.sampling_period);
         }
 
         fn notify_direction_changed(&mut self, direction: Direction) {
@@ -298,7 +339,7 @@ mod tests {
     }
 
     #[test]
-    fn test_speed() {
+    fn test_velocity() {
         let position1 = Position {
             resolution: ENCODER_RESOLUTION,
             revolutions: 0,
@@ -311,18 +352,18 @@ mod tests {
             angle: 1,
         };
 
-        let speed = Speed::from_positions(&position2, &position1, Microseconds(10));
-        assert_eq!(speed.rps, 25000.0);
+        let velocity = Velocity::from_positions(&position2, &position1, Microseconds(10));
+        assert_eq!(velocity.rps, 25000.0);
 
-        let speed = Speed::from_positions(&position1, &position2, Microseconds(10));
-        assert_eq!(speed.rps, -25000.0);
+        let velocity = Velocity::from_positions(&position1, &position2, Microseconds(10));
+        assert_eq!(velocity.rps, -25000.0);
 
         let position1 = Position::new(ENCODER_RESOLUTION, 0, ENCODER_RESOLUTION - 1);
 
         let position2 = Position::new(ENCODER_RESOLUTION, 1, 0);
 
-        let speed = Speed::from_positions(&position2, &position1, Microseconds(10));
-        assert_eq!(speed.rps, 25000.0);
+        let velocity = Velocity::from_positions(&position2, &position1, Microseconds(10));
+        assert_eq!(velocity.rps, 25000.0);
     }
 
     #[test]
@@ -350,17 +391,17 @@ mod tests {
     fn mock_encoder_test() {
         let mut encoder = MockEncoder::new();
         encoder.notify_direction_changed(Direction::Clockwise);
-        assert_eq!(encoder.get_speed().get_rps(), 0.0);
+        assert_eq!(encoder.get_velocity().get_rps(), 0.0);
         assert_eq!(encoder.get_position().get_increments(), 0);
 
         encoder.sample();
 
-        assert_eq!(encoder.get_speed().get_rps(), 250.0);
+        assert_eq!(encoder.get_velocity().get_rps(), 250.0);
         assert_eq!(encoder.get_position().get_increments(), 1);
 
         encoder.reset_position();
 
-        assert_eq!(encoder.get_speed().get_rps(), 0.0);
+        assert_eq!(encoder.get_velocity().get_rps(), 0.0);
         assert_eq!(encoder.get_position().get_increments(), 0);
     }
 }
