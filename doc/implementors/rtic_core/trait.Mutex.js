@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["main"] = [{"text":"impl&lt;'a&gt; Mutex for driver&lt;'a&gt;","synthetic":false,"types":[]}];
+implementors["main"] = [{"text":"impl&lt;'a&gt; Mutex for <a class=\"struct\" href=\"main/resources/struct.driver.html\" title=\"struct main::resources::driver\">driver</a>&lt;'a&gt;","synthetic":false,"types":["main::resources::driver"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -133,7 +133,7 @@
 <span id="130">130</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::{<span class="ident">encoder</span>::<span class="kw-2">*</span>, <span class="ident">Direction</span>};
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>::{<span class="ident">TIM2</span>, <span class="ident">TIM5</span>};
 
@@ -146,7 +146,7 @@
     <span class="ident">timer</span>: <span class="ident">T</span>,
     <span class="ident">past_position</span>: <span class="ident">Position</span>,
     <span class="ident">current_position</span>: <span class="ident">Position</span>,
-    <span class="ident">current_speed</span>: <span class="ident">Speed</span>,
+    <span class="ident">current_velocity</span>: <span class="ident">Velocity</span>,
     <span class="ident">direction</span>: <span class="ident">Direction</span>,
     <span class="ident">sampling_period</span>: <span class="ident">Microseconds</span>,
     <span class="ident">resolution</span>: <span class="ident">u16</span>,
@@ -171,8 +171,8 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Counter</span>,
 {
-    <span class="kw">fn</span> <span class="ident">get_speed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Speed</span> {
-        <span class="self">self</span>.<span class="ident">current_speed</span>
+    <span class="kw">fn</span> <span class="ident">get_velocity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Velocity</span> {
+        <span class="self">self</span>.<span class="ident">current_velocity</span>
     }
 
     <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Position</span> {
@@ -183,7 +183,7 @@
         <span class="kw">let</span> <span class="ident">past</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_position</span>;
         <span class="self">self</span>.<span class="ident">current_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="self">self</span>.<span class="ident">resolution</span>);
         <span class="self">self</span>.<span class="ident">past_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="self">self</span>.<span class="ident">resolution</span>);
-        <span class="self">self</span>.<span class="ident">current_speed</span> <span class="op">=</span> <span class="ident">Speed</span>::<span class="ident">zero</span>();
+        <span class="self">self</span>.<span class="ident">current_velocity</span> <span class="op">=</span> <span class="ident">Velocity</span>::<span class="ident">zero</span>();
         <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">reset_value</span>();
         <span class="ident">past</span>
     }
@@ -191,7 +191,7 @@
     <span class="kw">fn</span> <span class="ident">sample</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">update_current_position</span>();
 
-        <span class="self">self</span>.<span class="ident">current_speed</span> <span class="op">=</span> <span class="ident">Speed</span>::<span class="ident">from_positions</span>(
+        <span class="self">self</span>.<span class="ident">current_velocity</span> <span class="op">=</span> <span class="ident">Velocity</span>::<span class="ident">from_positions</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">current_position</span>,
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">past_position</span>,
             <span class="self">self</span>.<span class="ident">sampling_period</span>,
@@ -241,7 +241,7 @@
                     <span class="ident">direction</span>: <span class="ident">Direction</span>::<span class="ident">Clockwise</span>,
                     <span class="ident">past_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="ident">resolution</span>),
                     <span class="ident">current_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="ident">resolution</span>),
-                    <span class="ident">current_speed</span>: <span class="ident">Speed</span>::<span class="ident">zero</span>(),
+                    <span class="ident">current_velocity</span>: <span class="ident">Velocity</span>::<span class="ident">zero</span>(),
                     <span class="ident">sampling_period</span>,
                     <span class="ident">resolution</span>,
                 }
@@ -263,4 +263,5 @@
 <span class="macro">counter</span><span class="macro">!</span>(<span class="ident">TIM2</span>, <span class="ident">tim2</span>, <span class="number">0</span>, <span class="ident">tim2en</span>, <span class="ident">tim2rst</span>);
 <span class="macro">counter</span><span class="macro">!</span>(<span class="ident">TIM5</span>, <span class="ident">tim5</span>, <span class="number">3</span>, <span class="ident">tim5en</span>, <span class="ident">tim5rst</span>);
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "sm4_firmware";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sm4_firmware"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

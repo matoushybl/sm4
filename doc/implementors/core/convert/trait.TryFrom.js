@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["sm4_firmware"] = [{"text":"impl TryFrom&lt;u16&gt; for CANOpenMessage","synthetic":false,"types":[]}];
+implementors["sm4_firmware"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html\" title=\"trait core::convert::TryFrom\">TryFrom</a>&lt;u16&gt; for <a class=\"enum\" href=\"sm4_firmware/can/enum.CANOpenMessage.html\" title=\"enum sm4_firmware::can::CANOpenMessage\">CANOpenMessage</a>","synthetic":false,"types":["sm4_firmware::can::CANOpenMessage"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
