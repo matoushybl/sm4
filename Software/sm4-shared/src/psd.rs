@@ -1,6 +1,12 @@
 use crate::float;
 use embedded_time::duration::Microseconds;
 
+pub struct ControllerSettings {
+    proportional: f32,
+    integral: f32,
+    derivative: f32,
+}
+
 #[derive(Copy, Clone)]
 pub struct PSDController {
     sum: f32,
@@ -21,9 +27,7 @@ impl PSDController {
         &mut self,
         desired: &f32,
         actual: &f32,
-        p_gain: &f32,
-        s_gain: &f32,
-        d_gain: &f32,
+        settings: &ControllerSettings,
         limit: &f32,
     ) -> f32 {
         let error = desired - actual;
@@ -31,9 +35,9 @@ impl PSDController {
         self.sum += error * self.sampling_period;
         self.sum = float::fmaxf(float::fminf(self.sum, *limit), -*limit);
 
-        let action = error * p_gain
-            + d_gain * (error - self.previous) / self.sampling_period
-            + s_gain * self.sum;
+        let action = error * settings.proportional
+            + settings.derivative * (error - self.previous) / self.sampling_period
+            + settings.integral * self.sum;
         self.previous = error;
 
         float::fmaxf(float::fminf(action, *limit), -*limit)
