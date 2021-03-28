@@ -80,7 +80,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// use sm4_shared::encoder::Position;
+    /// use sm4_shared::prelude::Position;
     ///
     /// let position = Position::zero(4);
     /// assert_eq!(position.get_resolution(), 4);
@@ -105,7 +105,7 @@ impl Position {
     ///
     /// # Example
     /// ```
-    /// use sm4_shared::encoder::Position;
+    /// use sm4_shared::prelude::Position;
     /// let position = Position::new(4, 5, 2);
     ///
     /// assert_eq!(position.get_resolution(), 4);
@@ -147,7 +147,7 @@ impl Position {
     /// Returns the position as number of increments, this is useful for precise control.
     /// # Examples
     /// ```
-    /// use sm4_shared::encoder::Position;
+    /// use sm4_shared::prelude::Position;
     ///
     /// let position = Position::new(4, 1, 2);
     /// assert_eq!(position.get_increments(), 6);
@@ -162,7 +162,7 @@ impl Position {
     /// Returns number of revolutions as float with the angle embedded after the decimal point
     /// # Examples
     /// ```
-    /// use sm4_shared::encoder::Position;
+    /// use sm4_shared::prelude::Position;
     ///
     /// let position = Position::new(4, 1, 2);
     /// assert_eq!(position.get_relative_revolutions(), 1.5);
@@ -179,7 +179,7 @@ impl AddAssign<i32> for Position {
     /// Adds increments to position
     /// # Examples
     /// ```
-    /// use sm4_shared::encoder::Position;
+    /// use sm4_shared::prelude::Position;
     ///
     /// let mut position = Position::zero(4);
     /// position += 1;

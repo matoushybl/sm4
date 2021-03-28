@@ -1,6 +1,6 @@
+use crate::models::AxisMode;
 use crate::prelude::{Position, Velocity};
 use crate::psd::ControllerSettings;
-use crate::AxisMode;
 
 pub enum Key {
     Axis1Mode,

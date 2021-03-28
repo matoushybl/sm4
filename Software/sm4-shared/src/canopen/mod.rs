@@ -57,12 +57,14 @@ pub enum NMTState {
     PreOperational,
 }
 
+/// The default value for `NMTState` is [Self::BootUp].
 impl Default for NMTState {
     fn default() -> Self {
         NMTState::BootUp
     }
 }
 
+/// Used for serialization of `NMTState`.
 impl From<NMTState> for u8 {
     fn from(raw: NMTState) -> Self {
         match raw {
@@ -74,6 +76,7 @@ impl From<NMTState> for u8 {
     }
 }
 
+/// Used for deserialization of `NMTRequestedState`.
 impl TryFrom<u8> for NMTRequestedState {
     type Error = ();
 
@@ -89,6 +92,9 @@ impl TryFrom<u8> for NMTRequestedState {
     }
 }
 
+/// This enum represents the ID of the `Process Data Object`.
+/// The id is different for `RxPDO`s and `TxPDO`s, accessor methods shall be used to retrieve the raw ID value.
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub enum PDOId {
     PDO1,
     PDO2,
@@ -97,6 +103,15 @@ pub enum PDOId {
 }
 
 impl PDOId {
+    /// Returns the raw ID that represents a `TxPDO` in the CAN frame header.
+    /// Note that the ID doesn't encode device ID.
+    /// # Example
+    /// ```
+    /// use sm4_shared::prelude::PDOId;
+    ///
+    /// let txpdo1 = PDOId::PDO1;
+    /// assert_eq!(txpdo1.tx_id(), 0x180);
+    /// ```
     pub fn tx_id(&self) -> u16 {
         match self {
             PDOId::PDO1 => 0x180,
@@ -106,6 +121,15 @@ impl PDOId {
         }
     }
 
+    /// Returns the raw ID that represents a `RxPDO` in the CAN frame header.
+    /// Note that the ID doesn't encode device ID.
+    /// # Example
+    /// ```
+    /// use sm4_shared::prelude::PDOId;
+    ///
+    /// let txpdo1 = PDOId::PDO1;
+    /// assert_eq!(txpdo1.rx_id(), 0x200);
+    /// ```
     pub fn rx_id(&self) -> u16 {
         match self {
             PDOId::PDO1 => 0x200,
@@ -115,8 +139,18 @@ impl PDOId {
         }
     }
 
+    /// Returns the `PDOId` parsed from a raw value.
+    /// The method ignores device ID.
+    /// # Example
+    /// ```
+    /// use sm4_shared::prelude::PDOId;
+    ///
+    /// assert!(PDOId::PDO1 == PDOId::from_rx(0x200).unwrap());
+    /// assert!(PDOId::PDO1 == PDOId::from_rx(0x201).unwrap());
+    /// assert!(PDOId::from_rx(0x181).is_err());
+    /// ```
     pub fn from_rx(id: u16) -> Result<Self, ()> {
-        match id {
+        match id & 0xf00 {
             0x200 => Ok(PDOId::PDO1),
             0x300 => Ok(PDOId::PDO2),
             0x400 => Ok(PDOId::PDO3),

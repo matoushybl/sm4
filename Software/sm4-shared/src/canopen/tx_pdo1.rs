@@ -1,7 +1,12 @@
-#[derive(Copy, Clone, Default, Debug)]
+/// `TxPDO1` represents the first Process Data Object sent by the device to the master.
+/// The PDO is reserved for general status information only.
+/// As of now it contains the information about the motor supply voltage and die temperature.
+#[derive(Copy, Clone, Default)]
 pub struct TxPDO1 {
-    pub battery_voltage: u16, // millivolts
-    pub temperature: u16,     // 0.1 deg C
+    /// The motor supply temperature. In millivolts.
+    pub battery_voltage: u16,
+    /// The STM32F4 die temperature. In 0.1 deg C.
+    pub temperature: u16,
 }
 
 impl TxPDO1 {

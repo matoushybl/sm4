@@ -1,5 +1,5 @@
 use crate::canopen::PDODeserializationError;
-use crate::AxisMode;
+use crate::models::AxisMode;
 use core::convert::TryFrom;
 
 #[derive(Copy, Clone, Default, Debug)]
