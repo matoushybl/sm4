@@ -1,1 +1,20 @@
 \chapter{Related Work}
+\label{ch:related_work}
+This chapter describes the current state of the stepper motor controllers in the Robotics group and the efforts to improve it.
+Ongoing efforts to use program embedded systems in the Rust programming language is also described, both in the context of our research group and also in general.
+Finally, similar projects - either software or hardware wise are reported.
+
+In the Robotics and AI research group, currently a second generation of the KM2 stepper motor controller is widely in use.
+The controller utilizes an ATMega8 paired with two stepper motor controllers DRV8825, that are utilized in the form of breakout boards generally used in the now obsolete RAMPS boards.
+The motor controller is controlled using the I\textsuperscript{2}C bus.
+There are two major shortcomings of the driver - the used controller's I\textsuperscript{2}C peripheral's clock-stretching is not compatible with Raspberry Pi's, causing problems on clock speeds higher than 30 kHz.
+The second shortcoming are the used driver chips, that are quite loud and do not support contemporary advanced features.
+The boards for 3D printers are also reportedly not well designed and they may \hl{overheat}~\cite{prusa_rambo}.
+
+% KM3
+
+% dc motor
+
+% flott
+
+% servo from Ondra Bastan
