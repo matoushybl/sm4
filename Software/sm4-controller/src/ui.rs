@@ -2,6 +2,11 @@ use gtk::prelude::*;
 use gtk::{ApplicationWindow, HeaderBar, Notebook, Orientation, Switch};
 
 #[derive(Clone)]
+pub struct UIState {
+
+}
+
+#[derive(Clone)]
 pub struct UI {
     header: HeaderBar,
     sync_switch: Switch,
