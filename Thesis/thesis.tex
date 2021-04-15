@@ -68,12 +68,20 @@
 %    language=[LaTeX]{TeX},	% LaTeX
 %	language={Matlab},		% Matlab
 	language={C},           % jazyk C
-    basicstyle=\ttfamily,	% definice základního stylu písma
+	morekeywords={let,mut,struct,pub,impl,use,assert\_eq},
+	frame=single,
+	captionpos=b,
+	numbers=left,
+	breaklines=true,
+	basicstyle=\ttfamily,	% definice základního stylu písma
     tabsize=2,			% definice velikosti tabulátoru
     inputencoding=utf8,         % pro soubory uložené v kódování UTF-8
 		columns=fixed,  %fixed nebo flexible,
 		fontadjust=true %licovani sloupcu
     extendedchars=true,
+	commentstyle=\color{olive},
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
     literate=%  definice symbolů s diakritikou
     {á}{{\'a}}1
     {č}{{\v{c}}}1
@@ -189,7 +197,9 @@
 \include{text/steppers}
 \include{text/comm_protocol}
 \include{text/hardware}
-\include{text/software}
+\include{text/firmware}
+\include{text/eeprom}
+\include{text/control_software}
 
 \include{text/results}
 \include{text/conclusion}

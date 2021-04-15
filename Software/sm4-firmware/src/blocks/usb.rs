@@ -61,7 +61,7 @@ impl USBProtocol {
             Ok(count) => {
                 for c in buf[..count].iter() {
                     self.serial.write(&[*c]).unwrap();
-                    defmt::warn!("data {:u8}", c);
+                    defmt::warn!("data {:x}", c);
                 }
                 // count bytes were read to &buf[..count]
             }
