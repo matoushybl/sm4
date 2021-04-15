@@ -6,8 +6,8 @@ There are some examples - there are systems developed in Ada and currently the e
 While C and C++ are suitable for development of embedded systems, because they allow for direct hardware access and the programs written in them can be extremely performant, they carry the problem of memory unsafety and undefined behavior.
 
 Memory unsafe code is nowadays cause of many critical software problems, be it security vulnerabilities or safety hazards.
-Recent Chrome browser analysis and report shows that around 70 \% of high severity problems are memory safety problems - meaning problems with pointers and staggering half of these are use-after-free problems~\cite{chromium}.
-The notorious Heartbleed bug in the OpenSSL was also a problem of the ability of the program to access memory used by other parts of the program, allowing the attacker to steal confidential data from the memory~\cite{heartbleed}.
+Recent Chrome browser analysis and report shows that around 70 \% of high severity problems are memory safety problems - meaning problems with pointers and staggering half of these are use-after-free problems~\cite{noauthor_memory_nodate}.
+The notorious Heartbleed bug in the OpenSSL was also a problem of the ability of the program to access memory used by other parts of the program, allowing the attacker to steal confidential data from the memory~\cite{noauthor_heartbleed_nodate}.
 
 The problem of undefined behaviors and the inability of the commonly used tools to spot them, can be as harmful as memory safety problems, but in general cause problems during development.
 For example when programs behave as was not intended, but with seemingly error-less code.
@@ -27,7 +27,7 @@ Some of these approaches can be unit-testing and integration testing, dependency
 With this information in mind, we decided to develop a dual channel stepper motor controller and develop its firmware and control application in Rust, showcasing the language's advantages and disadvantages.
 This project's aim was also to push forward the development of electronics devices - using high-performance MCUs (Microcontroller Unit), state of the art stepper drivers and effective 4-layer PCB design and contemporary manufacturing capabilities.
 
-\cite{pair_conference}
+\cite{noauthor_program_nodate}
 
 The motor controller is designed to be used in the DCI FEEC BUT's (Department of Control and Instrumentation, Faculty of Electrical Engineering and Communications, Brno University of Technology) Robotics and AI group for students' projects and development of our robots.
 The current state of the stepper motor controllers in the research group is summed up in the following chapter~\ref{ch:related_work}.

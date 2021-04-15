@@ -18,13 +18,13 @@ The internal communication interfaces are revision dependent, however the steppe
 As was described in the Chapter on Related work~\ref{ch:related_work}, we decided to make the move from Cortex-M0 and Cortex-M0+ based ARM MCUs to more powerful Cortex-M4 MCUs.
 The biggest advantage of these cores is that they fully support atomic instructions, improving memory safety in ISRs, and also that they have FPU (Floating Point Unit).
 
-Given the past experience with STM32 family of ARM microcontrollers, we decided to select the STM32F4 product line, more specifically with the STM32F405RGT6 which features one megabyte of flash and 192 kilobytes of RAM and can be run with the 168 MHz clock\cite{stm32f405}.
+Given the past experience with STM32 family of ARM microcontrollers, we decided to select the STM32F4 product line, more specifically with the STM32F405RGT6 which features one megabyte of flash and 192 kilobytes of RAM and can be run with the 168 MHz clock\cite{noauthor_stm32f405rg_nodate}.
 The block diagram of the MCU with the core features and peripherals can be seen in the Figure~\ref{fig:stm32f405_block_diagram}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{obrazky/stm32f405_block_diagram}
-    \caption{The block diagram of the STM32F405RG MCU~\cite{stm32f405}.}
+    \caption{The block diagram of the STM32F405RG MCU~\cite{noauthor_stm32f405rg_nodate}.}
     \label{fig:stm32f405_block_diagram}
 \end{figure}
 
@@ -61,7 +61,7 @@ The first hardware revision features the TMC2100-TA driver IC, whose main featur
         Package & eTQFP48 \\
         \hline
     \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2100-TA driver IC\cite{tmc_2100}.}
+    \caption{Main parameters of the Trinamic TMC2100-TA driver IC~\cite{noauthor_tmc2100_nodate}.}
     \label{tab:tmc2100_param}
 \end{table}
 
@@ -91,7 +91,7 @@ The second hardware revision features the TMC2226-SA driver IC, whose properties
         Package & HTSSOP28 \\
         \hline
     \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2226-SA driver IC\cite{tmc_2226}.}
+    \caption{Main parameters of the Trinamic TMC2226-SA driver IC~\cite{tmc_2226}.}
     \label{tab:tmc2226_param}
 \end{table}
 
