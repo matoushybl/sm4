@@ -1,5 +1,39 @@
 \section{Development of the bare-metal firmware}
 \label{sec:firmware}
+This section describes the development of the bare-metal firmware.
+A brief introduction to the Rust programming language is given and the usage of the language for embedded systems is described in detail.
+Further, some interesting parts of the firmware itself is described, alongside with the project structure, testing, etc.
 
 \subsection{Rust programming language}
+\label{subsec:rust}
+Rust is a multi-paradigm systems programming language originally developed by Mozilla\cite{rust_authorship} in an effort to create language suitable for development of a safe and performant multi-threaded CSS rendering engine for the Firefox browser\cite{servo}.
+In the recent months the oversight of the language is done by the language's own foundation and is therefore independent on Mozilla\cite{rust_foundation}.
+
+The language itself is designed to be performant and memory efficient - it doesn't feature a garbage collector, memory is managed semi-manually with the leverage of many smart pointer types.
+The semi-automatic memory management and its type systems provides guarantees about memory and thread safety, that can be evaluated at compile time, promising that these kinds of potential bugs are found in development rather in production.
+
+The language itself is a part, albeit an important part, of a larger ecosystem, making the language and its tooling extremely usable with tools almost for everything - it features seamless package management and build system, documentation system, integrated testing, defined coding-style and more.
+
+As we said before, the language is a multi-paradigm language, meaning that the language features parts of the functional languages paradigm and object oriented-paradigm.
+
+In the following sections, some features of the language are described in order to provide some introduction into the semantics and syntax of the language.
+
+\subsubsection{Variable and constant expressions}
+In Rust, all variables are defined as immutable by default, promoting defensive programming - no variable can be unintentionally changed.
+The variables are declared using the keyword \textbf{let} and variable's mutability must be explicitly declared using the \textbf{mut} suffix.
+The type of a variably doesn't need to be explicitly specified in most cases as the language features type inference that is possible thanks to its powerful and strong type system.
+As for the provided types, the language
+An example can be seen in the following code snippet.
+
+\begin{lstlisting}
+let a = 10; // declares an immutable variable, whose type is automatically inferred to i32
+a = 11; // produces a compile-time error
+let mut b: u8 = 0x12; // declares a mutable variable with explicit u8 type
+b = 0x24; // this is ok
+\end{lstlisting}
+
+Rust also supports compile time constant evaluation using constants and constant functions.
+This can be achieved by using the \textbf{const} keyword, but describing this functionality is beyond the scope of this thesis.
+
 \subsection{Embedded Rust}
+\label{subsec:embedded_rust}
