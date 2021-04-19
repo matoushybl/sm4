@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["PSIZE_X8",""],["UNLOCK_KEY1",""],["UNLOCK_KEY2",""]],"enum":[["Error","Flash erase/program error"]],"fn":[["lock",""],["unlock",""]],"struct":[["MemIter",""],["UnlockedFlash","Result of `FlashExt::unlocked()`"]],"trait":[["FlashExt","Flash methods implemented for `stm32::FLASH`"]]});

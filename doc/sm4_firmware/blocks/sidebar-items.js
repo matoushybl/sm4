@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["current_reference",""],["gpio",""],["leds",""],["monitoring",""],["step_counter",""],["step_timer",""],["usb",""]]});
+initSidebarItems({"mod":[["current_reference",""],["eeprom",""],["flash",""],["gpio",""],["leds",""],["monitoring",""],["step_counter",""],["step_timer",""],["usb",""]]});

@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html\" title=\"trait core::fmt::Debug\">Debug</a> for <a class=\"enum\" href=\"sm4_firmware/blocks/flash/enum.Error.html\" title=\"enum sm4_firmware::blocks::flash::Error\">Error</a>","synthetic":false,"types":["sm4_firmware::blocks::flash::Error"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
