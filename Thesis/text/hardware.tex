@@ -97,15 +97,41 @@ The second hardware revision features the TMC2226-SA driver IC, whose properties
 
 % TODO describe motion control technologies from Trinamic
 
+% TODO read and refactor
 \subsubsection{SM4 stepper driver power design}
 \label{subsubsec:power_design}
+The power design of the SM4 stepper motor controller is fairly simple.
+According to the requirements, the only requirement for it is to provide basic electrical safety features, such as fuses and reverse voltage protection \textbf{FR-07}.
+The controller features two power rails - one for the power electronics, that can utilize quite high voltages and one 5~V for the MCU and the peripheral circuits.
+With the first revision, we were considering using a single power-rail with all voltages derived from the power electronics one.
+This was however dismissed as a buck converter from quite a high voltage would be required and designing a buck converter is out of the scope of this project and also the motor controller was never meant to be use as a standalone device, meaning that another device could provide the power for the 5~V rail.
+The buck converter would also pose EMI (ElectroMagnetic Interference) problems and would increase the price of the motor controller.
+
+As for the power electronics, only input voltage filtering using capacitors was utilized.
+The main reasoning being that this should be fused on the side of the power source and that reverse-voltage protection would require quite large components.
+
+The situation is different with the 5~V power rail for peripherals and the MCU.
+This power rail utilizes 500~mA PTC fuse, reverse-voltage protection implemented using P-channel MOSFET and a low-pass filter comprising of a ferrite bead and a capacitor.
+This power rail is connected to the connectors with CAN bus and I\textsuperscript{2}C.
+The output of the filtered power rail is merged with a 5~V power coming from the USB-C connector (which is also fused using a 500~mA PTC fuse) using Schottky diodes.
+For powering the MCU with 3.3~V, the 5~V is regulated with an LDO (Low-Dropout) regulator.
+The whole power rail can be seen in the schematic in the Figure~\ref{fig:power}.
+
+In the future revisions, the input protection circuits may be replaced by an eFuse\cite{efuse_great_scott}\cite{efuse}, an IC integrating the input power protection circuits such as overvoltage protection, undervoltage protection, overcurrent protection and reverse-voltage protection.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{obrazky/power}
+    \caption{The 5~V power rail for powering the MCU and peripherals.}
+    \label{fig:power}
+\end{figure}
 
 \subsubsection{PCB Design}
 \label{subsubsec:pcb_design}
 In order for this project to serve as a testbed for new manufacturing technologies, the PCB (Printed Circuit Board) was designed as 4-layer.
 The ability to design the board as a 4-layer one was enabled by the 4-layer PCB manufacturing price decrease by China-based PCB manufacturing companies.
 Big advantage of designing the PCB as 4-layer one was speedup of hardware development - the 4-layer stackup can be utilized so that there is no need to route power to the ICs.
-In our case we chose the inner layers to be filled with copper planes - one connected to GND and the other one connected to +3.3V.
+In our case we chose the inner layers to be filled with copper planes - one connected to GND and the other one connected to +3.3~V.
 This way whenever a connection to +3.3V or GND was required, simply connecting the pad to new via close-by was sufficient.
 Apart from being used for power distribution, the large copper planes allow for better PCB cooling and also for some minor signal connections in cases routing using the outer layers would prove difficult.
 The used stackup can be seen in the Figure~\ref{fig:stackup}.

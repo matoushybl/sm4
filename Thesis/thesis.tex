@@ -68,7 +68,7 @@
 %    language=[LaTeX]{TeX},	% LaTeX
 %	language={Matlab},		% Matlab
 	language={C},           % jazyk C
-	morekeywords={let,mut,struct,pub,impl,use,assert\_eq},
+	morekeywords={let,mut,struct,pub,impl,use,assert\_eq,enum,match,if,fn},
 	frame=single,
 	captionpos=b,
 	numbers=left,
@@ -193,13 +193,15 @@
 \include{text/related_work}
 
 \include{text/methodology}
-\include{text/requirements}
+\input{text/requirements}
 \include{text/steppers}
 \include{text/comm_protocol}
 \include{text/hardware}
+\input{text/kicad_design}
+\input{text/pcb_manufacturing}
 \include{text/firmware}
-\include{text/eeprom}
-\include{text/control_software}
+\input{text/eeprom}
+\input{text/control_software}
 
 \include{text/results}
 \include{text/conclusion}

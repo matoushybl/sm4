@@ -1,4 +1,4 @@
-\section{Development of the bare-metal firmware}
+\section{Development of the bare metal firmware}
 \label{sec:firmware}
 This section describes the development of the bare-metal firmware.
 A brief introduction to the Rust programming language is given and the usage of the language for embedded systems is described in detail.
@@ -18,7 +18,7 @@ As we said before, the language is a multi-paradigm language, meaning that the l
 
 In the following sections, some features of the language are described in order to provide some introduction into the semantics and syntax of the language.
 
-\subsubsection{Variable and constant expressions}
+\subsubsection{Variables and Mutability}
 In Rust, all variables are defined as immutable by default, promoting defensive programming - no variable can be unintentionally changed.
 The variables are declared using the keyword \textbf{let} and variable's mutability must be explicitly declared using the \textbf{mut} suffix.
 The type of a variably doesn't need to be explicitly specified in most cases as the language features type inference that is possible thanks to its powerful and strong type system.
@@ -34,6 +34,75 @@ b = 0x24; // this is ok
 
 Rust also supports compile time constant evaluation using constants and constant functions.
 This can be achieved by using the \textbf{const} keyword, but describing this functionality is beyond the scope of this thesis.
+
+\subsubsection{Ownership and Borrow Checker}
+The languages semi-automatic memory management system comprises of the ownership concept, move-by-default semantics and the borrow checker.
+
+The concept of ownership is described by these rules\cite{rust_lang_book}:
+\begin{itemize}
+    \item Each value in Rust has a variable that's called its \textit{owner}.
+    \item There cane be only one owner at a time.
+    \item When the owner goes out of scope, the value will be dropped.
+\end{itemize}
+For value passing, the Rust language uses \textbf{move-by-default} semantics as opposed to \textbf{copy-by-default} present in C++.
+The reasoning for it is that while move is almost zero-cost, copy almost never is.
+
+The borrow checker is a mechanism that references to variables are always in correct state - pointing to an existing value.
+There are three rules to the borrow checker:
+\begin{itemize}
+    \item There can be only one mutable reference to a value.
+    \item There can be unlimited immutable references to a value.
+    \item The first two rules are mutually exclusive - Rust forbids having both immutable an mutable reference to the same value.
+\end{itemize}
+
+The programming language also statically checks for reference lifetimes, making sure that the reference doesn't point to nonexistent memory, which is useful for returning references from functions or storing references to values in structs.
+
+\subsubsection{Enums and Pattern Matching}
+In Rust, enums are much more powerful than in C\\C++.
+There are two big differences - Rust enums allow adding methods and functions to them and also allow for having associated values.
+Consider the following code snippet:
+
+\begin{lstlisting}
+enum Value {
+    Integer(i64),
+    Float(f64)
+}
+
+let int_value = Value::Integer(15);
+let float_value = Value::Float(3.14);
+
+impl Value {
+    fn parse(raw: &str) -> Value {}; // code omitted
+}
+let raw_value = server.get_value();
+let value = Value::parse(raw_value);
+\end{lstlisting}
+
+First, we declare the enum to have two possible values - \textbf{Integer}, with the associated value of \textbf{i64} and \textbf{Float}, with the associated value of \textbf{f64}.
+Then, we add a function that parses a reference to a string into our enum \textbf{Value} and then we parse a received string into a value.
+The parsed Value will be one of the two values with the real numeric value embedded.
+Associated values in enums are a powerful concept for for example state machines and error handling.
+To access the associated value, the \textbf{match} or \textbf{if} keywords may be used as can be seen in the following snippet:
+
+\begin{lstlisting}
+match value {
+    Value::Integer(raw) => println!("Raw integer found: {}", raw),
+    Value::Float(raw) => println!("Raw float found: {}", raw),
+}
+if let Value::Integer(raw) = value {
+    println!("Raw integer found: {}", raw);
+}
+\end{lstlisting}
+
+\subsubsection{Objects and Methods}
+
+\subsubsection{Traits and Generics}
+
+\subsubsection{Macros}
+
+\subsubsection{Standard Library}
+
+\subsubsection{Unit Testing}
 
 \subsection{Embedded Rust}
 \label{subsec:embedded_rust}
