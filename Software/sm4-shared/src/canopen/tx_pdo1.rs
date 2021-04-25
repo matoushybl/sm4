@@ -1,3 +1,6 @@
+use core::convert::{TryFrom, TryInto};
+use crate::canopen::PDODeserializationError;
+
 /// `TxPDO1` represents the first Process Data Object sent by the device to the master.
 /// The PDO is reserved for general status information only.
 /// As of now it contains the information about the motor supply voltage and die temperature.
@@ -21,5 +24,20 @@ impl TxPDO1 {
         raw[2..4].clone_from_slice(&self.temperature.to_le_bytes());
 
         Ok(Self::SIZE)
+    }
+}
+
+impl TryFrom<&[u8]> for TxPDO1 {
+    type Error = PDODeserializationError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        if value.len() != Self::SIZE {
+            return Err(PDODeserializationError::IncorrectDataSize);
+        }
+
+        Ok(TxPDO1 {
+            battery_voltage: u16::from_le_bytes(value[..2].try_into().unwrap()),
+            temperature: u16::from_le_bytes(value[2..4].try_into().unwrap()),
+        })
     }
 }

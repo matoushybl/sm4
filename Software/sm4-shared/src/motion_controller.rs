@@ -26,7 +26,7 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         dictionary.set_actual_velocity(self.encoder.get_velocity());
         dictionary.set_actual_position(self.encoder.get_position());
 
-        let target_velocity = if !dictionary.enabled() || global_disable {
+        let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),
                 AxisMode::Position => Velocity::zero(),

@@ -29,6 +29,7 @@ where
         } else {
             -(increment as i32)
         };
+
         self.timer.reset_value();
     }
 }

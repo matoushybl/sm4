@@ -104,6 +104,10 @@ impl SM4 {
         );
     }
 
+    pub fn failsafe_tick(&mut self) {
+        self.state.decrement_last_received_speed_command_counter();
+    }
+
     pub fn blink_leds(&mut self) {
         self.leds.tick();
     }
@@ -203,6 +207,7 @@ impl SM4 {
                             .actual_position()
                             .get_angle() as u32,
                     };
+                    defmt::error!("pos: {} - {}", pdo.revolutions, pdo.angle);
                     let size = pdo.to_raw(&mut buffer).unwrap();
                     self.can.send(CANOpenMessage::TxPDO3, &buffer[..size]);
 
@@ -222,8 +227,6 @@ impl SM4 {
                     };
                     let size = pdo.to_raw(&mut buffer).unwrap();
                     self.can.send(CANOpenMessage::TxPDO4, &buffer[..size]);
-
-                    defmt::error!("sync received");
                 }
                 CANOpenMessage::Emergency => {}
                 CANOpenMessage::TimeStamp => {}
@@ -267,6 +270,8 @@ impl SM4 {
                             .object_dictionary()
                             .axis2_mut()
                             .set_target_velocity(Velocity::new(pdo.axis2_velocity));
+
+                        self.state.invalidate_last_received_speed_command_counter();
                     } else {
                         defmt::warn!("Malformed RxPDO2 received.");
                     }
@@ -323,5 +328,9 @@ impl SM4 {
 
     pub const fn sampling_period() -> u32 {
         SECOND / 100
+    }
+
+    pub const fn failsafe_tick_period() -> u32 {
+        SECOND / 10
     }
 }

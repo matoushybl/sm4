@@ -31,6 +31,19 @@ impl TryFrom<&[u8]> for RxPDO1 {
     }
 }
 
+impl RxPDO1 {
+    pub fn to_raw(&self, raw: &mut [u8]) -> Result<usize, ()> {
+        if raw.len() < Self::SIZE {
+            return Err(());
+        }
+
+        raw[0] = u8::from(self.axis1_mode) | u8::from(self.axis2_mode) << 4;
+        raw[1] = if self.axis1_enabled {1} else {0} | if self.axis2_enabled { 2 } else {0};
+
+        Ok(Self::SIZE)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

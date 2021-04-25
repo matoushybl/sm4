@@ -1,4 +1,6 @@
-pub mod ui;
+pub mod canopen_backend;
+pub mod gui;
+pub mod tui;
 
 #[derive(Copy, Clone, PartialOrd, PartialEq, Default, Debug)]
 pub struct State {
