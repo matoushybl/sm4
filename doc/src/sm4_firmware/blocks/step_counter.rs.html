@@ -131,6 +131,7 @@
 <span id="128">128</span>
 <span id="129">129</span>
 <span id="130">130</span>
+<span id="131">131</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
@@ -163,6 +164,7 @@
         } <span class="kw">else</span> {
             <span class="op">-</span>(<span class="ident">increment</span> <span class="kw">as</span> <span class="ident">i32</span>)
         };
+
         <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">reset_value</span>();
     }
 }
