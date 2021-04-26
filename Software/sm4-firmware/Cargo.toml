@@ -35,8 +35,7 @@ features = ["libm"]
 [features]
 # set logging levels here
 default = [
-  "defmt-default",
-  # "dependency-a/defmt-trace",
+  "defmt-trace",
 ]
 
 # do NOT modify these features

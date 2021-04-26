@@ -100,8 +100,8 @@ impl AxisDictionary {
             target_position: Position::zero(resolution),
             actual_position: Position::zero(resolution),
             current: CurrentSettings::default(),
-            velocity_controller_settings: Default::default(),
-            position_controller_settings: Default::default(),
+            velocity_controller_settings: ControllerSettings::new(1.0, 0.1, 0.0, 3.0),
+            position_controller_settings: ControllerSettings::new(1.0, 0.0, 0.0, 3.0),
             velocity_feedback_control_enabled: false,
             acceleration: 1.0,
         }

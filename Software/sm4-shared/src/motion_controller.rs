@@ -30,7 +30,7 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),
-                AxisMode::Position => Velocity::zero(),
+                AxisMode::Position => Velocity::new(self.position_controller.sample(&dictionary.target_position().get_relative_revolutions(), &dictionary.actual_position().get_relative_revolutions() , &dictionary.position_controller_settings())),
             }
         } else {
             Velocity::zero()

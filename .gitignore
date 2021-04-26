@@ -1,0 +1,9 @@
+/.idea
+/Hardware/rev1/out/
+/Hardware/rev1/out2/
+/Hardware/rev2/out/
+/Hardware/rev2/out2/
+/Software/Deps/
+/Software/.idea
+/Software/sm4-controller/.idea
+/Software/sm4-firmware/.idea
