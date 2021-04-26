@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use num_traits::Float;
 
 use embedded_time::duration::Microseconds;
 
@@ -50,10 +51,19 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
             self.encoder.notify_direction_changed(axis_new_direction);
         }
 
-        self.driver.set_output_frequency(
-            self.ramp_generator
-                .generate(axis_velocity_action, dictionary.acceleration()),
-        );
+        let output_frequency = self
+            .ramp_generator
+            .generate(axis_velocity_action, dictionary.acceleration());
+
+        self.driver.set_output_frequency(output_frequency);
+        let current = if output_frequency.abs() < 0.1 {
+            dictionary.current().standstill_current()
+        } else if (output_frequency - axis_velocity_action).abs() < f32::EPSILON {
+            dictionary.current().constant_velocity_current()
+        } else {
+            dictionary.current().accelerating_current()
+        };
+        self.driver.set_current(current);
     }
 
     pub fn decompose(self) -> (D, E) {

@@ -108,6 +108,13 @@ impl SM4 {
         self.state.decrement_last_received_speed_command_counter();
     }
 
+    pub fn heartbeat_tick(&mut self) {
+        self.can.send(
+            CANOpenMessage::NMTNodeMonitoring,
+            &[u8::from(self.state.nmt_state())],
+        )
+    }
+
     pub fn blink_leds(&mut self) {
         self.leds.tick();
     }
@@ -207,7 +214,6 @@ impl SM4 {
                             .actual_position()
                             .get_angle() as u32,
                     };
-                    defmt::error!("pos: {} - {}", pdo.revolutions, pdo.angle);
                     let size = pdo.to_raw(&mut buffer).unwrap();
                     self.can.send(CANOpenMessage::TxPDO3, &buffer[..size]);
 
@@ -332,5 +338,9 @@ impl SM4 {
 
     pub const fn failsafe_tick_period() -> u32 {
         SECOND / 10
+    }
+
+    pub const fn heartbeat_tick_period() -> u32 {
+        SECOND / 2
     }
 }

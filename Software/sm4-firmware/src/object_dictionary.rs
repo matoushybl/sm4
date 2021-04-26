@@ -1,10 +1,6 @@
 use bxcan::Data;
 use sm4_shared::prelude::*;
 
-const DEFAULT_STANDSTILL_CURRENT: f32 = 0.4;
-const DEFAULT_ACCELERATING_CURRENT: f32 = 0.7;
-const DEFAULT_CONSTANT_VELOCITY_CURRENT: f32 = 0.6;
-
 /// The object dictionary struct represents the global state of the driver
 #[derive(Copy, Clone)]
 pub struct ObjectDictionary {

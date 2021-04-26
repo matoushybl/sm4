@@ -53,6 +53,18 @@ pub struct CurrentSettings {
     constant_velocity_current: f32,
 }
 
+impl CurrentSettings {
+    pub fn standstill_current(&self) -> f32 {
+        self.standstill_current
+    }
+    pub fn accelerating_current(&self) -> f32 {
+        self.accelerating_current
+    }
+    pub fn constant_velocity_current(&self) -> f32 {
+        self.constant_velocity_current
+    }
+}
+
 impl Default for CurrentSettings {
     fn default() -> Self {
         Self {

@@ -15,7 +15,7 @@ const APP: () = {
         driver: SM4,
     }
 
-    #[init(schedule = [blink, monitoring, sample, failsafe_tick])]
+    #[init(schedule = [blink, monitoring, sample, failsafe_tick, heartbeat_tick])]
     fn init(cx: init::Context) -> init::LateResources {
         let mut core: rtic::Peripherals = cx.core;
         let device: hal::pac::Peripherals = cx.device;
@@ -38,6 +38,9 @@ const APP: () = {
             .unwrap();
         cx.schedule
             .failsafe_tick(now + SM4::failsafe_tick_period().cycles())
+            .unwrap();
+        cx.schedule
+            .heartbeat_tick(now + SM4::heartbeat_tick_period().cycles())
             .unwrap();
 
         init::LateResources { driver }
@@ -88,6 +91,15 @@ const APP: () = {
 
         cx.schedule
             .failsafe_tick(cx.scheduled + SM4::failsafe_tick_period().cycles())
+            .unwrap();
+    }
+
+    #[task(resources = [driver], schedule = [heartbeat_tick])]
+    fn heartbeat_tick(cx: heartbeat_tick::Context) {
+        cx.resources.driver.heartbeat_tick();
+
+        cx.schedule
+            .heartbeat_tick(cx.scheduled + SM4::heartbeat_tick_period().cycles())
             .unwrap();
     }
 

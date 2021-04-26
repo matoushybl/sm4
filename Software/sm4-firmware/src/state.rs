@@ -19,6 +19,10 @@ impl DriverState {
         }
     }
 
+    pub fn nmt_state(&self) -> NMTState {
+        self.nmt_state
+    }
+
     pub fn go_to_preoperational_if_needed(&mut self) {
         if self.nmt_state == NMTState::BootUp {
             self.nmt_state = NMTState::PreOperational;

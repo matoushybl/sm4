@@ -1,10 +1,10 @@
-use byteorder::{ByteOrder, LittleEndian};
 use parking_lot::Mutex;
 use sm4_shared::prelude::{
-    AxisMode, PDODeserializationError, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2,
-    TxPDO3, TxPDO4,
+    AxisMode, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2, TxPDO3, TxPDO4,
 };
-use socketcan::canopen::{CANOpen, CANOpenNodeCommand, CANOpenNodeMessage, NMTCommand, PDO};
+use socketcan::canopen::{
+    CANOpen, CANOpenNodeCommand, CANOpenNodeMessage, NMTCommand, NMTState, PDO,
+};
 use socketcan::CANFrame;
 use std::convert::TryFrom;
 use std::sync::Arc;
@@ -63,11 +63,6 @@ impl CANOpenBackend {
                 {
                     match frame {
                         CANOpenNodeMessage::SyncReceived => {
-                            // FIXME move where it belongs
-                            sender.send(CANFrame::from(CANOpenNodeCommand::SendNMT(
-                                1,
-                                NMTCommand::GoToOperational,
-                            )));
                             let state = state.lock();
                             let mut rx_pdo1 = RxPDO1::default();
                             rx_pdo1.axis1_enabled = state.enabled;
@@ -139,7 +134,16 @@ impl CANOpenBackend {
                                 }
                             },
                         },
-                        CANOpenNodeMessage::NMTReceived(_) => {}
+                        CANOpenNodeMessage::NMTReceived(state) => {
+                            if state == NMTState::Operational {
+                                sender
+                                    .send(CANFrame::from(CANOpenNodeCommand::SendNMT(
+                                        id,
+                                        NMTCommand::GoToOperational,
+                                    )))
+                                    .unwrap();
+                            }
+                        }
                         CANOpenNodeMessage::SDOReceived(_, _, _, _, _) => {}
                     }
                 }

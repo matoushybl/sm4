@@ -1,23 +1,12 @@
-use byteorder::{ByteOrder, LittleEndian};
-use crossterm::event::{
-    read, DisableMouseCapture, EnableMouseCapture, KeyCode, KeyEvent, KeyModifiers,
-};
+use crossterm::event::KeyCode;
 use crossterm::execute;
-use crossterm::style::Print;
 use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen,
+    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
-use crossterm::{cursor, event};
-use device_query::{DeviceQuery, DeviceState, Keycode};
 use sm4_controller::canopen_backend::CANOpenBackend;
 use sm4_controller::tui::{SystemEvent, SystemEvents};
-use socketcan::canopen::CANOpenNodeCommand::SendPDO;
-use socketcan::canopen::{CANOpen, CANOpenNodeMessage, PDO};
-use socketcan::{CANFrame, CANSocket};
-use std::io::{stdout, Write};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use std::io::Write;
 use tui::backend::CrosstermBackend;
 use tui::layout::{Constraint, Direction, Layout};
 use tui::style::{Color, Modifier, Style};
@@ -27,7 +16,7 @@ use tui::Terminal;
 
 fn main() -> anyhow::Result<()> {
     enable_raw_mode()?;
-    let mut stdout = stdout();
+    let mut stdout = std::io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
 
     let backend = CrosstermBackend::new(stdout);
