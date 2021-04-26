@@ -1,4 +1,3 @@
-use bxcan::Data;
 use sm4_shared::prelude::*;
 
 /// The object dictionary struct represents the global state of the driver
@@ -18,10 +17,6 @@ impl ObjectDictionary {
             axis1: AxisDictionary::new(resolution),
             axis2: AxisDictionary::new(resolution),
         }
-    }
-
-    pub fn update_from_raw(&mut self, index: u16, subindex: Key, raw: Data) -> Result<(), ()> {
-        Ok(())
     }
 }
 

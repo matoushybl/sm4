@@ -7,6 +7,7 @@ use stm32f4xx_hal::{stm32, stm32::TIM1};
 pub struct StepGeneratorTimer<T> {
     timer: T,
     clocks: Clocks,
+    frequency: u32,
 }
 
 macro_rules! generator {
@@ -41,12 +42,20 @@ macro_rules! generator {
                 timer.cr1.modify(|_, w| w.cms().bits(0).opm().disabled());
                 timer.bdtr.modify(|_, w| w.aoe().set_bit());
 
-                Self { timer, clocks }
+                Self {
+                    timer,
+                    clocks,
+                    frequency: 0,
+                }
             }
         }
 
         impl StepGenerator for StepGeneratorTimer<$tim> {
             fn set_step_frequency(&mut self, freq: Hertz) {
+                if self.frequency == freq.0 {
+                    return;
+                }
+                self.frequency = freq.0;
                 // pause
                 self.timer.cr1.modify(|_, w| w.cen().clear_bit());
                 // reset counter

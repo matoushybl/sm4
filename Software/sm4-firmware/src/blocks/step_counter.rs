@@ -16,6 +16,7 @@ pub struct StepCounterEncoder<T> {
     direction: Direction,
     sampling_period: Microseconds,
     resolution: u16,
+    past_value: u32
 }
 
 impl<T> StepCounterEncoder<T>
@@ -23,14 +24,16 @@ where
     T: Counter,
 {
     fn update_current_position(&mut self) {
-        let increment = self.timer.get_value();
+        let value = self.timer.get_value();
+        let increment = value - self.past_value;
+        self.past_value = value;
         self.current_position += if self.direction == Direction::Clockwise {
             increment as i32
         } else {
             -(increment as i32)
         };
 
-        self.timer.reset_value();
+        // self.timer.reset_value();
     }
 }
 
@@ -51,6 +54,7 @@ where
         self.current_position = Position::zero(self.resolution);
         self.past_position = Position::zero(self.resolution);
         self.current_velocity = Velocity::zero();
+        self.past_value = 0;
         self.timer.reset_value();
         past
     }
@@ -111,6 +115,7 @@ macro_rules! counter {
                     current_velocity: Velocity::zero(),
                     sampling_period,
                     resolution,
+                    past_value: 0
                 }
             }
         }

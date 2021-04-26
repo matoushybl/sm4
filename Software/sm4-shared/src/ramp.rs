@@ -16,7 +16,7 @@ impl TrapRampGen {
     pub fn generate(&mut self, target_speed: f32, target_acceleration: f32) -> f32 {
         let step = target_acceleration / self.generation_frequency;
         let diff = target_speed - self.current_speed;
-        if diff < step {
+        if diff.abs() < step {
             self.current_speed = target_speed;
         } else {
             self.current_speed += diff.signum() * step;

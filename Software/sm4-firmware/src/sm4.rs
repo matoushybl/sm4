@@ -64,7 +64,7 @@ impl SM4 {
         let timer1 = StepGeneratorTimer::init_tim8(device.TIM8, clocks);
         let timer2 = StepGeneratorTimer::init_tim1(device.TIM1, clocks);
 
-        let sampling_period = Microseconds(10000);
+        let sampling_period = Microseconds(1000);
 
         let axis1 = AxisMotionController::new(
             TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, SENSE_R),
@@ -333,7 +333,7 @@ impl SM4 {
     }
 
     pub const fn sampling_period() -> u32 {
-        SECOND / 100
+        SECOND / 1000
     }
 
     pub const fn failsafe_tick_period() -> u32 {

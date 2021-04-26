@@ -24,13 +24,16 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
 
     pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
         self.encoder.sample();
-        dictionary.set_actual_velocity(self.encoder.get_velocity());
         dictionary.set_actual_position(self.encoder.get_position());
 
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),
-                AxisMode::Position => Velocity::new(self.position_controller.sample(&dictionary.target_position().get_relative_revolutions(), &dictionary.actual_position().get_relative_revolutions() , &dictionary.position_controller_settings())),
+                AxisMode::Position => Velocity::new(self.position_controller.sample(
+                    &dictionary.target_position().get_relative_revolutions(),
+                    &dictionary.actual_position().get_relative_revolutions(),
+                    &dictionary.position_controller_settings(),
+                )),
             }
         } else {
             Velocity::zero()
@@ -45,15 +48,17 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         } else {
             target_velocity.get_rps()
         };
-        let axis_new_direction = Direction::from(axis_velocity_action);
-
-        if Direction::from(dictionary.actual_velocity().get_rps()) != axis_new_direction {
-            self.encoder.notify_direction_changed(axis_new_direction);
-        }
 
         let output_frequency = self
             .ramp_generator
             .generate(axis_velocity_action, dictionary.acceleration());
+
+        let axis_new_direction = Direction::from(axis_velocity_action);
+        if Direction::from(dictionary.actual_velocity().get_rps()) != axis_new_direction {
+            self.encoder.notify_direction_changed(axis_new_direction);
+        }
+
+        dictionary.set_actual_velocity(Velocity::new(output_frequency));
 
         self.driver.set_output_frequency(output_frequency);
         let current = if output_frequency.abs() < 0.1 {
