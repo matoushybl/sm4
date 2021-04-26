@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["DEFAULT_ACCELERATING_CURRENT",""],["DEFAULT_CONSTANT_VELOCITY_CURRENT",""],["DEFAULT_STANDSTILL_CURRENT",""]],"struct":[["ObjectDictionary","The object dictionary struct represents the global state of the driver"]]});
+initSidebarItems({"struct":[["ObjectDictionary","The object dictionary struct represents the global state of the driver"]]});

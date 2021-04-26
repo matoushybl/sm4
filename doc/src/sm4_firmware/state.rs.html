@@ -59,6 +59,10 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">ObjectDictionary</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="ident">NMTState</span>;
@@ -79,6 +83,10 @@
             <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>::<span class="ident">new</span>(<span class="ident">encoder_resolution</span>),
             <span class="ident">last_received_speed_command_down_counter</span>: <span class="number">0</span>,
         }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nmt_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NMTState</span> {
+        <span class="self">self</span>.<span class="ident">nmt_state</span>
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">go_to_preoperational_if_needed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
