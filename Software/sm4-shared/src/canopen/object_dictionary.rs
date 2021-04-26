@@ -57,9 +57,9 @@ impl AxisDictionary {
             actual_position: Position::zero(resolution),
             current: CurrentSettings::default(),
             velocity_controller_settings: ControllerSettings::new(1.0, 0.1, 0.0, 3.0),
-            position_controller_settings: ControllerSettings::new(2.0, 0.05, 0.0, 3.0),
+            position_controller_settings: ControllerSettings::new(0.5, 0.005, 0.001, 3.0),
             velocity_feedback_control_enabled: false,
-            acceleration: 1.0,
+            acceleration: 10.0,
         }
     }
 }
