@@ -1,6 +1,6 @@
-use crate::float::fabs;
 use crate::hal::{DACChannel, StepGenerator, StepperDriver};
 use embedded_time::rate::Hertz;
+use num_traits::Float;
 
 const V_FS: f32 = 0.32; // V
 const R_OFFSET: f32 = 0.02; // Ohm
@@ -12,6 +12,7 @@ pub struct TMC2100<G, STEP, DIR, DAC> {
     dir_pin: DIR,
     current_dac: DAC,
     sense_r: f32,
+    microsteps_per_revolution: f32,
 }
 
 impl<G, STEP, DIR, DAC> TMC2100<G, STEP, DIR, DAC>
@@ -20,13 +21,21 @@ where
     DIR: embedded_hal::digital::v2::OutputPin,
     DAC: DACChannel,
 {
-    pub fn new(generator: G, step_pin: STEP, dir_pin: DIR, current_dac: DAC, sense_r: f32) -> Self {
+    pub fn new(
+        generator: G,
+        step_pin: STEP,
+        dir_pin: DIR,
+        current_dac: DAC,
+        sense_r: f32,
+        microsteps_per_revolution: u32,
+    ) -> Self {
         let mut s = Self {
             generator,
             _step_pin: step_pin,
             dir_pin,
             current_dac,
             sense_r,
+            microsteps_per_revolution: microsteps_per_revolution as f32,
         };
 
         s.set_current(0.2);
@@ -48,13 +57,14 @@ where
             self.dir_pin.set_low().ok();
         };
 
-        self.generator
-            .set_step_frequency(Hertz::new((fabs(frequency) * 16.0 * 200.0) as u32))
+        self.generator.set_step_frequency(Hertz::new(
+            (frequency.abs() * self.microsteps_per_revolution) as u32,
+        ))
     }
 
     fn set_current(&mut self, current: f32) {
         let voltage =
-            (fabs(current) * MAX_V_REF as f32 / V_FS * (self.sense_r + R_OFFSET) / 0.707) as u16;
+            (current.abs() * MAX_V_REF as f32 / V_FS * (self.sense_r + R_OFFSET) / 0.707) as u16;
         self.current_dac.set_output_voltage(voltage.min(MAX_V_REF));
     }
 }

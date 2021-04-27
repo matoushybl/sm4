@@ -2,13 +2,11 @@ use gio::prelude::*;
 use gtk::prelude::*;
 use std::env::args;
 
-use byteorder::{ByteOrder, LittleEndian};
 use sm4_controller::gui::ui::UI;
 use sm4_controller::State;
-use socketcan::canopen::{CANOpen, CANOpenNodeMessage, PDO};
 use std::sync::{Arc, Mutex};
 
-fn build_ui(application: &gtk::Application, state: Arc<Mutex<State>>) {
+fn build_ui(application: &gtk::Application, _state: Arc<Mutex<State>>) {
     let window = gtk::ApplicationWindow::new(application);
 
     window.set_title("SM4-controller");
@@ -30,9 +28,8 @@ fn main() {
 
     let state = Arc::new(Mutex::new(State::default()));
 
-    let state_clone = state.clone();
     application.connect_activate(move |app| {
-        build_ui(app, state_clone.clone());
+        build_ui(app, state.clone());
     });
 
     application.run(&args().collect::<Vec<_>>());

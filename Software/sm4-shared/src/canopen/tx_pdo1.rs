@@ -1,4 +1,4 @@
-use crate::canopen::PDODeserializationError;
+use crate::canopen::{PDODeserializationError, PDOSerializationError, SerializePDO};
 use core::convert::{TryFrom, TryInto};
 
 /// `TxPDO1` represents the first Process Data Object sent by the device to the master.
@@ -14,16 +14,23 @@ pub struct TxPDO1 {
 
 impl TxPDO1 {
     const SIZE: usize = 4;
+}
 
-    pub fn to_raw(&self, raw: &mut [u8]) -> Result<usize, ()> {
+impl SerializePDO for TxPDO1 {
+    fn len() -> usize {
+        Self::SIZE
+    }
+
+    fn to_raw(&self) -> Result<[u8; 8], PDOSerializationError> {
+        let mut raw = [0u8; 8];
         if raw.len() < Self::SIZE {
-            return Err(());
+            return Err(PDOSerializationError::BufferTooSmall);
         }
 
         raw[..2].clone_from_slice(&self.battery_voltage.to_le_bytes());
         raw[2..4].clone_from_slice(&self.temperature.to_le_bytes());
 
-        Ok(Self::SIZE)
+        Ok(raw)
     }
 }
 

@@ -3,7 +3,6 @@ use crate::prelude::config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R};
 use crate::prelude::definitions::{Axis1, Axis2};
 use crate::prelude::*;
 use crate::state::DriverState;
-use core::convert::TryFrom;
 use embedded_time::duration::Microseconds;
 use hal::dma::StreamsTuple;
 use hal::prelude::*;
@@ -67,12 +66,26 @@ impl SM4 {
         let sampling_period = Microseconds(1000);
 
         let axis1 = AxisMotionController::new(
-            TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, SENSE_R),
+            TMC2100::new(
+                timer1,
+                gpio.step1,
+                gpio.dir1,
+                ref1,
+                SENSE_R,
+                config::MICROSTEPS_PER_REV,
+            ),
             StepCounterEncoder::tim5(device.TIM5, sampling_period),
             sampling_period,
         );
         let axis2 = AxisMotionController::new(
-            TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, SENSE_R),
+            TMC2100::new(
+                timer2,
+                gpio.step2,
+                gpio.dir2,
+                ref2,
+                SENSE_R,
+                config::MICROSTEPS_PER_REV,
+            ),
             StepCounterEncoder::tim2(device.TIM2, sampling_period),
             sampling_period,
         );
@@ -148,178 +161,30 @@ impl SM4 {
         self.usb.process_interrupt();
     }
 
-    // TODO send NMT heartbeat
     pub fn process_can(&mut self) {
         if let Some((message, frame)) = self.can.process_incoming_frame() {
             match message {
                 CANOpenMessage::NMTNodeControl => {
-                    if frame.dlc() != 2 {
-                        defmt::error!("Malformed NMT node control data received.");
-                        return;
-                    }
-                    if frame.data().unwrap()[1] != CAN_ID {
-                        return;
-                    }
-                    match NMTRequestedState::try_from(frame.data().unwrap()[0]) {
-                        Ok(state) => match state {
-                            NMTRequestedState::Operational => {
-                                self.state.go_to_operational();
-                            }
-                            NMTRequestedState::Stopped => {
-                                self.state.go_to_stopped();
-                            }
-                            NMTRequestedState::PreOperational => {
-                                self.state.go_to_preoperational();
-                            }
-                            NMTRequestedState::ResetNode => {
-                                unimplemented!()
-                            }
-                            NMTRequestedState::ResetCommunication => {
-                                unimplemented!()
-                            }
-                        },
-                        Err(_) => {
-                            defmt::error!("Invalid NMT requested state received.");
-                        }
-                    }
+                    crate::protocol::canopen::nmt_received(CAN_ID, &frame, &mut self.state);
                 }
                 CANOpenMessage::GlobalFailsafeCommand => {}
                 CANOpenMessage::Sync => {
-                    let pdo = TxPDO1 {
-                        battery_voltage: (self.state.object_dictionary().battery_voltage() * 1000.0)
-                            as u16,
-                        temperature: (self.state.object_dictionary().temperature() * 10.0) as u16,
-                    };
-                    let mut buffer = [0u8; 8];
-                    let size = pdo.to_raw(&mut buffer).unwrap();
-                    self.can.send(CANOpenMessage::TxPDO1, &buffer[..size]);
-
-                    let pdo = TxPDO2 {
-                        axis1_velocity: self
-                            .state
-                            .object_dictionary()
-                            .axis1()
-                            .actual_velocity()
-                            .get_rps(),
-                        axis2_velocity: self
-                            .state
-                            .object_dictionary()
-                            .axis2()
-                            .actual_velocity()
-                            .get_rps(),
-                    };
-                    let size = pdo.to_raw(&mut buffer).unwrap();
-                    self.can.send(CANOpenMessage::TxPDO2, &buffer[..size]);
-
-                    let pdo = TxPDO3 {
-                        revolutions: self
-                            .state
-                            .object_dictionary()
-                            .axis1()
-                            .actual_position()
-                            .get_revolutions(),
-                        angle: self
-                            .state
-                            .object_dictionary()
-                            .axis1()
-                            .actual_position()
-                            .get_angle() as u32,
-                    };
-                    let size = pdo.to_raw(&mut buffer).unwrap();
-                    self.can.send(CANOpenMessage::TxPDO3, &buffer[..size]);
-
-                    let pdo = TxPDO4 {
-                        revolutions: self
-                            .state
-                            .object_dictionary()
-                            .axis2()
-                            .actual_position()
-                            .get_revolutions(),
-                        angle: self
-                            .state
-                            .object_dictionary()
-                            .axis2()
-                            .actual_position()
-                            .get_angle() as u32,
-                    };
-                    let size = pdo.to_raw(&mut buffer).unwrap();
-                    self.can.send(CANOpenMessage::TxPDO4, &buffer[..size]);
+                    self.leds.signalize_sync();
+                    crate::protocol::canopen::sync(&mut self.can, &mut self.state);
                 }
                 CANOpenMessage::Emergency => {}
                 CANOpenMessage::TimeStamp => {}
                 CANOpenMessage::RxPDO1 => {
-                    if frame.data().is_none() {
-                        defmt::warn!("Invalid RxPDO1 received.");
-                        return;
-                    }
-                    if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
-                        self.state
-                            .object_dictionary()
-                            .axis1_mut()
-                            .set_mode(pdo.axis1_mode);
-                        self.state
-                            .object_dictionary()
-                            .axis2_mut()
-                            .set_mode(pdo.axis2_mode);
-                        self.state
-                            .object_dictionary()
-                            .axis1_mut()
-                            .set_enabled(pdo.axis1_enabled);
-                        self.state
-                            .object_dictionary()
-                            .axis2_mut()
-                            .set_enabled(pdo.axis2_enabled);
-                    } else {
-                        defmt::warn!("Malformed RxPDO1 received.");
-                    }
+                    crate::protocol::canopen::rx_pdo1(&frame, &mut self.state)
                 }
                 CANOpenMessage::RxPDO2 => {
-                    if frame.data().is_none() {
-                        defmt::warn!("Invalid RxPDO2 received.");
-                        return;
-                    }
-                    if let Ok(pdo) = RxPDO2::try_from(frame.data().unwrap().as_ref()) {
-                        self.state
-                            .object_dictionary()
-                            .axis1_mut()
-                            .set_target_velocity(Velocity::new(pdo.axis1_velocity));
-                        self.state
-                            .object_dictionary()
-                            .axis2_mut()
-                            .set_target_velocity(Velocity::new(pdo.axis2_velocity));
-
-                        self.state.invalidate_last_received_speed_command_counter();
-                    } else {
-                        defmt::warn!("Malformed RxPDO2 received.");
-                    }
+                    crate::protocol::canopen::rx_pdo2(&frame, &mut self.state)
                 }
                 CANOpenMessage::RxPDO3 => {
-                    if frame.data().is_none() {
-                        defmt::warn!("Invalid RxPDO1 received.");
-                        return;
-                    }
-                    if let Ok(pdo) = RxPDO3::try_from(frame.data().unwrap().as_ref()) {
-                        self.state
-                            .object_dictionary()
-                            .axis1_mut()
-                            .set_target_position(Position::new(pdo.revolutions, pdo.angle));
-                    } else {
-                        defmt::warn!("Malformed RxPDO3 received.");
-                    }
+                    crate::protocol::canopen::rx_pdo3(&frame, &mut self.state)
                 }
                 CANOpenMessage::RxPDO4 => {
-                    if frame.data().is_none() {
-                        defmt::warn!("Invalid RxPDO4 received.");
-                        return;
-                    }
-                    if let Ok(pdo) = RxPDO4::try_from(frame.data().unwrap().as_ref()) {
-                        self.state
-                            .object_dictionary()
-                            .axis2_mut()
-                            .set_target_position(Position::new(pdo.revolutions, pdo.angle));
-                    } else {
-                        defmt::warn!("Malformed RxPDO4 received.");
-                    }
+                    crate::protocol::canopen::rx_pdo4(&frame, &mut self.state)
                 }
                 CANOpenMessage::RxSDO => {}
                 _ => {}

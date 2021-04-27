@@ -4,6 +4,7 @@ pub mod config {
     pub const MICROSTEPS: u32 = 16;
     pub const STEPS_PER_REV: u32 = 200;
     pub const ENCODER_RESOLUTION: u32 = MICROSTEPS * STEPS_PER_REV;
+    pub const MICROSTEPS_PER_REV: u32 = ENCODER_RESOLUTION;
 }
 
 pub mod definitions {

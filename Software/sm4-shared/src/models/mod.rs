@@ -1,5 +1,11 @@
 //! This module contains data objects used in the shared API.
 
+mod position;
+mod velocity;
+
+pub use position::Position;
+pub use velocity::Velocity;
+
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
 /// In raw data, the [Self::Velocity] variant is represented as a zero and the [Self::Position] variant is represented as 1.
 /// The variant [Self::Velocity] is the default.

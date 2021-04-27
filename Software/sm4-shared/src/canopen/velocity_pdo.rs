@@ -1,4 +1,4 @@
-use crate::canopen::PDODeserializationError;
+use crate::canopen::{PDODeserializationError, PDOSerializationError, SerializePDO};
 use core::convert::{TryFrom, TryInto};
 
 #[derive(Copy, Clone, Default, Debug)]
@@ -26,15 +26,20 @@ impl TryFrom<&[u8]> for VelocityPDO {
     }
 }
 
-impl VelocityPDO {
-    pub fn to_raw(&self, raw: &mut [u8]) -> Result<usize, ()> {
+impl SerializePDO for VelocityPDO {
+    fn len() -> usize {
+        Self::SIZE
+    }
+
+    fn to_raw(&self) -> Result<[u8; 8], PDOSerializationError> {
+        let mut raw = [0u8; 8];
         if raw.len() < Self::SIZE {
-            return Err(());
+            return Err(PDOSerializationError::BufferTooSmall);
         }
 
         raw[..4].clone_from_slice(&self.axis1_velocity.to_le_bytes());
         raw[4..].clone_from_slice(&self.axis2_velocity.to_le_bytes());
 
-        Ok(Self::SIZE)
+        Ok(raw)
     }
 }

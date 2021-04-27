@@ -1,4 +1,4 @@
-use crate::canopen::PDODeserializationError;
+use crate::canopen::{PDODeserializationError, PDOSerializationError, SerializePDO};
 use crate::models::AxisMode;
 use core::convert::TryFrom;
 
@@ -31,16 +31,21 @@ impl TryFrom<&[u8]> for RxPDO1 {
     }
 }
 
-impl RxPDO1 {
-    pub fn to_raw(&self, raw: &mut [u8]) -> Result<usize, ()> {
+impl SerializePDO for RxPDO1 {
+    fn len() -> usize {
+        Self::SIZE
+    }
+
+    fn to_raw(&self) -> Result<[u8; 8], PDOSerializationError> {
+        let mut raw = [0u8; 8];
         if raw.len() < Self::SIZE {
-            return Err(());
+            return Err(PDOSerializationError::BufferTooSmall);
         }
 
         raw[0] = u8::from(self.axis1_mode) | u8::from(self.axis2_mode) << 4;
         raw[1] = if self.axis1_enabled { 1 } else { 0 } | if self.axis2_enabled { 2 } else { 0 };
 
-        Ok(Self::SIZE)
+        Ok(raw)
     }
 }
 

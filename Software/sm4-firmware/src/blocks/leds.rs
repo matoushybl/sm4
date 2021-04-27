@@ -20,6 +20,7 @@ impl LEDs {
     }
 
     pub fn signalize_sync(&mut self) {
-        self.status_led.enqueue(blinq::patterns::morse::SOS);
+        self.status_led
+            .enqueue(blinq::patterns::blinks::SHORT_ON_OFF);
     }
 }

@@ -30,15 +30,22 @@ mod pdos {
 }
 
 /// Error returned from deserializing the raw data from CAN frames.
+#[derive(Copy, Clone, Debug)]
 pub enum PDODeserializationError {
     /// The received data length is not the same as the length required to deserialize the frame.
     IncorrectDataSize,
 }
 
 /// Error returned from serializing the PDO to raw data for CAN frames.
+#[derive(Copy, Clone, Debug)]
 pub enum PDOSerializationError {
     /// The provided buffer into which the raw data should be serialized is too small.
     BufferTooSmall,
+}
+
+pub trait SerializePDO {
+    fn len() -> usize;
+    fn to_raw(&self) -> Result<[u8; 8], PDOSerializationError>;
 }
 
 pub enum NMTRequestedState {

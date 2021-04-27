@@ -1,4 +1,4 @@
-use crate::canopen::PDODeserializationError;
+use crate::canopen::{PDODeserializationError, PDOSerializationError, SerializePDO};
 use core::convert::{TryFrom, TryInto};
 
 /// The `PositionPDO` contains the position information of an axis.
@@ -27,15 +27,20 @@ impl TryFrom<&[u8]> for PositionPDO {
     }
 }
 
-impl PositionPDO {
-    pub fn to_raw(&self, raw: &mut [u8]) -> Result<usize, ()> {
-        if raw.len() < Self::SIZE {
-            return Err(());
+impl SerializePDO for PositionPDO {
+    fn len() -> usize {
+        Self::SIZE
+    }
+
+    fn to_raw(&self) -> Result<[u8; 8], PDOSerializationError> {
+        let mut raw = [0u8; 8];
+        if raw.len() < Self::len() {
+            return Err(PDOSerializationError::BufferTooSmall);
         }
 
         raw[..4].clone_from_slice(&self.revolutions.to_le_bytes());
         raw[4..].clone_from_slice(&self.angle.to_le_bytes());
 
-        Ok(Self::SIZE)
+        Ok(raw)
     }
 }

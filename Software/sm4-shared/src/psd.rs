@@ -1,4 +1,3 @@
-use crate::float;
 use embedded_time::duration::Microseconds;
 
 #[derive(Copy, Clone, Default)]
@@ -45,9 +44,9 @@ impl PSDController {
         let error = desired - actual;
 
         self.sum += error * self.sampling_period;
-        self.sum = float::fmaxf(
-            float::fminf(self.sum, settings.max_output_amplitude),
+        self.sum = self.sum.clamp(
             -settings.max_output_amplitude,
+            settings.max_output_amplitude,
         );
 
         let action = error * settings.proportional
@@ -55,9 +54,9 @@ impl PSDController {
             + settings.integral * self.sum;
         self.previous = error;
 
-        float::fmaxf(
-            float::fminf(action, settings.max_output_amplitude),
+        action.clamp(
             -settings.max_output_amplitude,
+            settings.max_output_amplitude,
         )
     }
 }

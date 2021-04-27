@@ -1,6 +1,7 @@
 use parking_lot::Mutex;
 use sm4_shared::prelude::{
-    AxisMode, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2, TxPDO3, TxPDO4,
+    AxisMode, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4, SerializePDO, TxPDO1, TxPDO2, TxPDO3,
+    TxPDO4,
 };
 use socketcan::canopen::{
     CANOpen, CANOpenNodeCommand, CANOpenNodeMessage, NMTCommand, NMTState, PDO,
@@ -9,14 +10,16 @@ use socketcan::CANFrame;
 use std::convert::TryFrom;
 use std::sync::Arc;
 
+pub const ENCODER_RESOLUTION: u32 = 16 * 200;
+
 #[derive(Copy, Clone)]
 pub struct AxisState {
     pub enabled: bool,
     pub mode: AxisMode,
     pub actual_velocity: f32,
     pub target_velocity: f32,
-    pub actual_position: Position,
-    pub target_position: Position,
+    pub actual_position: Position<ENCODER_RESOLUTION>,
+    pub target_position: Position<ENCODER_RESOLUTION>,
 }
 
 impl Default for AxisState {
@@ -26,8 +29,8 @@ impl Default for AxisState {
             mode: AxisMode::Velocity,
             actual_velocity: 0.0,
             target_velocity: 0.0,
-            actual_position: Position::zero(16 * 200),
-            target_position: Position::zero(16 * 200),
+            actual_position: Position::zero(),
+            target_position: Position::zero(),
         }
     }
 }
@@ -92,76 +95,65 @@ impl CANOpenBackend {
             let sender = sender.clone();
             let state = state.clone();
             move || loop {
-                if let Ok(Some(frame)) = receiver
-                    .recv()
-                    .map(|frame| Option::<CANOpenNodeMessage>::from(frame))
-                {
+                if let Ok(Some(frame)) = receiver.recv().map(Option::<CANOpenNodeMessage>::from) {
                     match frame {
                         CANOpenNodeMessage::SyncReceived => {
                             let state = state.lock();
-                            let rx_pdo1 = RxPDO1 {
-                                axis1_mode: state.axis1.mode,
-                                axis2_mode: state.axis2.mode,
-                                axis1_enabled: state.axis1.enabled,
-                                axis2_enabled: state.axis2.enabled,
-                            };
-
-                            let mut raw = [0u8; 8];
-                            let size = rx_pdo1.to_raw(&mut raw).unwrap();
                             sender
                                 .send(CANFrame::from(CANOpenNodeCommand::SendPDO(
                                     id,
                                     PDO::PDO1,
-                                    raw,
-                                    size,
+                                    RxPDO1 {
+                                        axis1_mode: state.axis1.mode,
+                                        axis2_mode: state.axis2.mode,
+                                        axis1_enabled: state.axis1.enabled,
+                                        axis2_enabled: state.axis2.enabled,
+                                    }
+                                    .to_raw()
+                                    .unwrap(),
+                                    TxPDO1::len(),
                                 )))
                                 .unwrap();
 
-                            let rx_pdo2 = RxPDO2 {
-                                axis1_velocity: state.axis1.target_velocity,
-                                axis2_velocity: state.axis2.target_velocity,
-                            };
-
-                            let mut raw = [0u8; 8];
-                            let size = rx_pdo2.to_raw(&mut raw).unwrap();
                             sender
                                 .send(CANFrame::from(CANOpenNodeCommand::SendPDO(
                                     id,
                                     PDO::PDO2,
-                                    raw,
-                                    size,
+                                    RxPDO2 {
+                                        axis1_velocity: state.axis1.target_velocity,
+                                        axis2_velocity: state.axis2.target_velocity,
+                                    }
+                                    .to_raw()
+                                    .unwrap(),
+                                    RxPDO2::len(),
                                 )))
                                 .unwrap();
 
-                            let rx_pdo3 = RxPDO3 {
-                                revolutions: state.axis1.target_position.get_revolutions(),
-                                angle: state.axis1.target_position.get_angle() as u32,
-                            };
-
-                            let mut raw = [0u8; 8];
-                            let size = rx_pdo3.to_raw(&mut raw).unwrap();
                             sender
                                 .send(CANFrame::from(CANOpenNodeCommand::SendPDO(
                                     id,
                                     PDO::PDO3,
-                                    raw,
-                                    size,
+                                    RxPDO3 {
+                                        revolutions: state.axis1.target_position.get_revolutions(),
+                                        angle: state.axis1.target_position.get_angle(),
+                                    }
+                                    .to_raw()
+                                    .unwrap(),
+                                    RxPDO3::len(),
                                 )))
                                 .unwrap();
 
-                            let rx_pdo4 = RxPDO4 {
-                                revolutions: state.axis2.target_position.get_revolutions(),
-                                angle: state.axis2.target_position.get_angle() as u32,
-                            };
-
-                            let mut raw = [0u8; 8];
-                            let size = rx_pdo4.to_raw(&mut raw).unwrap();
                             sender
                                 .send(CANFrame::from(CANOpenNodeCommand::SendPDO(
                                     id,
                                     PDO::PDO4,
-                                    raw,
-                                    size,
+                                    RxPDO4 {
+                                        revolutions: state.axis2.target_position.get_revolutions(),
+                                        angle: state.axis2.target_position.get_angle(),
+                                    }
+                                    .to_raw()
+                                    .unwrap_or_default(),
+                                    RxPDO4::len(),
                                 )))
                                 .unwrap();
                         }
@@ -189,7 +181,7 @@ impl CANOpenBackend {
                             PDO::PDO3 => match TxPDO3::try_from(&data[..(len as usize)]) {
                                 Ok(pdo) => {
                                     state.lock().axis1.actual_position =
-                                        Position::new(200 * 16, pdo.revolutions, pdo.angle as u16);
+                                        Position::new(pdo.revolutions, pdo.angle);
                                 }
                                 Err(_) => {
                                     println!("received malformed TxPDO3");
@@ -198,7 +190,7 @@ impl CANOpenBackend {
                             PDO::PDO4 => match TxPDO4::try_from(&data[..(len as usize)]) {
                                 Ok(pdo) => {
                                     state.lock().axis2.actual_position =
-                                        Position::new(200 * 16, pdo.revolutions, pdo.angle as u16);
+                                        Position::new(pdo.revolutions, pdo.angle);
                                 }
                                 Err(_) => {
                                     println!("received malformed TxPDO4");
@@ -268,11 +260,11 @@ impl CANOpenBackend {
         };
     }
 
-    pub fn set_axis1_target_position(&self, position: Position) {
+    pub fn set_axis1_target_position(&self, position: Position<ENCODER_RESOLUTION>) {
         self.state.lock().axis1.target_position = position;
     }
 
-    pub fn set_axis2_target_position(&self, position: Position) {
+    pub fn set_axis2_target_position(&self, position: Position<ENCODER_RESOLUTION>) {
         self.state.lock().axis2.target_position = position;
     }
 }

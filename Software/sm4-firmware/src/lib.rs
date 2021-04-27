@@ -12,6 +12,7 @@ mod blocks;
 mod board;
 mod can;
 mod object_dictionary;
+mod protocol;
 mod sm4;
 mod state;
 
@@ -19,6 +20,7 @@ pub mod prelude {
     pub use crate::blocks::*;
     pub use crate::board::*;
     pub use crate::object_dictionary::ObjectDictionary;
+    pub use crate::protocol::*;
     pub use crate::state::DriverState;
 }
 
