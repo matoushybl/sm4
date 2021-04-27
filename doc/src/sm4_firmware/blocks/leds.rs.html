@@ -26,6 +26,7 @@
 <span id="23">23</span>
 <span id="24">24</span>
 <span id="25">25</span>
+<span id="26">26</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::<span class="ident">definitions</span>::{<span class="ident">ErrorLED</span>, <span class="ident">StatusLED</span>};
 <span class="kw">use</span> <span class="ident">blinq</span>::<span class="ident">Blinq</span>;
@@ -49,7 +50,8 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signalize_sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">status_led</span>.<span class="ident">enqueue</span>(<span class="ident">blinq</span>::<span class="ident">patterns</span>::<span class="ident">morse</span>::<span class="ident">SOS</span>);
+        <span class="self">self</span>.<span class="ident">status_led</span>
+            .<span class="ident">enqueue</span>(<span class="ident">blinq</span>::<span class="ident">patterns</span>::<span class="ident">blinks</span>::<span class="ident">SHORT_ON_OFF</span>);
     }
 }
 </pre></div>
