@@ -92,7 +92,7 @@ pub fn nmt_received<const R: u32>(id: u8, frame: &Frame, state: &mut DriverState
                 unimplemented!()
             }
             NMTRequestedState::ResetCommunication => {
-                unimplemented!()
+                unimplemented!();
             }
         },
         Err(_) => {

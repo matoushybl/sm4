@@ -11,6 +11,7 @@ pub use sm4::SM4;
 mod blocks;
 mod board;
 mod can;
+mod i2c;
 mod object_dictionary;
 mod protocol;
 mod sm4;

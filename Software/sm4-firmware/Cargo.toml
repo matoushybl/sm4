@@ -1,5 +1,4 @@
 [package]
-# TODO(1) fix `authors` and `name` if you didn't use `cargo-generate`
 authors = ["Matous Hybl <hyblmatous@gmail.com>"]
 name = "sm4-firmware"
 edition = "2018"

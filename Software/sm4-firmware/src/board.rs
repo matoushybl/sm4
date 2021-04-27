@@ -33,7 +33,7 @@ pub mod definitions {
     pub type En1 = PA6<Input<Floating>>;
     pub type En2 = PA7<Input<Floating>>;
 
-    pub type Step1 = PC6<Alternate<AF3>>; // TODO not sure about AF
+    pub type Step1 = PC6<Alternate<AF3>>;
     pub type Step2 = PA8<Alternate<AF1>>;
 
     pub type Err1 = PC5<Input<PullDown>>;
