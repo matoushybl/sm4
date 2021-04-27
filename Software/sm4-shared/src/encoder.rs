@@ -13,7 +13,7 @@
 //! * The encoder shall store information about the total position.
 //! * The total position shall be resettable.
 //! * For non-quadrature encoders a method that indicates change of motor rotation shall be implemented.
-use core::ops::{AddAssign, SubAssign};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 use embedded_time::duration::Microseconds;
 use embedded_time::fixed_point::FixedPoint;
 
@@ -173,6 +173,24 @@ impl Position {
     pub fn get_relative_revolutions(&self) -> f32 {
         self.revolutions as f32 + self.angle as f32 / self.resolution as f32
     }
+
+    fn from_raw(resolution: u16, mut revolutions: i32, mut angle: i32) -> Position {
+        if angle.abs() as i32 >= resolution as i32 {
+            revolutions += angle.signum() * angle / resolution as i32;
+            angle %= resolution as i32;
+        }
+
+        if angle < 0 {
+            revolutions -= 1;
+            angle += resolution as i32;
+        }
+
+        Position {
+            resolution,
+            revolutions,
+            angle: angle as u16,
+        }
+    }
 }
 
 impl AddAssign<i32> for Position {
@@ -196,27 +214,70 @@ impl AddAssign<i32> for Position {
         let added_revolutions = rhs / self.resolution as i32;
         let added_angle = rhs % self.resolution as i32;
 
-        let mut new_revolutions = self.revolutions + added_revolutions;
-        let mut new_angle = added_angle + self.angle as i32;
+        let new_revolutions = self.revolutions + added_revolutions;
+        let new_angle = added_angle + self.angle as i32;
 
-        if new_angle.abs() as i32 >= self.resolution as i32 {
-            new_revolutions += new_angle.signum();
-            new_angle %= self.resolution as i32;
-        }
+        let position = Position::from_raw(self.resolution, new_revolutions, new_angle);
 
-        if new_angle < 0 {
-            new_revolutions -= 1;
-            new_angle += self.resolution as i32;
-        }
-
-        self.revolutions = new_revolutions;
-        self.angle = new_angle as u16;
+        self.revolutions = position.revolutions;
+        self.angle = position.angle;
     }
 }
 
 impl SubAssign<i32> for Position {
     fn sub_assign(&mut self, rhs: i32) {
         *self += -rhs;
+    }
+}
+
+/// Adds position to position
+/// # Examples
+/// ```
+/// use sm4_shared::prelude::Position;
+///
+/// let position = Position::zero(4);
+/// let new_position = position + &Position::new(4, 3, 1);
+///
+/// assert_eq!(new_position.get_revolutions(), 3);
+/// assert_eq!(new_position.get_angle(), 1);
+/// ```
+impl Add<&Position> for Position {
+    type Output = Position;
+
+    fn add(self, rhs: &Position) -> Self::Output {
+        let new_revolutions = self.revolutions + rhs.revolutions;
+        let new_angle = rhs.angle as i32 + self.angle as i32;
+
+        Position::from_raw(self.resolution, new_revolutions, new_angle)
+    }
+}
+
+impl AddAssign<&Position> for Position {
+    fn add_assign(&mut self, rhs: &Position) {
+        let new = *self + rhs;
+
+        self.revolutions = new.revolutions;
+        self.angle = new.angle;
+    }
+}
+
+impl Sub<&Position> for Position {
+    type Output = Position;
+
+    fn sub(self, rhs: &Position) -> Self::Output {
+        let new_revolutions = self.revolutions - rhs.revolutions;
+        let new_angle = self.angle as i32 - rhs.angle as i32;
+
+        Position::from_raw(self.resolution, new_revolutions, new_angle)
+    }
+}
+
+impl SubAssign<&Position> for Position {
+    fn sub_assign(&mut self, rhs: &Position) {
+        let new = *self - rhs;
+
+        self.revolutions = new.revolutions;
+        self.angle = new.angle;
     }
 }
 
@@ -385,6 +446,36 @@ mod tests {
         assert_eq!(position.revolutions, -1);
         assert_eq!(position.angle, 2);
         assert_eq!(position.get_increments(), -2);
+
+        let position = Position::zero(ENCODER_RESOLUTION);
+        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 1);
+        assert_eq!(new_position.get_revolutions(), 3);
+        assert_eq!(new_position.get_angle(), 1);
+
+        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
+        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 1);
+        assert_eq!(new_position.get_revolutions(), 4);
+        assert_eq!(new_position.get_angle(), 2);
+
+        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
+        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 3);
+        assert_eq!(new_position.get_revolutions(), 5);
+        assert_eq!(new_position.get_angle(), 0);
+
+        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
+        let new_position = position - &Position::new(ENCODER_RESOLUTION, 0, 1);
+        assert_eq!(new_position.get_revolutions(), 1);
+        assert_eq!(new_position.get_angle(), 0);
+
+        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
+        let new_position = position - &Position::new(ENCODER_RESOLUTION, 1, 1);
+        assert_eq!(new_position.get_revolutions(), 0);
+        assert_eq!(new_position.get_angle(), 0);
+
+        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
+        let new_position = position - &Position::new(ENCODER_RESOLUTION, 1, 2);
+        assert_eq!(new_position.get_revolutions(), -1);
+        assert_eq!(new_position.get_angle(), 3);
     }
 
     #[test]

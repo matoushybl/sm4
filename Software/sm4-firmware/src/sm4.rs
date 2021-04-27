@@ -93,12 +93,23 @@ impl SM4 {
         }
     }
 
-    pub fn sample(&mut self) {
+    pub fn control(&mut self) {
         self.axis1.control(
             self.state.is_movement_blocked(),
             self.state.object_dictionary().axis1_mut(),
         );
         self.axis2.control(
+            self.state.is_movement_blocked(),
+            self.state.object_dictionary().axis2_mut(),
+        );
+    }
+
+    pub fn ramp(&mut self) {
+        self.axis1.ramp(
+            self.state.is_movement_blocked(),
+            self.state.object_dictionary().axis1_mut(),
+        );
+        self.axis2.ramp(
             self.state.is_movement_blocked(),
             self.state.object_dictionary().axis2_mut(),
         );
@@ -332,8 +343,12 @@ impl SM4 {
         SECOND / 10
     }
 
-    pub const fn sampling_period() -> u32 {
+    pub const fn ramping_period() -> u32 {
         SECOND / 1000
+    }
+
+    pub const fn control_period() -> u32 {
+        SECOND / 100
     }
 
     pub const fn failsafe_tick_period() -> u32 {

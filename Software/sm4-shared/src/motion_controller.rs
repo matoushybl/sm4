@@ -9,6 +9,7 @@ pub struct AxisMotionController<D: StepperDriver, E: Encoder> {
     velocity_controller: PSDController,
     position_controller: PSDController,
     ramp_generator: TrapRampGen,
+    axis_velocity_action: f32,
 }
 
 impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
@@ -19,13 +20,41 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
             velocity_controller: PSDController::new(sampling_period),
             position_controller: PSDController::new(sampling_period),
             ramp_generator: TrapRampGen::new(sampling_period),
+            axis_velocity_action: 0.0,
         }
     }
 
-    pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
+    pub fn ramp(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
         self.encoder.sample();
         dictionary.set_actual_position(self.encoder.get_position());
 
+        if global_disable {
+            self.axis_velocity_action = 0.0;
+        }
+
+        let output_frequency = self
+            .ramp_generator
+            .generate(self.axis_velocity_action, dictionary.acceleration());
+
+        let axis_new_direction = Direction::from(output_frequency);
+        if Direction::from(dictionary.actual_velocity().get_rps()) != axis_new_direction {
+            self.encoder.notify_direction_changed(axis_new_direction);
+        }
+        // TODO in case of using encoders, it should be read from the encoder
+        dictionary.set_actual_velocity(Velocity::new(output_frequency));
+
+        self.driver.set_output_frequency(output_frequency);
+        let current = if output_frequency.abs() < 0.1 {
+            dictionary.current().standstill_current()
+        } else if (output_frequency - self.axis_velocity_action).abs() < f32::EPSILON {
+            dictionary.current().constant_velocity_current()
+        } else {
+            dictionary.current().accelerating_current()
+        };
+        self.driver.set_current(current);
+    }
+
+    pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),
@@ -39,7 +68,7 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
             Velocity::zero()
         };
 
-        let axis_velocity_action = if dictionary.velocity_feedback_control_enabled() {
+        self.axis_velocity_action = if dictionary.velocity_feedback_control_enabled() {
             self.velocity_controller.sample(
                 &target_velocity.get_rps(),
                 &dictionary.actual_velocity().get_rps(),
@@ -48,27 +77,6 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         } else {
             target_velocity.get_rps()
         };
-
-        let output_frequency = self
-            .ramp_generator
-            .generate(axis_velocity_action, dictionary.acceleration());
-
-        let axis_new_direction = Direction::from(axis_velocity_action);
-        if Direction::from(dictionary.actual_velocity().get_rps()) != axis_new_direction {
-            self.encoder.notify_direction_changed(axis_new_direction);
-        }
-
-        dictionary.set_actual_velocity(Velocity::new(output_frequency));
-
-        self.driver.set_output_frequency(output_frequency);
-        let current = if output_frequency.abs() < 0.1 {
-            dictionary.current().standstill_current()
-        } else if (output_frequency - axis_velocity_action).abs() < f32::EPSILON {
-            dictionary.current().constant_velocity_current()
-        } else {
-            dictionary.current().accelerating_current()
-        };
-        self.driver.set_current(current);
     }
 
     pub fn decompose(self) -> (D, E) {
