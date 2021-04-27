@@ -2,38 +2,38 @@ use sm4_shared::prelude::*;
 
 /// The object dictionary struct represents the global state of the driver
 #[derive(Copy, Clone)]
-pub struct ObjectDictionary {
+pub struct ObjectDictionary<const RESOLUTION: u32> {
     battery_voltage: f32,
     temperature: f32,
-    axis1: AxisDictionary,
-    axis2: AxisDictionary,
+    axis1: AxisDictionary<RESOLUTION>,
+    axis2: AxisDictionary<RESOLUTION>,
 }
 
-impl ObjectDictionary {
-    pub fn new(resolution: u16) -> Self {
+impl<const RESOLUTION: u32> ObjectDictionary<RESOLUTION> {
+    pub fn new() -> Self {
         Self {
             battery_voltage: 0.0,
             temperature: 0.0,
-            axis1: AxisDictionary::new(resolution),
-            axis2: AxisDictionary::new(resolution),
+            axis1: AxisDictionary::new(),
+            axis2: AxisDictionary::new(),
         }
     }
 }
 
-impl ObjectDictionary {
-    pub fn axis1(&self) -> &AxisDictionary {
+impl<const RESOLUTION: u32> ObjectDictionary<RESOLUTION> {
+    pub fn axis1(&self) -> &AxisDictionary<RESOLUTION> {
         &self.axis1
     }
 
-    pub fn axis1_mut(&mut self) -> &mut AxisDictionary {
+    pub fn axis1_mut(&mut self) -> &mut AxisDictionary<RESOLUTION> {
         &mut self.axis1
     }
 
-    pub fn axis2(&self) -> &AxisDictionary {
+    pub fn axis2(&self) -> &AxisDictionary<RESOLUTION> {
         &self.axis2
     }
 
-    pub fn axis2_mut(&mut self) -> &mut AxisDictionary {
+    pub fn axis2_mut(&mut self) -> &mut AxisDictionary<RESOLUTION> {
         &mut self.axis2
     }
 

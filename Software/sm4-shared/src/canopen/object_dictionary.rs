@@ -32,13 +32,13 @@ impl Default for CurrentSettings {
 }
 
 #[derive(Copy, Clone)]
-pub struct AxisDictionary {
+pub struct AxisDictionary<const RESOLUTION: u32> {
     mode: AxisMode,
     enabled: bool,
     target_velocity: Velocity,
     actual_velocity: Velocity,
-    target_position: Position,
-    actual_position: Position,
+    target_position: Position<RESOLUTION>,
+    actual_position: Position<RESOLUTION>,
     current: CurrentSettings,
     velocity_controller_settings: ControllerSettings,
     position_controller_settings: ControllerSettings,
@@ -46,15 +46,15 @@ pub struct AxisDictionary {
     acceleration: f32,
 }
 
-impl AxisDictionary {
-    pub fn new(resolution: u16) -> Self {
+impl<const RESOLUTION: u32> AxisDictionary<RESOLUTION> {
+    pub fn new() -> Self {
         Self {
             mode: Default::default(),
             enabled: false,
             target_velocity: Velocity::zero(),
             actual_velocity: Velocity::zero(),
-            target_position: Position::zero(resolution),
-            actual_position: Position::zero(resolution),
+            target_position: Position::zero(),
+            actual_position: Position::zero(),
             current: CurrentSettings::default(),
             velocity_controller_settings: ControllerSettings::new(1.0, 0.1, 0.0, 3.0),
             position_controller_settings: ControllerSettings::new(3.0, 0.001, 0.0001, 3.0),
@@ -64,7 +64,7 @@ impl AxisDictionary {
     }
 }
 
-impl AxisDictionary {
+impl<const RESOLUTION: u32> AxisDictionary<RESOLUTION> {
     pub fn mode(&self) -> AxisMode {
         self.mode
     }
@@ -77,10 +77,10 @@ impl AxisDictionary {
     pub fn actual_velocity(&self) -> Velocity {
         self.actual_velocity
     }
-    pub fn target_position(&self) -> Position {
+    pub fn target_position(&self) -> Position<RESOLUTION> {
         self.target_position
     }
-    pub fn actual_position(&self) -> Position {
+    pub fn actual_position(&self) -> Position<RESOLUTION> {
         self.actual_position
     }
     pub fn current(&self) -> CurrentSettings {
@@ -108,10 +108,10 @@ impl AxisDictionary {
     pub fn set_actual_velocity(&mut self, actual_velocity: Velocity) {
         self.actual_velocity = actual_velocity;
     }
-    pub fn set_target_position(&mut self, target_position: Position) {
+    pub fn set_target_position(&mut self, target_position: Position<RESOLUTION>) {
         self.target_position = target_position;
     }
-    pub fn set_actual_position(&mut self, actual_position: Position) {
+    pub fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>) {
         self.actual_position = actual_position;
     }
     pub fn set_current(&mut self, current: CurrentSettings) {

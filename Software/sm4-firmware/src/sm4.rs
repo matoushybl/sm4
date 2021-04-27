@@ -17,7 +17,7 @@ pub struct SM4 {
     usb: USBProtocol,
     can: CANOpen,
     monitoring: Monitoring,
-    state: DriverState,
+    state: DriverState<{ ENCODER_RESOLUTION }>,
     axis1: Axis1,
     axis2: Axis2,
 }
@@ -68,18 +68,18 @@ impl SM4 {
 
         let axis1 = AxisMotionController::new(
             TMC2100::new(timer1, gpio.step1, gpio.dir1, ref1, SENSE_R),
-            StepCounterEncoder::tim5(device.TIM5, sampling_period, ENCODER_RESOLUTION),
+            StepCounterEncoder::tim5(device.TIM5, sampling_period),
             sampling_period,
         );
         let axis2 = AxisMotionController::new(
             TMC2100::new(timer2, gpio.step2, gpio.dir2, ref2, SENSE_R),
-            StepCounterEncoder::tim2(device.TIM2, sampling_period, ENCODER_RESOLUTION),
+            StepCounterEncoder::tim2(device.TIM2, sampling_period),
             sampling_period,
         );
 
         defmt::error!("init done");
 
-        let mut state = DriverState::new(ENCODER_RESOLUTION);
+        let mut state = DriverState::new();
         state.go_to_preoperational_if_needed();
 
         Self {
@@ -302,11 +302,7 @@ impl SM4 {
                         self.state
                             .object_dictionary()
                             .axis1_mut()
-                            .set_target_position(Position::new(
-                                ENCODER_RESOLUTION,
-                                pdo.revolutions,
-                                pdo.angle as u16,
-                            ));
+                            .set_target_position(Position::new(pdo.revolutions, pdo.angle));
                     } else {
                         defmt::warn!("Malformed RxPDO3 received.");
                     }
@@ -320,11 +316,7 @@ impl SM4 {
                         self.state
                             .object_dictionary()
                             .axis2_mut()
-                            .set_target_position(Position::new(
-                                ENCODER_RESOLUTION,
-                                pdo.revolutions,
-                                pdo.angle as u16,
-                            ));
+                            .set_target_position(Position::new(pdo.revolutions, pdo.angle));
                     } else {
                         defmt::warn!("Malformed RxPDO4 received.");
                     }

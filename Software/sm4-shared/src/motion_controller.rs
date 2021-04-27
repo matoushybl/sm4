@@ -3,7 +3,7 @@ use num_traits::Float;
 
 use embedded_time::duration::Microseconds;
 
-pub struct AxisMotionController<D: StepperDriver, E: Encoder> {
+pub struct AxisMotionController<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32> {
     driver: D,
     encoder: E,
     velocity_controller: PSDController,
@@ -12,7 +12,9 @@ pub struct AxisMotionController<D: StepperDriver, E: Encoder> {
     axis_velocity_action: f32,
 }
 
-impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
+impl<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32>
+    AxisMotionController<D, E, RESOLUTION>
+{
     pub fn new(driver: D, encoder: E, sampling_period: Microseconds) -> Self {
         Self {
             driver,
@@ -24,7 +26,7 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         }
     }
 
-    pub fn ramp(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
+    pub fn ramp(&mut self, global_disable: bool, dictionary: &mut AxisDictionary<RESOLUTION>) {
         self.encoder.sample();
         dictionary.set_actual_position(self.encoder.get_position());
 
@@ -54,7 +56,7 @@ impl<D: StepperDriver, E: Encoder> AxisMotionController<D, E> {
         self.driver.set_current(current);
     }
 
-    pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary) {
+    pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary<RESOLUTION>) {
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),

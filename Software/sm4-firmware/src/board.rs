@@ -1,9 +1,9 @@
 pub mod config {
     pub const CAN_ID: u8 = 0x01;
     pub const SENSE_R: f32 = 0.22;
-    pub const MICROSTEPS: u16 = 16;
-    pub const STEPS_PER_REV: u16 = 200;
-    pub const ENCODER_RESOLUTION: u16 = MICROSTEPS * STEPS_PER_REV;
+    pub const MICROSTEPS: u32 = 16;
+    pub const STEPS_PER_REV: u32 = 200;
+    pub const ENCODER_RESOLUTION: u32 = MICROSTEPS * STEPS_PER_REV;
 }
 
 pub mod definitions {
@@ -64,9 +64,13 @@ pub mod definitions {
         Dir2,
         CurrentDACChannel<CurrentRef2Channel>,
     >;
-    type Axis1Encoder = StepCounterEncoder<stm32f4xx_hal::pac::TIM5>;
-    type Axis2Encoder = StepCounterEncoder<stm32f4xx_hal::pac::TIM2>;
+    type Axis1Encoder =
+        StepCounterEncoder<stm32f4xx_hal::pac::TIM5, { super::config::ENCODER_RESOLUTION }>;
+    type Axis2Encoder =
+        StepCounterEncoder<stm32f4xx_hal::pac::TIM2, { super::config::ENCODER_RESOLUTION }>;
 
-    pub type Axis1 = AxisMotionController<Axis1Driver, Axis1Encoder>;
-    pub type Axis2 = AxisMotionController<Axis2Driver, Axis2Encoder>;
+    pub type Axis1 =
+        AxisMotionController<Axis1Driver, Axis1Encoder, { super::config::ENCODER_RESOLUTION }>;
+    pub type Axis2 =
+        AxisMotionController<Axis2Driver, Axis2Encoder, { super::config::ENCODER_RESOLUTION }>;
 }

@@ -66,13 +66,12 @@ impl From<f32> for Direction {
 /// there is always one more revolution added (-2.5 revolutions in reality -> -3 revolutions in `Position`) and
 /// the resulting position is calculated by adding the positive angle to it.
 #[derive(Copy, Clone)]
-pub struct Position {
-    resolution: u16,
+pub struct Position<const RESOLUTION: u32> {
     revolutions: i32,
-    angle: u16,
+    angle: u32,
 }
 
-impl Position {
+impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// Create a zero position with specified resolution
     ///
     /// # Arguments
@@ -82,14 +81,13 @@ impl Position {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::zero(4);
+    /// let position = Position::zero();
     /// assert_eq!(position.get_resolution(), 4);
     /// assert_eq!(position.get_revolutions(), 0);
     /// assert_eq!(position.get_angle(), 0);
     /// ```
-    pub fn zero(resolution: u16) -> Self {
+    pub fn zero() -> Self {
         Self {
-            resolution,
             revolutions: 0,
             angle: 0,
         }
@@ -106,32 +104,31 @@ impl Position {
     /// # Example
     /// ```
     /// use sm4_shared::prelude::Position;
-    /// let position = Position::new(4, 5, 2);
+    /// let position = Position::new(5, 2);
     ///
     /// assert_eq!(position.get_resolution(), 4);
     /// assert_eq!(position.get_revolutions(), 5);
     /// assert_eq!(position.get_angle(), 2);
     ///
-    /// let invalid_position = Position::new(4, 1, 7);
+    /// let invalid_position = Position::new(1, 7);
     /// assert_eq!(invalid_position.get_revolutions(), 2);
     /// assert_eq!(invalid_position.get_angle(), 3);
     ///
-    /// let invalid_position = Position::new(4, -1, 2);
+    /// let invalid_position = Position::new(-1, 2);
     /// assert_eq!(invalid_position.get_revolutions(), -1);
     /// assert_eq!(invalid_position.get_angle(), 2);
     /// ```
-    pub fn new(resolution: u16, revolutions: i32, angle: u16) -> Self {
+    pub fn new(revolutions: i32, angle: u32) -> Self {
         Self {
-            resolution,
-            revolutions: revolutions + (angle / resolution) as i32,
-            angle: angle % resolution,
+            revolutions: revolutions + (angle / RESOLUTION) as i32,
+            angle: angle % RESOLUTION,
         }
     }
 
     /// Returns the resolution of the encoder.
     /// Resolution means the number of pulses for a full shaft turn.
-    pub fn get_resolution(&self) -> u16 {
-        self.resolution
+    pub const fn get_resolution(&self) -> u32 {
+        RESOLUTION
     }
 
     /// Returns the number of revolutions the shaft had travelled.
@@ -140,7 +137,7 @@ impl Position {
     }
 
     /// Returns the angle of the shaft in increments relative to a "zero" position.
-    pub fn get_angle(&self) -> u16 {
+    pub fn get_angle(&self) -> u32 {
         self.angle
     }
 
@@ -149,14 +146,14 @@ impl Position {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::new(4, 1, 2);
+    /// let position = Position::new(1, 2);
     /// assert_eq!(position.get_increments(), 6);
     ///
-    /// let position = Position::new(4, -1, 2);
+    /// let position = Position::new(-1, 2);
     /// assert_eq!(position.get_increments(), -2);
     /// ```
     pub fn get_increments(&self) -> i32 {
-        self.revolutions * self.resolution as i32 + self.angle as i32
+        self.revolutions * RESOLUTION as i32 + self.angle as i32
     }
 
     /// Returns number of revolutions as float with the angle embedded after the decimal point
@@ -164,42 +161,41 @@ impl Position {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::new(4, 1, 2);
+    /// let position = Position::new(1, 2);
     /// assert_eq!(position.get_relative_revolutions(), 1.5);
     ///
-    /// let position = Position::new(4, -1, 2);
+    /// let position = Position::new(-1, 2);
     /// assert_eq!(position.get_relative_revolutions(), -0.5);
     /// ```
     pub fn get_relative_revolutions(&self) -> f32 {
-        self.revolutions as f32 + self.angle as f32 / self.resolution as f32
+        self.revolutions as f32 + self.angle as f32 / RESOLUTION as f32
     }
 
-    fn from_raw(resolution: u16, mut revolutions: i32, mut angle: i32) -> Position {
-        if angle.abs() as i32 >= resolution as i32 {
-            revolutions += angle.signum() * angle / resolution as i32;
-            angle %= resolution as i32;
+    fn from_raw(mut revolutions: i32, mut angle: i32) -> Position<RESOLUTION> {
+        if angle.abs() as i32 >= RESOLUTION as i32 {
+            revolutions += angle.signum() * angle / RESOLUTION as i32;
+            angle %= RESOLUTION as i32;
         }
 
         if angle < 0 {
             revolutions -= 1;
-            angle += resolution as i32;
+            angle += RESOLUTION as i32;
         }
 
         Position {
-            resolution,
             revolutions,
-            angle: angle as u16,
+            angle: angle as u32,
         }
     }
 }
 
-impl AddAssign<i32> for Position {
+impl<const RESOLUTION: u32> AddAssign<i32> for Position<RESOLUTION> {
     /// Adds increments to position
     /// # Examples
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let mut position = Position::zero(4);
+    /// let mut position = Position::zero();
     /// position += 1;
     ///
     /// assert_eq!(position.get_increments(), 1);
@@ -211,20 +207,20 @@ impl AddAssign<i32> for Position {
     /// assert_eq!(position.get_increments(), 4);
     /// ```
     fn add_assign(&mut self, rhs: i32) {
-        let added_revolutions = rhs / self.resolution as i32;
-        let added_angle = rhs % self.resolution as i32;
+        let added_revolutions = rhs / RESOLUTION as i32;
+        let added_angle = rhs % RESOLUTION as i32;
 
         let new_revolutions = self.revolutions + added_revolutions;
         let new_angle = added_angle + self.angle as i32;
 
-        let position = Position::from_raw(self.resolution, new_revolutions, new_angle);
+        let position = Position::<RESOLUTION>::from_raw(new_revolutions, new_angle);
 
         self.revolutions = position.revolutions;
         self.angle = position.angle;
     }
 }
 
-impl SubAssign<i32> for Position {
+impl<const RESOLUTION: u32> SubAssign<i32> for Position<RESOLUTION> {
     fn sub_assign(&mut self, rhs: i32) {
         *self += -rhs;
     }
@@ -235,25 +231,25 @@ impl SubAssign<i32> for Position {
 /// ```
 /// use sm4_shared::prelude::Position;
 ///
-/// let position = Position::zero(4);
-/// let new_position = position + &Position::new(4, 3, 1);
+/// let position = Position::zero();
+/// let new_position = position + &Position::new(3, 1);
 ///
 /// assert_eq!(new_position.get_revolutions(), 3);
 /// assert_eq!(new_position.get_angle(), 1);
 /// ```
-impl Add<&Position> for Position {
-    type Output = Position;
+impl<const RESOLUTION: u32> Add<&Position<RESOLUTION>> for Position<RESOLUTION> {
+    type Output = Position<RESOLUTION>;
 
-    fn add(self, rhs: &Position) -> Self::Output {
+    fn add(self, rhs: &Position<RESOLUTION>) -> Self::Output {
         let new_revolutions = self.revolutions + rhs.revolutions;
         let new_angle = rhs.angle as i32 + self.angle as i32;
 
-        Position::from_raw(self.resolution, new_revolutions, new_angle)
+        Position::from_raw(new_revolutions, new_angle)
     }
 }
 
-impl AddAssign<&Position> for Position {
-    fn add_assign(&mut self, rhs: &Position) {
+impl<const RESOLUTION: u32> AddAssign<&Position<RESOLUTION>> for Position<RESOLUTION> {
+    fn add_assign(&mut self, rhs: &Position<RESOLUTION>) {
         let new = *self + rhs;
 
         self.revolutions = new.revolutions;
@@ -261,19 +257,19 @@ impl AddAssign<&Position> for Position {
     }
 }
 
-impl Sub<&Position> for Position {
-    type Output = Position;
+impl<const RESOLUTION: u32> Sub<&Position<RESOLUTION>> for Position<RESOLUTION> {
+    type Output = Position<RESOLUTION>;
 
-    fn sub(self, rhs: &Position) -> Self::Output {
+    fn sub(self, rhs: &Position<RESOLUTION>) -> Self::Output {
         let new_revolutions = self.revolutions - rhs.revolutions;
         let new_angle = self.angle as i32 - rhs.angle as i32;
 
-        Position::from_raw(self.resolution, new_revolutions, new_angle)
+        Position::from_raw(new_revolutions, new_angle)
     }
 }
 
-impl SubAssign<&Position> for Position {
-    fn sub_assign(&mut self, rhs: &Position) {
+impl<const RESOLUTION: u32> SubAssign<&Position<RESOLUTION>> for Position<RESOLUTION> {
+    fn sub_assign(&mut self, rhs: &Position<RESOLUTION>) {
         let new = *self - rhs;
 
         self.revolutions = new.revolutions;
@@ -302,10 +298,13 @@ impl Velocity {
     }
 
     /// Calculates the velocity using two sampled positions and the time between those samples.
-    pub fn from_positions(current: &Position, past: &Position, period: Microseconds) -> Self {
-        let resolution = current.resolution as f32;
+    pub fn from_positions<const RESOLUTION: u32>(
+        current: &Position<RESOLUTION>,
+        past: &Position<RESOLUTION>,
+        period: Microseconds,
+    ) -> Self {
         let diff = (current.get_increments() - past.get_increments()) as f32;
-        let rps = diff / resolution * 1.0e6 / *period.integer() as f32;
+        let rps = diff / RESOLUTION as f32 * 1.0e6 / *period.integer() as f32;
         Self { rps }
     }
 
@@ -319,18 +318,18 @@ impl Velocity {
 /// It is suitable for both incremental and absolute encoders.
 /// It is designed so its [`Self::sample()`] shall be periodically called with known fixed period,
 /// which allows for velocity calculations.
-pub trait Encoder {
+pub trait Encoder<const RESOLUTION: u32> {
     /// Returns the velocity measured by the encoder.
     /// This value is generally calculated from consecutive position readings.
     fn get_velocity(&self) -> Velocity;
 
     /// Returns the current position of the shaft.
-    fn get_position(&self) -> Position;
+    fn get_position(&self) -> Position<RESOLUTION>;
 
     /// Sets the sampled position to zero.
     /// This is applicable only with incremental encoders.
     /// Absolute encoders might offset the zero by software.
-    fn reset_position(&mut self) -> Position;
+    fn reset_position(&mut self) -> Position<RESOLUTION>;
 
     /// This functions shall be periodically called to sample the encoder.
     /// Sampled values are used for position and velocity readings.
@@ -346,10 +345,10 @@ pub trait Encoder {
 mod tests {
     use super::*;
 
-    const ENCODER_RESOLUTION: u16 = 4;
+    const ENCODER_RESOLUTION: u32 = 4;
 
     struct MockEncoder {
-        current_position: Position,
+        current_position: Position<ENCODER_RESOLUTION>,
         current_velocity: Velocity,
         direction: Direction,
         sampling_period: Microseconds,
@@ -358,7 +357,7 @@ mod tests {
     impl MockEncoder {
         fn new() -> Self {
             Self {
-                current_position: Position::zero(ENCODER_RESOLUTION),
+                current_position: Position::zero(),
                 current_velocity: Velocity::zero(),
                 direction: Direction::Clockwise,
                 sampling_period: Microseconds(1000),
@@ -366,18 +365,18 @@ mod tests {
         }
     }
 
-    impl Encoder for MockEncoder {
+    impl Encoder<ENCODER_RESOLUTION> for MockEncoder {
         fn get_velocity(&self) -> Velocity {
             self.current_velocity
         }
 
-        fn get_position(&self) -> Position {
+        fn get_position(&self) -> Position<ENCODER_RESOLUTION> {
             self.current_position
         }
 
-        fn reset_position(&mut self) -> Position {
+        fn reset_position(&mut self) -> Position<ENCODER_RESOLUTION> {
             let past = self.current_position;
-            self.current_position = Position::zero(ENCODER_RESOLUTION);
+            self.current_position = Position::zero();
             self.current_velocity = Velocity::zero();
             past
         }
@@ -401,14 +400,12 @@ mod tests {
 
     #[test]
     fn test_velocity() {
-        let position1 = Position {
-            resolution: ENCODER_RESOLUTION,
+        let position1 = Position::<ENCODER_RESOLUTION> {
             revolutions: 0,
             angle: 0,
         };
 
-        let position2 = Position {
-            resolution: ENCODER_RESOLUTION,
+        let position2 = Position::<ENCODER_RESOLUTION> {
             revolutions: 0,
             angle: 1,
         };
@@ -419,9 +416,9 @@ mod tests {
         let velocity = Velocity::from_positions(&position1, &position2, Microseconds(10));
         assert_eq!(velocity.rps, -25000.0);
 
-        let position1 = Position::new(ENCODER_RESOLUTION, 0, ENCODER_RESOLUTION - 1);
+        let position1 = Position::<ENCODER_RESOLUTION>::new(0, ENCODER_RESOLUTION - 1);
 
-        let position2 = Position::new(ENCODER_RESOLUTION, 1, 0);
+        let position2 = Position::<ENCODER_RESOLUTION>::new(1, 0);
 
         let velocity = Velocity::from_positions(&position2, &position1, Microseconds(10));
         assert_eq!(velocity.rps, 25000.0);
@@ -429,7 +426,7 @@ mod tests {
 
     #[test]
     fn position_manipulation() {
-        let mut position = Position::zero(ENCODER_RESOLUTION);
+        let mut position = Position::<ENCODER_RESOLUTION>::zero();
         position += 6;
         assert_eq!(position.revolutions, 1);
         assert_eq!(position.angle, 2);
@@ -447,33 +444,33 @@ mod tests {
         assert_eq!(position.angle, 2);
         assert_eq!(position.get_increments(), -2);
 
-        let position = Position::zero(ENCODER_RESOLUTION);
-        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 1);
+        let position = Position::<ENCODER_RESOLUTION>::zero();
+        let new_position = position + &Position::new(3, 1);
         assert_eq!(new_position.get_revolutions(), 3);
         assert_eq!(new_position.get_angle(), 1);
 
-        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
-        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 1);
+        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let new_position = position + &Position::new(3, 1);
         assert_eq!(new_position.get_revolutions(), 4);
         assert_eq!(new_position.get_angle(), 2);
 
-        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
-        let new_position = position + &Position::new(ENCODER_RESOLUTION, 3, 3);
+        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let new_position = position + &Position::new(3, 3);
         assert_eq!(new_position.get_revolutions(), 5);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
-        let new_position = position - &Position::new(ENCODER_RESOLUTION, 0, 1);
+        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let new_position = position - &Position::new(0, 1);
         assert_eq!(new_position.get_revolutions(), 1);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
-        let new_position = position - &Position::new(ENCODER_RESOLUTION, 1, 1);
+        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let new_position = position - &Position::new(1, 1);
         assert_eq!(new_position.get_revolutions(), 0);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::new(ENCODER_RESOLUTION, 1, 1);
-        let new_position = position - &Position::new(ENCODER_RESOLUTION, 1, 2);
+        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let new_position = position - &Position::new(1, 2);
         assert_eq!(new_position.get_revolutions(), -1);
         assert_eq!(new_position.get_angle(), 3);
     }

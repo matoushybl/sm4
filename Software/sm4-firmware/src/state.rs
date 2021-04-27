@@ -4,17 +4,17 @@ use sm4_shared::prelude::NMTState;
 const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
 
 #[derive(Copy, Clone)]
-pub struct DriverState {
+pub struct DriverState<const RESOLUTION: u32> {
     nmt_state: NMTState,
-    object_dictionary: ObjectDictionary,
+    object_dictionary: ObjectDictionary<RESOLUTION>,
     last_received_speed_command_down_counter: u8,
 }
 
-impl DriverState {
-    pub fn new(encoder_resolution: u16) -> Self {
+impl<const RESOLUTION: u32> DriverState<RESOLUTION> {
+    pub fn new() -> Self {
         Self {
             nmt_state: NMTState::default(),
-            object_dictionary: ObjectDictionary::new(encoder_resolution),
+            object_dictionary: ObjectDictionary::new(),
             last_received_speed_command_down_counter: 0,
         }
     }
@@ -56,7 +56,7 @@ impl DriverState {
         self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
     }
 
-    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary {
+    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary<RESOLUTION> {
         &mut self.object_dictionary
     }
 }

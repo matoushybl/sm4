@@ -8,18 +8,17 @@ pub trait Counter {
     fn reset_value(&mut self);
 }
 
-pub struct StepCounterEncoder<T> {
+pub struct StepCounterEncoder<T, const RESOLUTION: u32> {
     timer: T,
-    past_position: Position,
-    current_position: Position,
+    past_position: Position<RESOLUTION>,
+    current_position: Position<RESOLUTION>,
     current_velocity: Velocity,
     direction: Direction,
     sampling_period: Microseconds,
-    resolution: u16,
-    past_value: u32
+    past_value: u32,
 }
 
-impl<T> StepCounterEncoder<T>
+impl<T, const RESOLUTION: u32> StepCounterEncoder<T, RESOLUTION>
 where
     T: Counter,
 {
@@ -37,7 +36,7 @@ where
     }
 }
 
-impl<T> Encoder for StepCounterEncoder<T>
+impl<T, const RESOLUTION: u32> Encoder<RESOLUTION> for StepCounterEncoder<T, RESOLUTION>
 where
     T: Counter,
 {
@@ -45,14 +44,14 @@ where
         self.current_velocity
     }
 
-    fn get_position(&self) -> Position {
+    fn get_position(&self) -> Position<RESOLUTION> {
         self.current_position
     }
 
-    fn reset_position(&mut self) -> Position {
+    fn reset_position(&mut self) -> Position<RESOLUTION> {
         let past = self.current_position;
-        self.current_position = Position::zero(self.resolution);
-        self.past_position = Position::zero(self.resolution);
+        self.current_position = Position::zero();
+        self.past_position = Position::zero();
         self.current_velocity = Velocity::zero();
         self.past_value = 0;
         self.timer.reset_value();
@@ -80,8 +79,8 @@ where
 
 macro_rules! counter {
     ($tim:ident, $new:ident, $ts:literal, $en:ident, $rst:ident) => {
-        impl StepCounterEncoder<$tim> {
-            pub fn $new(timer: $tim, sampling_period: Microseconds, resolution: u16) -> Self {
+        impl<const RESOLUTION: u32> StepCounterEncoder<$tim, RESOLUTION> {
+            pub fn $new(timer: $tim, sampling_period: Microseconds) -> Self {
                 unsafe {
                     let rcc = &(*stm32::RCC::ptr());
                     rcc.apb1enr.modify(|_, w| w.$en().enabled());
@@ -110,12 +109,11 @@ macro_rules! counter {
                 Self {
                     timer,
                     direction: Direction::Clockwise,
-                    past_position: Position::zero(resolution),
-                    current_position: Position::zero(resolution),
+                    past_position: Position::zero(),
+                    current_position: Position::zero(),
                     current_velocity: Velocity::zero(),
                     sampling_period,
-                    resolution,
-                    past_value: 0
+                    past_value: 0,
                 }
             }
         }
