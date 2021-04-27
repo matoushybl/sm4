@@ -54,13 +54,7 @@
 <span id="51">51</span>
 <span id="52">52</span>
 <span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">bxcan</span>::<span class="ident">Data</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// The object dictionary struct represents the global state of the driver</span>
@@ -80,10 +74,6 @@
             <span class="ident">axis1</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(<span class="ident">resolution</span>),
             <span class="ident">axis2</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(<span class="ident">resolution</span>),
         }
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_from_raw</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">u16</span>, <span class="ident">subindex</span>: <span class="ident">Key</span>, <span class="ident">raw</span>: <span class="ident">Data</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(())
     }
 }
 

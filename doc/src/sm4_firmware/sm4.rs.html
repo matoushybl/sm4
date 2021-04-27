@@ -347,6 +347,21 @@
 <span id="344">344</span>
 <span id="345">345</span>
 <span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">config</span>::{<span class="ident">CAN_ID</span>, <span class="ident">ENCODER_RESOLUTION</span>, <span class="ident">SENSE_R</span>};
@@ -414,7 +429,7 @@
         <span class="kw">let</span> <span class="ident">timer1</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim8</span>(<span class="ident">device</span>.<span class="ident">TIM8</span>, <span class="ident">clocks</span>);
         <span class="kw">let</span> <span class="ident">timer2</span> <span class="op">=</span> <span class="ident">StepGeneratorTimer</span>::<span class="ident">init_tim1</span>(<span class="ident">device</span>.<span class="ident">TIM1</span>, <span class="ident">clocks</span>);
 
-        <span class="kw">let</span> <span class="ident">sampling_period</span> <span class="op">=</span> <span class="ident">Microseconds</span>(<span class="number">10000</span>);
+        <span class="kw">let</span> <span class="ident">sampling_period</span> <span class="op">=</span> <span class="ident">Microseconds</span>(<span class="number">1000</span>);
 
         <span class="kw">let</span> <span class="ident">axis1</span> <span class="op">=</span> <span class="ident">AxisMotionController</span>::<span class="ident">new</span>(
             <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">gpio</span>.<span class="ident">step1</span>, <span class="ident">gpio</span>.<span class="ident">dir1</span>, <span class="ident">ref1</span>, <span class="ident">SENSE_R</span>),
@@ -443,12 +458,23 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sample</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">axis1</span>.<span class="ident">control</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis1_mut</span>(),
         );
         <span class="self">self</span>.<span class="ident">axis2</span>.<span class="ident">control</span>(
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis2_mut</span>(),
+        );
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ramp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">axis1</span>.<span class="ident">ramp</span>(
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis1_mut</span>(),
+        );
+        <span class="self">self</span>.<span class="ident">axis2</span>.<span class="ident">ramp</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis2_mut</span>(),
         );
@@ -682,7 +708,11 @@
         <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">10</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">sampling_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">ramping_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+        <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">1000</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">control_period</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
         <span class="ident">SECOND</span> <span class="op">/</span> <span class="number">100</span>
     }
 
