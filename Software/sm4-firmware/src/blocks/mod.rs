@@ -9,11 +9,11 @@ pub use usb::USBProtocol;
 pub use eeprom::Storage;
 
 mod current_reference;
+mod eeprom;
+mod flash;
 mod gpio;
 mod leds;
 mod monitoring;
 mod step_counter;
 mod step_timer;
 mod usb;
-mod eeprom;
-mod flash;

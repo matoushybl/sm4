@@ -1,6 +1,6 @@
-use core::convert::TryInto;
 use crate::blocks::flash;
-use crate::blocks::flash::{FlashExt, UnlockedFlash, MemIter};
+use crate::blocks::flash::{FlashExt, MemIter, UnlockedFlash};
+use core::convert::TryInto;
 
 #[derive(Copy, Clone)]
 enum Page {
@@ -89,7 +89,8 @@ impl Storage {
     }
 
     pub fn read_f32(&self, key: u16) -> Option<f32> {
-        self.read(key).map(|u| unsafe { *(u.to_le_bytes().as_ptr() as *const f32) })
+        self.read(key)
+            .map(|u| unsafe { *(u.to_le_bytes().as_ptr() as *const f32) })
     }
 
     pub fn write_raw(&mut self, key: u16, raw: &[u8]) -> Result<(), flash::Error> {

@@ -38,7 +38,7 @@ impl RxPDO1 {
         }
 
         raw[0] = u8::from(self.axis1_mode) | u8::from(self.axis2_mode) << 4;
-        raw[1] = if self.axis1_enabled {1} else {0} | if self.axis2_enabled { 2 } else {0};
+        raw[1] = if self.axis1_enabled { 1 } else { 0 } | if self.axis2_enabled { 2 } else { 0 };
 
         Ok(Self::SIZE)
     }

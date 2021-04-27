@@ -1,5 +1,5 @@
-use core::convert::{TryFrom, TryInto};
 use crate::canopen::PDODeserializationError;
+use core::convert::{TryFrom, TryInto};
 
 /// `TxPDO1` represents the first Process Data Object sent by the device to the master.
 /// The PDO is reserved for general status information only.
