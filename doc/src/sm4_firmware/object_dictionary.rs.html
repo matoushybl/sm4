@@ -59,38 +59,38 @@
 
 <span class="doccomment">/// The object dictionary struct represents the global state of the driver</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectDictionary</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> {
     <span class="ident">battery_voltage</span>: <span class="ident">f32</span>,
     <span class="ident">temperature</span>: <span class="ident">f32</span>,
-    <span class="ident">axis1</span>: <span class="ident">AxisDictionary</span>,
-    <span class="ident">axis2</span>: <span class="ident">AxisDictionary</span>,
+    <span class="ident">axis1</span>: <span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span>,
+    <span class="ident">axis2</span>: <span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">ObjectDictionary</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">resolution</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">battery_voltage</span>: <span class="number">0.0</span>,
             <span class="ident">temperature</span>: <span class="number">0.0</span>,
-            <span class="ident">axis1</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(<span class="ident">resolution</span>),
-            <span class="ident">axis2</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(<span class="ident">resolution</span>),
+            <span class="ident">axis1</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(),
+            <span class="ident">axis2</span>: <span class="ident">AxisDictionary</span>::<span class="ident">new</span>(),
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ObjectDictionary</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis1</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">AxisDictionary</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis1</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">axis1</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis1_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AxisDictionary</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis1_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">axis1</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis2</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">AxisDictionary</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis2</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">axis2</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis2_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AxisDictionary</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">axis2_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AxisDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">axis2</span>
     }
 

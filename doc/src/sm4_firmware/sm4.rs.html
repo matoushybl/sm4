@@ -354,14 +354,6 @@
 <span id="351">351</span>
 <span id="352">352</span>
 <span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
-<span id="361">361</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">config</span>::{<span class="ident">CAN_ID</span>, <span class="ident">ENCODER_RESOLUTION</span>, <span class="ident">SENSE_R</span>};
@@ -382,7 +374,7 @@
     <span class="ident">usb</span>: <span class="ident">USBProtocol</span>,
     <span class="ident">can</span>: <span class="ident">CANOpen</span>,
     <span class="ident">monitoring</span>: <span class="ident">Monitoring</span>,
-    <span class="ident">state</span>: <span class="ident">DriverState</span>,
+    <span class="ident">state</span>: <span class="ident">DriverState</span><span class="op">&lt;</span>{ <span class="ident">ENCODER_RESOLUTION</span> }<span class="op">&gt;</span>,
     <span class="ident">axis1</span>: <span class="ident">Axis1</span>,
     <span class="ident">axis2</span>: <span class="ident">Axis2</span>,
 }
@@ -433,18 +425,18 @@
 
         <span class="kw">let</span> <span class="ident">axis1</span> <span class="op">=</span> <span class="ident">AxisMotionController</span>::<span class="ident">new</span>(
             <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer1</span>, <span class="ident">gpio</span>.<span class="ident">step1</span>, <span class="ident">gpio</span>.<span class="ident">dir1</span>, <span class="ident">ref1</span>, <span class="ident">SENSE_R</span>),
-            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim5</span>(<span class="ident">device</span>.<span class="ident">TIM5</span>, <span class="ident">sampling_period</span>, <span class="ident">ENCODER_RESOLUTION</span>),
+            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim5</span>(<span class="ident">device</span>.<span class="ident">TIM5</span>, <span class="ident">sampling_period</span>),
             <span class="ident">sampling_period</span>,
         );
         <span class="kw">let</span> <span class="ident">axis2</span> <span class="op">=</span> <span class="ident">AxisMotionController</span>::<span class="ident">new</span>(
             <span class="ident">TMC2100</span>::<span class="ident">new</span>(<span class="ident">timer2</span>, <span class="ident">gpio</span>.<span class="ident">step2</span>, <span class="ident">gpio</span>.<span class="ident">dir2</span>, <span class="ident">ref2</span>, <span class="ident">SENSE_R</span>),
-            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim2</span>(<span class="ident">device</span>.<span class="ident">TIM2</span>, <span class="ident">sampling_period</span>, <span class="ident">ENCODER_RESOLUTION</span>),
+            <span class="ident">StepCounterEncoder</span>::<span class="ident">tim2</span>(<span class="ident">device</span>.<span class="ident">TIM2</span>, <span class="ident">sampling_period</span>),
             <span class="ident">sampling_period</span>,
         );
 
         <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;init done&quot;</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">DriverState</span>::<span class="ident">new</span>(<span class="ident">ENCODER_RESOLUTION</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">DriverState</span>::<span class="ident">new</span>();
         <span class="ident">state</span>.<span class="ident">go_to_preoperational_if_needed</span>();
 
         <span class="self">Self</span> {
@@ -667,11 +659,7 @@
                         <span class="self">self</span>.<span class="ident">state</span>
                             .<span class="ident">object_dictionary</span>()
                             .<span class="ident">axis1_mut</span>()
-                            .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(
-                                <span class="ident">ENCODER_RESOLUTION</span>,
-                                <span class="ident">pdo</span>.<span class="ident">revolutions</span>,
-                                <span class="ident">pdo</span>.<span class="ident">angle</span> <span class="kw">as</span> <span class="ident">u16</span>,
-                            ));
+                            .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">revolutions</span>, <span class="ident">pdo</span>.<span class="ident">angle</span>));
                     } <span class="kw">else</span> {
                         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO3 received.&quot;</span>);
                     }
@@ -685,11 +673,7 @@
                         <span class="self">self</span>.<span class="ident">state</span>
                             .<span class="ident">object_dictionary</span>()
                             .<span class="ident">axis2_mut</span>()
-                            .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(
-                                <span class="ident">ENCODER_RESOLUTION</span>,
-                                <span class="ident">pdo</span>.<span class="ident">revolutions</span>,
-                                <span class="ident">pdo</span>.<span class="ident">angle</span> <span class="kw">as</span> <span class="ident">u16</span>,
-                            ));
+                            .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">revolutions</span>, <span class="ident">pdo</span>.<span class="ident">angle</span>));
                     } <span class="kw">else</span> {
                         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO4 received.&quot;</span>);
                     }

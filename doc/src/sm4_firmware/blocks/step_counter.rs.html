@@ -135,8 +135,6 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
@@ -148,18 +146,17 @@
     <span class="kw">fn</span> <span class="ident">reset_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>);
 }
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> {
     <span class="ident">timer</span>: <span class="ident">T</span>,
-    <span class="ident">past_position</span>: <span class="ident">Position</span>,
-    <span class="ident">current_position</span>: <span class="ident">Position</span>,
+    <span class="ident">past_position</span>: <span class="ident">Position</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span>,
+    <span class="ident">current_position</span>: <span class="ident">Position</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span>,
     <span class="ident">current_velocity</span>: <span class="ident">Velocity</span>,
     <span class="ident">direction</span>: <span class="ident">Direction</span>,
     <span class="ident">sampling_period</span>: <span class="ident">Microseconds</span>,
-    <span class="ident">resolution</span>: <span class="ident">u16</span>,
-    <span class="ident">past_value</span>: <span class="ident">u32</span>
+    <span class="ident">past_value</span>: <span class="ident">u32</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RESOLUTION</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Counter</span>,
 {
@@ -177,7 +174,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Encoder</span> <span class="kw">for</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RESOLUTION</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Counter</span>,
 {
@@ -185,14 +182,14 @@
         <span class="self">self</span>.<span class="ident">current_velocity</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Position</span> {
+    <span class="kw">fn</span> <span class="ident">get_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Position</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">current_position</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">reset_position</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Position</span> {
+    <span class="kw">fn</span> <span class="ident">reset_position</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Position</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">past</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_position</span>;
-        <span class="self">self</span>.<span class="ident">current_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="self">self</span>.<span class="ident">resolution</span>);
-        <span class="self">self</span>.<span class="ident">past_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="self">self</span>.<span class="ident">resolution</span>);
+        <span class="self">self</span>.<span class="ident">current_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>();
+        <span class="self">self</span>.<span class="ident">past_position</span> <span class="op">=</span> <span class="ident">Position</span>::<span class="ident">zero</span>();
         <span class="self">self</span>.<span class="ident">current_velocity</span> <span class="op">=</span> <span class="ident">Velocity</span>::<span class="ident">zero</span>();
         <span class="self">self</span>.<span class="ident">past_value</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">reset_value</span>();
@@ -220,8 +217,8 @@
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">counter</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tim</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ts</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">en</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rst</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">impl</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">tim</span><span class="op">&gt;</span> {
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new</span>(<span class="ident">timer</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tim</span>, <span class="ident">sampling_period</span>: <span class="ident">Microseconds</span>, <span class="ident">resolution</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">StepCounterEncoder</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">tim</span>, <span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">new</span>(<span class="ident">timer</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">tim</span>, <span class="ident">sampling_period</span>: <span class="ident">Microseconds</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="kw">unsafe</span> {
                     <span class="kw">let</span> <span class="ident">rcc</span> <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="ident">stm32</span>::<span class="ident">RCC</span>::<span class="ident">ptr</span>());
                     <span class="ident">rcc</span>.<span class="ident">apb1enr</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">en</span>().<span class="ident">enabled</span>());
@@ -250,12 +247,11 @@
                 <span class="self">Self</span> {
                     <span class="ident">timer</span>,
                     <span class="ident">direction</span>: <span class="ident">Direction</span>::<span class="ident">Clockwise</span>,
-                    <span class="ident">past_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="ident">resolution</span>),
-                    <span class="ident">current_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(<span class="ident">resolution</span>),
+                    <span class="ident">past_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(),
+                    <span class="ident">current_position</span>: <span class="ident">Position</span>::<span class="ident">zero</span>(),
                     <span class="ident">current_velocity</span>: <span class="ident">Velocity</span>::<span class="ident">zero</span>(),
                     <span class="ident">sampling_period</span>,
-                    <span class="ident">resolution</span>,
-                    <span class="ident">past_value</span>: <span class="number">0</span>
+                    <span class="ident">past_value</span>: <span class="number">0</span>,
                 }
             }
         }
