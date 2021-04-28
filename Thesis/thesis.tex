@@ -117,6 +117,11 @@
 
 \usepackage{epigraph}
 
+\usepackage[
+	backend=biber,
+	style=iso-numeric
+]{biblatex}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%      Definice informací o dokumentu             %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,6 +149,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%       Začátek dokumentu               %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\addbibresource{literatura.bib}
+
 \begin{document}
 \pagestyle{empty} %vypnutí číslování stránek
 
@@ -206,9 +214,10 @@
 \include{text/results}
 \include{text/conclusion}
 
-\bibliographystyle{unsrturl}
-\bibliography{text/literatura}
-\nocite{*}
+%\bibliographystyle{unsrturl}
+\printbibliography
+%\bibliography{text/literatura}
+%\nocite{*}
 
 \include{text/abbreviations}
 
