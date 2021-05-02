@@ -98,14 +98,14 @@ Microstepping is nowadays the prevalent way of stepper motor control as it allow
     \label{fig:microstepping}
 \end{figure}
 
-
 \subsection{Stepper motor driver IC comparison}
 \label{subsec:stepper_ic}
 In order to select a proper driver IC for the SM4 stepper motor controller a simplified comparison was performed.
-Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community for them and we wanted to secure silent function of the motor controller.
+Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{josef_prusa_original_2017,josef_prusa_original_2019,3daddict_stepper_2020}  for them and we wanted to secure silent function of the motor controller.
+With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100 as we aimed for as simple chip as possible, while the second hardware revision utilizes the TMC2226, which is a more modern, and fully featured stepper motor driver, which also has higher peak current.
+By selecting these two stepper driver ICs, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
 The comparison can be seen in the following table:
 
-% FIXME add info on the 2130 and 2209
 \begin{sidewaystable}
     \centering
     \begin{tabular}{ |p{2.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2.5cm}|p{2.5cm}|p{2cm}|p{4cm}| }
@@ -117,13 +117,13 @@ The comparison can be seen in the following table:
         \hline
         A4988\cite{allegro_microsystems_a4988_2014} & max 35~V & max 2 A & STEP/DIR & GPIO & up to 16 & QFN28ET & None \\
         \hline
-        TMC2100\cite{trinamic_tmc2100-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & GPIO & up to 256 & TQFP48 / QFN36 & MicroPlyer, SpreadCycle, StealthChop \\
+        TMC2100\cite{trinamic_tmc2100-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & GPIO & up to 256 & TQFP48 / QFN36 & MicroPlyer\texttrademark, SpreadCycle\texttrademark, StealthChop\texttrademark \\
         \hline
-        TMC2130\cite{trinamic_tmc2130-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & SPI & up to 256 & TQFP48 / QFN36 & MicroPlyer, SpreadCycle, StealthChop, ChopSync, CoolStep, StallGuard \\
+        TMC2130\cite{trinamic_tmc2130-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & SPI & up to 256 & TQFP48 / QFN36 & MicroPlyer, SpreadCycle\texttrademark, StealthChop\texttrademark, ChopSync\texttrademark, CoolStep\texttrademark, StallGuard\texttrademark \\
         \hline
-        TMC2209\cite{trinamic_tmc2209_2019} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & QFN28 & MicroPlyer, SpreadCycle, StealthChop2, CoolStep, StallGuard4 \\
+        TMC2209\cite{trinamic_tmc2209_2019} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & QFN28 & MicroPlyer\texttrademark, SpreadCycle\texttrademark, StealthChop2\texttrademark, CoolStep\texttrademark, StallGuard4\texttrademark \\
         \hline
-        TMC2226\cite{trinamic_tmc2226_2020} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & HTSSOP28 & MicroPlyer, SpreadCycle, StealthChop2, CoolStep, StallGuard4 \\
+        TMC2226\cite{trinamic_tmc2226_2020} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & HTSSOP28 & MicroPlyer\texttrademark, SpreadCycle, StealthChop2\texttrademark, CoolStep\texttrademark, StallGuard4\texttrademark \\
         \hline
     \end{tabular}
     \caption{Comparison of stepper motor driver ICs}
@@ -132,4 +132,78 @@ The comparison can be seen in the following table:
 \newpage
 \subsection{Trinamic motion control technologies}
 \label{subsec:trinamic_tech}
+Since we decided to utilize the Trinamic driver ICs and their stepper control technologies, it is vital to describe these technologies as they have immediate impact on the driver performance and properties.
 
+\subsubsection{MicroPlyer\texttrademark}
+MicroPlyer\texttrademark is a microstepping interpolator.
+The reason for the interpolator is that the drivers feature 256 microsteps per step and generating the stepping signal would be impractical if not impossible for some systems.
+The driver is configured with the number of microsteps that the driver will consider a full step and the MicroPlyer\texttrademark interpolates the rest of the microsteps up to the 256 microsteps per step\cite{trinamic_microstepping_nodate}.
+
+\subsubsection{Voltage Chopper Modes - SpreadCycle\texttrademark, StealthChop\texttrademark}
+In order to define chopper modes, we first need to define the current control modes for a bipolar stepper motor.
+The current control modes are the ON-phase, fast decay and slow decay.
+These modes can be seen in the Figure~\ref{fig:current_phases}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/winding_modes}
+    \caption{Stepper motor winding control modes~\cite{trinamic_chopper_nodate}.}
+    \label{fig:current_phases}
+\end{figure}
+
+The current in the winding is controlled using voltage choppers.
+First, a very high voltage is applied to the winding, which causes current rise in the winding, when the current exceeds specific limit, the voltage is chopped (turned off).
+When the current drops below a specified limit, the very high voltage is turned back on.
+Using this approach, it is possible to maintain a relatively constant current in the winding\cite{trinamic_chopper_nodate}.
+
+When using a Constant T\_OFF Current Chopper, the basic chopper principle is enhanced by first, energizing the winding, then utilizing fast-decay and then slow decay.
+This is a commonly used chopper mode as it is quite simple, but it causes motor vibration, and the high pitch noise.
+This problem is caused by the relationship between the fast decay and slow decay phase, resulting in the average current being lower than the desired target.
+This means that there are moments when the motor has no torque, which in turn causes vibrations\cite{trinamic_chopper_nodate}.
+The graph showing the winding current in time can be seen in the Figure~\ref{fig:t_off_chopper}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/t_off_chopper}
+    \caption{Constant T\_OFF Chopper Mode~\cite{trinamic_chopper_nodate}.}
+    \label{fig:t_off_chopper}
+\end{figure}
+
+The SpreadCycle\texttrademark current chopper is an improvement over the Constant T\_OFF Current chopper.
+According to Trinamic, it automatically applies a fitting relation between slow decay and fast decay to create the optimal fast decay for that cycle\cite{trinamic_chopper_nodate}.
+This technique leads to the average current matching the target current and the current wave resembles sine wave.
+This technology also remains effective at higher RPMs, where the classic constant T\_OFF Chopper shows current deformations\cite{trinamic_chopper_nodate}.
+The current in time can be seen in the Figure~\ref{fig:spread_cycle}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/spread_cycle}
+    \caption{The SpreadCycle\texttrademark Mode current graph~\cite{trinamic_chopper_nodate}.}
+    \label{fig:spread_cycle}
+\end{figure}
+
+StealthChop\texttrademark is the most advanced voltage chopper technology Trinamic drivers provide.
+The chopper completely silences stepper motors by eliminating the noise cause by unsynchronized motor coil chopper operation, PWM jitter and regulation noise at the sense resistors\cite{trinamic_chopper_nodate}.
+The chopper modulates the current using the PWM duty cycle, which minimizes the current ripple\cite{trinamic_chopper_nodate}.
+Adjusting the PWM duty cycle also results in a perfect current sine wave and minimizing the current ripple minimizes Eddy currents in the stator, which in turn leads to less power loss and increase efficiency\cite{trinamic_chopper_nodate}.
+
+
+\subsubsection{StallGuard\texttrademark}
+The StallGuard\texttrademark technology utilizes the back EMF (ElectroMotive Force) to analyze the load of the motor.
+This provides the drivers with a sensorless load measurement.
+This technology may be utilized for sensorless homing, self-calibration or distance measurement.
+The StallGuard\texttrademark technology also prevents step loss when the axis is obstructed\cite{trinamic_trinamic_nodate}.
+
+\subsubsection{CoolStep\texttrademark}
+CoolStep\texttrademark is a technology that adjusts the motor current based on the feedback provided by the StallGuard\texttrademark technology.
+This technology always drives the motor at the minimum required current sufficient for driving the actual load.
+That leads to reduced current consumption and also reduces heat generation.
+The technology also allows for temporary current boosts.
+An example of the dependency on the motor current on the load torque can be seen in the Figure~\ref{fig:torque_current}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/Trinamic_CoolStep}
+    \caption{The Trinamic CoolStep\texttrademark technology~\cite{trinamic_trinamic_nodate}.}
+    \label{fig:torque_current}
+\end{figure}

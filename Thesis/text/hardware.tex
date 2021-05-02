@@ -35,66 +35,11 @@ This MCU conforms to all of the requirement and has enough peripherals to suppor
 \label{subsubsec:stepper_driver}
 As per the requirements \textbf{C-01} and \textbf{C-02}, the stepper driver shall be able to drive stepper motors with current of up to 2A and feature silent operation.
 We decided to use the stepper motor driver ICs developed by Trinamic.
-These drivers are nowadays being used for motion control of 3D printers~\cite{prusa_trinamic} and allow for silent operation with their StealthChop technology.
+These drivers are nowadays being used for motion control of 3D printers~\cite{josef_prusa_original_2017, josef_prusa_original_2019} and allow for silent operation with their StealthChop\texttrademark technology.
 When selecting the driver ICs there were different priorities in mind - first the package should be solderable by hand, secondly with the first revision of the SM4 stepper motor controller we aimed for the ability to power the drivers via a 10-cell Li-Ion power pack, which required maximal input voltage of more than 42 Volts.
-The first hardware revision features the TMC2100-TA driver IC, whose main features are shown in the Table~\ref{tab:tmc2100_param}.
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{ |p{5cm}|p{7cm}| }
-        \hline
-        Parameter & Value \\
-        \hline
-        \hline
-        Motor supply voltage & 5-46 V \\
-        \hline
-        Microsteps & up to 256 \\
-        \hline
-        Control interface & Step/Dir \\
-        \hline
-        Configuration interface & GPIO \\
-        \hline
-        Phase current (RMS) & 1.4 A \\
-        \hline
-        Advanced stepper control technologies & MicroPlyer, SpreadCycle, StealthChop \\
-        \hline
-        Package & eTQFP48 \\
-        \hline
-    \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2100-TA driver IC~\cite{trinamic_tmc2100-datasheet_2018}.}
-    \label{tab:tmc2100_param}
-\end{table}
-
-
+The first hardware revision features the TMC2100-TA driver IC.
 With the second hardware revision, the priorities have shifted and higher phase current was required (\textbf{C-01}) even at the expense of the supply voltage.
-The second hardware revision features the TMC2226-SA driver IC, whose properties are shown in the Table~\ref{tab:tmc2226_param}.
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{ |p{5cm}|p{7cm}| }
-        \hline
-        Parameter & Value \\
-        \hline
-        \hline
-        Motor supply voltage & 4.75-29 V \\
-        \hline
-        Microsteps & up to 256 \\
-        \hline
-        Control interface & Step/Dir or UART \\
-        \hline
-        Configuration interface & UART \\
-        \hline
-        Phase current (RMS) & 2.0 A \\
-        \hline
-        Advanced stepper control technologies & MicroPlyer, CoolStep, SpreadCycle, StealthChop2, StallGuard4 \\
-        \hline
-        Package & HTSSOP28 \\
-        \hline
-    \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2226-SA driver IC~\cite{trinamic_tmc2226_2020}.}
-    \label{tab:tmc2226_param}
-\end{table}
-
+The second hardware revision features the TMC2226-SA driver IC.
 
 % TODO read and refactor
 \subsubsection{SM4 stepper driver power design}
