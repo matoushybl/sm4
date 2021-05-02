@@ -18,19 +18,19 @@ The internal communication interfaces are revision dependent, however the steppe
 As was described in the Chapter on Related work~\ref{ch:related_work}, we decided to make the move from Cortex-M0 and Cortex-M0+ based ARM MCUs to more powerful Cortex-M4 MCUs.
 The biggest advantage of these cores is that they fully support atomic instructions, improving memory safety in ISRs, and also that they have FPU (Floating Point Unit).
 
-Given the past experience with STM32 family of ARM microcontrollers, we decided to select the STM32F4 product line, more specifically with the STM32F405RGT6 which features one megabyte of flash and 192 kilobytes of RAM and can be run with the 168 MHz clock\cite{noauthor_stm32f405rg_nodate}.
+Given the past experience with STM32 family of ARM microcontrollers, we decided to select the STM32F4 product line, more specifically with the STM32F405RGT6 which features one megabyte of flash and 192 kilobytes of RAM and can be run with the 168 MHz clock\cite{stmicro_stm32f405rg_nodate}.
 The block diagram of the MCU with the core features and peripherals can be seen in the Figure~\ref{fig:stm32f405_block_diagram}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{obrazky/stm32f405_block_diagram}
-    \caption{The block diagram of the STM32F405RG MCU~\cite{noauthor_stm32f405rg_nodate}.}
+    \caption{The block diagram of the STM32F405RG MCU~\cite{stmicro_enbd_stm32f405_1mbjpg_nodate}.}
     \label{fig:stm32f405_block_diagram}
 \end{figure}
 
 This MCU conforms to all of the requirement and has enough peripherals to support future development.
 
-% Stepper Driver selection
+% FIXME reference Stepper Driver ic comparison
 \subsubsection{Stepper driver}
 \label{subsubsec:stepper_driver}
 As per the requirements \textbf{C-01} and \textbf{C-02}, the stepper driver shall be able to drive stepper motors with current of up to 2A and feature silent operation.
@@ -61,7 +61,7 @@ The first hardware revision features the TMC2100-TA driver IC, whose main featur
         Package & eTQFP48 \\
         \hline
     \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2100-TA driver IC~\cite{noauthor_tmc2100_nodate}.}
+    \caption{Main parameters of the Trinamic TMC2100-TA driver IC~\cite{trinamic_tmc2100-datasheet_2018}.}
     \label{tab:tmc2100_param}
 \end{table}
 
@@ -91,11 +91,10 @@ The second hardware revision features the TMC2226-SA driver IC, whose properties
         Package & HTSSOP28 \\
         \hline
     \end{tabular}
-    \caption{Main parameters of the Trinamic TMC2226-SA driver IC~\cite{tmc_2226}.}
+    \caption{Main parameters of the Trinamic TMC2226-SA driver IC~\cite{trinamic_tmc2226_2020}.}
     \label{tab:tmc2226_param}
 \end{table}
 
-% TODO describe motion control technologies from Trinamic
 
 % TODO read and refactor
 \subsubsection{SM4 stepper driver power design}
