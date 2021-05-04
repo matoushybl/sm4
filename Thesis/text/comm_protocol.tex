@@ -5,8 +5,8 @@ This section aims to give a brief overview into these communication interfaces a
 
 \subsection{CANOpen}
 \label{subsec:canopen}
-
-
+In this subsection, first the CAN bus physical and data link layer is described.
+Secondly, the CANOpen protocol is described alongside with what was implemented for the SM4 motor controller.
 
 % TODO cite
 \subsubsection{CAN bus}
@@ -34,6 +34,64 @@ The structure of a CAN frame can be seen in the Figure~\ref{fig:can_frame}.
 
 An important bit for CANOpen is the RTR bit, which stands for Remote Transmission Request, when this bit is recessive, there are no data contained in the frame and the frame asks the remote device for data.
 As can be seen in the figure, the identifier and the RTR field are part of an Arbitration field, these bytes are used in the shared medium collision detection and control and thanks to this field, frames with lower id have higher priority in the transmission.
+
+\subsection{Object Dictionary}
+\label{subsec:object_dictionary}
+In a CANOpen device, the Object Dictionary contains the global shared state of a device.
+This means that the software responsible for communicating over CANOpen protocols sends data available in the Object Dictionary and writes to it the data it receives.
+On the other side, the Object Dictionary serves as a data source for the algorithms and systems running on the device itself.
+There are two numbers used to access the values in the Object Dictionary - first the Index - a 16 bit unsigned value, and the SubIndex - an 8 bit unsigned value.
+Some of the Index ranges are reserved by the CANOpen specification for predefined parameters such as communication settings, while other Index ranges contain application specific parameters\cite{cia}.
+
+\subsection{CANOpen protocols}
+\label{subsec:canopen_proto}
+CANOpen is a set of higher level protocols based on the CAN bus physical and link layer.
+These provide standardized communication objects (COBs) with specific identifiers (IDs) for time critical processes, communication and network management\cite{cia}.
+The most important parts CANOpen protocol are the SYNC protocol, the PDO protocol, the SDO protocol and the NMT protocol.
+Another protocols are the EMCY protocol, TimeStamp protocol and LSS protocol.
+Every device in a CANOpen network is assigned with a unique ID.
+Within the CANOpen protocols, the CAN frames sent to device either target specific device or all of them.
+The frames that target specific devices contain the identifier of the frame (e.g.PDO CAN ID) bit-ored with the device ID.
+
+\subsubsection{SYNC protocol}
+The SYNC protocol is responsible for synchronizing the communication on the bus.
+It initiates the transfer by sending a CAN frame with the identifier \textbf{0x80}, after which every device on the bus sends/receives synchronous data objects, such as PDOs (Process Data Units).
+The CAN frame can also contain a single byte containing SYNC number, that can be utilized to conditionally send synchronous data or for more granular synchronization\cite{cia}.
+SYNC message is generally sent periodically.
+
+\subsubsection{PDO protocol}
+Process Data Objects (PDOs) are used for broadcasting high-priority status and control information\cite{cia}.
+Each PDO consists of a single CAN bus frame and can contain up-to 8 bytes of data.
+The contents of the PDO can be set in some devices according to the specific application needs using a technique called PDO mapping where PDO data are mapped to Object Dictionary fields.
+There are three mechanisms used to transmit PDOs asynchronous PDOs can be sent upon an event trigger in the device.
+Asynchronous PDOs can also be remotely requested using the RTR bit in the CAN frame.
+Synchronous PDOs are broadcasted as a reaction to the SYNC protocol.
+There are two types of PDOs - RxPDOs and TxPDOs, the RxPDOs are the PDOs that are received by the target device, while the TxPDOs are the PDOs that are transmitted by the target device.
+There are four available RxPDOs and four available TxPDOs, each PDO has a CAN ID assigned as can be seen in the Table~\ref{tab:pdo}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |c|c|c| }
+        \hline
+        PDO & RxPDO CAN ID & TxPDO CAN ID \\
+        \hline
+        \hline
+        PDO1 & 0x200 & 0x180 \\
+        \hline
+        PDO2 & 0x300 & 0x280 \\
+        \hline
+        PDO3 & 0x400 & 0x380 \\
+        \hline
+        PDO4 & 0x500 & 0x480 \\
+        \hline
+    \end{tabular}
+    \caption{RxPDO and TxPDO CAN IDs\cite{wiki_canopen}}
+    \label{tab:pdo}
+\end{table}
+
+\subsubsection{SDO protocol}
+
+\subsubsection{NMT protocol}
 
 \subsection{I2C}
 \label{subsec:i2c}
