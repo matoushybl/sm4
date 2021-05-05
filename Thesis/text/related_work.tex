@@ -12,13 +12,12 @@ It is used primarily by the students of the BPC-PRP course for driving a simple 
 The controller utilizes an ATMega8 paired with two stepper motor controllers DRV8825, that are utilized in the form of breakout boards generally used in the now obsolete RAMPS boards.
 The motor controller is controlled using the I\textsuperscript{2}C bus.
 There are two major shortcomings of the driver - the used controller's I\textsuperscript{2}C peripheral's clock-stretching is not compatible with Raspberry Pi's, causing problems on clock speeds higher than 30 kHz.
-The second shortcoming are the used driver chips, that are quite loud and do not support contemporary advanced features.
-The boards for 3D printers are also reportedly not well designed and they may \hl{overheat}~\cite{prusa_rambo}.
+The second shortcoming are the used driver chips, that are quite loud and do not support contemporary advanced features, overheating is also common with them.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{obrazky/km2render}
-    \caption{KM2 motor controller render~\cite{frantisek_burian_km2renderpng_nodate}.}
+    \caption{KM2 motor controller render~\cite{burian_km2renderpng_nodate}.}
     \label{fig:km2render}
 \end{figure}
 
@@ -31,7 +30,7 @@ Even though the new MCU was an improvement over the ATMega8, it proved to be the
 For example, the lack of pins made it impossible to directly generate pulses to control the STEP/DIR interface of the motor drivers chip and the control had therefore be done manually in software.
 Also the fact, that the MCU utilizes a Cortex-M0 core means that the support for atomic instructions mis missing, making it hard to work with guarantees about memory safety in cases of interrupt routine being called during memory manipulation
 
-We developed the Rust firmware~\cite{matous_hybl_robotics-butkm3-rs_2020} for this board and concluded that the board and its design may be suitable for the students' robot projects, but it is way too limited to be used in more serious projects.
+We developed the Rust firmware~\cite{hybl_robotics-butkm3-rs_2020} for this board and concluded that the board and its design may be suitable for the students' robot projects, but it is way too limited to be used in more serious projects.
 We also concluded that the hardware used is now overcome and the development of this board shall not be further pursued as the technology it's been designed upon as well as its goals have been considered obsolete.
 
 \begin{figure}[H]
@@ -82,7 +81,7 @@ If there was a semestral thesis and preliminary market research preceeding this 
 
 \section{Flott}
 \label{sec:flott}
-Flott is a set of libraries suitable for developing motion controllers in the Rust programming language\cite{hanno_braun_flott_nodate}.
+Flott is a set of libraries suitable for developing motion controllers in the Rust programming language\cite{braun_flott_nodate}.
 It is a relatively new project, but as of now, it contains an abstraction layer for stepper motors and acceleration ramp generator.
 The project is taking a different approach to controlling stepper motors as we are.
 It aims to utilize software pulse generation instead of timers and uses variable step period in ramp generation.

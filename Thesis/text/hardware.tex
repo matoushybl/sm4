@@ -35,7 +35,7 @@ This MCU conforms to all of the requirement and has enough peripherals to suppor
 \label{subsubsec:stepper_driver}
 As per the requirements \textbf{C-01} and \textbf{C-02}, the stepper driver shall be able to drive stepper motors with current of up to 2A and feature silent operation.
 We decided to use the stepper motor driver ICs developed by Trinamic.
-These drivers are nowadays being used for motion control of 3D printers~\cite{josef_prusa_original_2017, josef_prusa_original_2019} and allow for silent operation with their StealthChop\texttrademark technology.
+These drivers are nowadays being used for motion control of 3D printers~\cite{prusa_original_2017, prusa_original_2019} and allow for silent operation with their StealthChop\texttrademark technology.
 When selecting the driver ICs there were different priorities in mind - first the package should be solderable by hand, secondly with the first revision of the SM4 stepper motor controller we aimed for the ability to power the drivers via a 10-cell Li-Ion power pack, which required maximal input voltage of more than 42 Volts.
 The first hardware revision features the TMC2100-TA driver IC.
 With the second hardware revision, the priorities have shifted and higher phase current was required (\textbf{C-01}) even at the expense of the supply voltage.
@@ -61,7 +61,7 @@ The output of the filtered power rail is merged with a 5~V power coming from the
 For powering the MCU with 3.3~V, the 5~V is regulated with an LDO (Low-Dropout) regulator.
 The whole power rail can be seen in the schematic in the Figure~\ref{fig:power}.
 
-In the future revisions, the input protection circuits may be replaced by an eFuse\cite{efuse_great_scott}\cite{efuse}, an IC integrating the input power protection circuits such as overvoltage protection, undervoltage protection, overcurrent protection and reverse-voltage protection.
+In the future revisions, the input protection circuits may be replaced by an eFuse\cite{greatscott_best_2021,texas_instruments_efuse_2021}, an IC integrating the input power protection circuits such as overvoltage protection, undervoltage protection, overcurrent protection and reverse-voltage protection.
 
 \begin{figure}[H]
     \centering

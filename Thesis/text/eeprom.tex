@@ -10,7 +10,7 @@ In order to save space on the PCB, save cost, and better utilize the MCU resourc
 Even though the flash memory may seem straightforward to use since they are ubiquitous, their low level use is not that simple.
 A flash memory is generally divided into sectors, that can be several kilobytes or megabytes large.
 These sectors can be electrically erased - which means that every bit in the sector is set to 1.
-Depending on the memory a word of a specific size can be programmed, but it is only possible to flip the bits in the word to zero~\cite{pablo_mansanet_ecorax_nodate}.
+Depending on the memory a word of a specific size can be programmed, but it is only possible to flip the bits in the word to zero~\cite{mansanet_ecorax_nodate, mansanet_ecorax_nodate-1}.
 That means that to write a higher number to the word of the memory, the flash needs to be first erased and then programmed.
 This is problematic for two reasons:
 \begin{enumerate}
@@ -57,7 +57,7 @@ The solution to this problem is by leaving the first sector (Sector 0) for the v
 According to the documentation of the \textbf{cortex-m} Rust crate~\cite{rust_embedded_wg_rust-embeddedcortex-m-rt_nodate}, this can be achieved by adding the line \textbf{\_stext = ORIGIN(FLASH) + OFFSET} to the linker script, where the \textbf{OFFSET} shall be replaced with the offset of the target sector where we want our program to be stored, in our case \textbf{0x0000C000}, which indicates the start of the Sector 3.
 
 As for the actual implementation of the emulation for the STM32F405, we decided to develop our own, as no suitable Rust crate was available for it.
-The development was inspired by a crate that implemented the emulation for STM32F103~\cite{crate_f103_eeprom} and by following the implementation in the Application Note.
+The development was inspired by a crate that implemented the emulation for STM32F103~\cite{dubrov_idubroveeprom_2020} and by following the implementation in the Application Note.
 The functions from flash memory access were adopted from an as of the time of writing unmerged Pull Request into the STM32F4 HAL~\cite{astro_implement_2020}.
 An example of accessing the emulated persistent storage can be seen in the following Listing~\ref{lst:eeprom}.
 

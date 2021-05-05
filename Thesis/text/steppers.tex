@@ -4,7 +4,7 @@ This section gives a brief introduction into stepper motors and their control.
 First, stepper motors and their types are described.
 Then, a comparison of stepper driver ICs is given and some of the motion control technologies by Trinamic are described.
 
-Stepper motors are a type of DC motors which move in discrete steps\cite{bill_earl_all_nodate,carmine_fiore_stepper_2021}.
+Stepper motors are a type of DC motors which move in discrete steps\cite{earl_all_nodate,carmine_fiore_stepper_2021}.
 Such movement is achieved by their construction - they consist of a stator and a rotor, where the stator is made of coils
 (two coils form a phase) wound on ridges, whereas the rotor consists is a ferromagnetic structure - either a permanent
 magnet or a variable reluctance iron core\cite{carmine_fiore_stepper_2021}.
@@ -101,7 +101,7 @@ Microstepping is nowadays the prevalent way of stepper motor control as it allow
 \subsection{Stepper motor driver IC comparison}
 \label{subsec:stepper_ic}
 In order to select a proper driver IC for the SM4 stepper motor controller a simplified comparison was performed.
-Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{josef_prusa_original_2017,josef_prusa_original_2019,3daddict_stepper_2020}  for them and we wanted to secure silent function of the motor controller.
+Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{prusa_original_2017,prusa_original_2019,3daddict_stepper_2020}  for them and we wanted to secure silent function of the motor controller.
 With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100 as we aimed for as simple chip as possible, while the second hardware revision utilizes the TMC2226, which is a more modern, and fully featured stepper motor driver, which also has higher peak current.
 By selecting these two stepper driver ICs, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
 The comparison can be seen in the following table:
