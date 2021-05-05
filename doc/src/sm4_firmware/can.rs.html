@@ -283,12 +283,12 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="ident">CANOpenMessage</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="ident">CANOpenMessage</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">Frame</span>::<span class="ident">new_data</span>(
             <span class="ident">message</span>.<span class="ident">message_id_with_device</span>(<span class="self">self</span>.<span class="ident">id</span>),
             <span class="ident">Data</span>::<span class="ident">new</span>(<span class="ident">data</span>).<span class="ident">unwrap</span>(),
         );
-        <span class="ident">nb</span>::<span class="macro">block</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">bus</span>.<span class="ident">transmit</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">unwrap</span>()
+        <span class="self">self</span>.<span class="ident">bus</span>.<span class="ident">transmit</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 }
 

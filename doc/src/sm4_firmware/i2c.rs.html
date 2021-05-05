@@ -285,513 +285,291 @@
 <span id="282">282</span>
 <span id="283">283</span>
 <span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
-<span id="361">361</span>
-<span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
-<span id="365">365</span>
-<span id="366">366</span>
-<span id="367">367</span>
-<span id="368">368</span>
-<span id="369">369</span>
-<span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-<span id="373">373</span>
-<span id="374">374</span>
-<span id="375">375</span>
-<span id="376">376</span>
-<span id="377">377</span>
-<span id="378">378</span>
-<span id="379">379</span>
-<span id="380">380</span>
-<span id="381">381</span>
-<span id="382">382</span>
-<span id="383">383</span>
-<span id="384">384</span>
-<span id="385">385</span>
-<span id="386">386</span>
-<span id="387">387</span>
-<span id="388">388</span>
-<span id="389">389</span>
-<span id="390">390</span>
-<span id="391">391</span>
-<span id="392">392</span>
-<span id="393">393</span>
-<span id="394">394</span>
-<span id="395">395</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="comment">// use stm32f4xx_hal::i2c::{Instance, PinScl, PinSda};</span>
-<span class="comment">// use stm32f4xx_hal::stm32::RCC;</span>
+<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">i2c</span>::{<span class="ident">Instance</span>, <span class="ident">PinScl</span>, <span class="ident">PinSda</span>};
+<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>::<span class="ident">RCC</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TransferState</span> {
+    <span class="ident">Idle</span>,
+    <span class="ident">Addressed</span>,
+    <span class="ident">RegisterSet</span>,
+    <span class="ident">Receiving</span>,
+    <span class="ident">Transmitting</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">State</span> {
+    <span class="ident">DataRequested</span>(<span class="ident">u8</span>),
+    <span class="ident">DataReceived</span>(<span class="ident">u8</span>),
+}
+
+<span class="comment">// direction as specified in the datasheet</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Direction</span> {
+    <span class="ident">Write</span>, <span class="comment">// slave is receiver</span>
+    <span class="ident">Read</span>,  <span class="comment">// slave is transmitter</span>
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Direction</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">dir</span>: <span class="ident">Direction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">match</span> <span class="ident">dir</span> {
+            <span class="ident">Direction</span>::<span class="ident">Write</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="ident">Direction</span>::<span class="ident">Read</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Direction</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">raw</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="ident">raw</span> {
+            <span class="ident">Direction</span>::<span class="ident">Read</span>
+        } <span class="kw">else</span> {
+            <span class="ident">Direction</span>::<span class="ident">Write</span>
+        }
+    }
+}
+
+<span class="kw">const</span> <span class="ident">BUFFER_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">32</span>;
 <span class="comment">//</span>
-<span class="comment">// #[derive(PartialEq)]</span>
-<span class="comment">// pub enum TransferState {</span>
-<span class="comment">//     Idle,</span>
-<span class="comment">//     Addressed,</span>
-<span class="comment">//     RegisterSet,</span>
-<span class="comment">//     Receiving,</span>
-<span class="comment">//     Transmitting,</span>
-<span class="comment">// }</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">I2CSlave</span><span class="op">&lt;</span><span class="ident">I2C</span>: <span class="ident">Instance</span>, <span class="ident">SDA</span>, <span class="ident">SCL</span><span class="op">&gt;</span> {
+    <span class="ident">i2c</span>: <span class="ident">I2C</span>,
+    <span class="ident">transfer_buffer</span>: [<span class="ident">u8</span>; <span class="ident">BUFFER_SIZE</span>],
+    <span class="ident">transfer_len</span>: <span class="ident">usize</span>,
+    <span class="ident">buffer_index</span>: <span class="ident">usize</span>,
+    <span class="ident">register</span>: <span class="ident">u8</span>,
+    <span class="ident">transfer_state</span>: <span class="ident">TransferState</span>,
+    <span class="ident">state</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
+    <span class="ident">_sda</span>: <span class="ident">SDA</span>,
+    <span class="ident">_scl</span>: <span class="ident">SCL</span>,
+}
 <span class="comment">//</span>
-<span class="comment">// #[derive(Copy, Clone)]</span>
-<span class="comment">// pub enum State {</span>
-<span class="comment">//     DataRequested(u8),</span>
-<span class="comment">//     DataReceived(u8),</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// // direction as specified in the datasheet</span>
-<span class="comment">// #[derive(PartialEq)]</span>
-<span class="comment">// pub enum Direction {</span>
-<span class="comment">//     Write, // slave is receiver</span>
-<span class="comment">//     Read,  // slave is transmitter</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// impl From&lt;Direction&gt; for bool {</span>
-<span class="comment">//     fn from(dir: Direction) -&gt; Self {</span>
-<span class="comment">//         match dir {</span>
-<span class="comment">//             Direction::Write =&gt; false,</span>
-<span class="comment">//             Direction::Read =&gt; true,</span>
-<span class="comment">//         }</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// impl From&lt;bool&gt; for Direction {</span>
-<span class="comment">//     fn from(raw: bool) -&gt; Self {</span>
-<span class="comment">//         if raw {</span>
-<span class="comment">//             Direction::Read</span>
-<span class="comment">//         } else {</span>
-<span class="comment">//             Direction::Write</span>
-<span class="comment">//         }</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// pub enum Status {</span>
-<span class="comment">//     AddressMatch(Direction),</span>
-<span class="comment">//     Busy,</span>
-<span class="comment">//     Timeout,</span>
-<span class="comment">//     Overrun,</span>
-<span class="comment">//     ArbitrationLost,</span>
-<span class="comment">//     BusError,</span>
-<span class="comment">//     TransferCompleteReload,</span>
-<span class="comment">//     Stop,</span>
-<span class="comment">//     NACKReceived,</span>
-<span class="comment">//     RxNotEmpty,</span>
-<span class="comment">//     TxDataMustBeWritten,</span>
-<span class="comment">//     TxEmpty,</span>
-<span class="comment">// }</span>
-<span class="comment">// const BUFFER_SIZE: usize = 32;</span>
-<span class="comment">//</span>
-<span class="comment">// pub struct I2CSlave&lt;I2C: Instance, SDA, SCL&gt; {</span>
-<span class="comment">//     i2c: I2C,</span>
-<span class="comment">//     transfer_buffer: [u8; BUFFER_SIZE],</span>
-<span class="comment">//     transfer_len: usize,</span>
-<span class="comment">//     buffer_index: usize,</span>
-<span class="comment">//     register: u8,</span>
-<span class="comment">//     transfer_state: TransferState,</span>
-<span class="comment">//     state: Option&lt;State&gt;,</span>
-<span class="comment">//     _sda: SDA,</span>
-<span class="comment">//     _scl: SCL,</span>
-<span class="comment">// }</span>
-<span class="comment">//</span>
-<span class="comment">// impl&lt;I2C: Instance, SDA, SCL&gt; I2CSlave&lt;I2C, SDA, SCL&gt;</span>
-<span class="comment">// where</span>
-<span class="comment">//     SDA: PinSda&lt;I2C&gt;,</span>
-<span class="comment">//     SCL: PinScl&lt;I2C&gt;,</span>
-<span class="comment">// {</span>
-<span class="comment">//     pub fn new(i2c: I2C, address: u8, sda: SDA, scl: SCL) -&gt; Self {</span>
-<span class="comment">//         // RCC init taken from https://github.com/stm32-rs/stm32f4xx-hal/blob/bb160bbe8604bccf28557975131d0afdb2fa1014/src/i2c.rs#L723</span>
-<span class="comment">//         unsafe {</span>
-<span class="comment">//             // NOTE(unsafe) this reference will only be used for atomic writes with no side effects.</span>
-<span class="comment">//             let rcc = &amp;(*RCC::ptr());</span>
-<span class="comment">//</span>
-<span class="comment">//             // Enable and reset clock.</span>
-<span class="comment">//             I2C::enable_clock(&amp;rcc);</span>
-<span class="comment">//         }</span>
-<span class="comment">//</span>
-<span class="comment">//         i2c.cr1.write(|w| {</span>
-<span class="comment">//             w.nostretch().enabled() // enable clock stretching</span>
-<span class="comment">//                                     // .anfoff()</span>
-<span class="comment">//                                     // .enabled() // enable analog filter</span>
-<span class="comment">//                                     // .dnf()</span>
-<span class="comment">//                                     // .no_filter() // disable digital filter</span>
-<span class="comment">//                                     // .errie()</span>
-<span class="comment">//                                     // .enabled() // error interrupt enabled</span>
-<span class="comment">//                                     // // .tcie()</span>
-<span class="comment">//                                     // // .enabled() // transmission complete interrupt enabled</span>
-<span class="comment">//                                     // .stopie()</span>
-<span class="comment">//                                     // .enabled() // stop interrupt enabled</span>
-<span class="comment">//                                     // .nackie()</span>
-<span class="comment">//                                     // .enabled() // nack interrupt enabled</span>
-<span class="comment">//                                     // .addrie()</span>
-<span class="comment">//                                     // .enabled() // address match interrupt enabled</span>
-<span class="comment">//                                     // .rxie() // rx interrupt enabled</span>
-<span class="comment">//                                     // .enabled()</span>
-<span class="comment">//                                     // // .txie() // tx interrupt enabled</span>
-<span class="comment">//                                     // // .enabled()</span>
-<span class="comment">//                                     // .wupen()</span>
-<span class="comment">//                                     // .enabled() // wake up when address match</span>
-<span class="comment">//         });</span>
-<span class="comment">//</span>
-<span class="comment">//         // decide about using sbc with nbytes</span>
-<span class="comment">//         // set up timing for nostretch mode</span>
-<span class="comment">//</span>
-<span class="comment">//         // let scll = cmp::max((((48_000_000 &gt;&gt; 1) &gt;&gt; 1) / KiloHertz(100).0) - 1, 255) as u8;</span>
-<span class="comment">//         // i2c.timingr.write(|w| {</span>
-<span class="comment">//         //     w.presc()</span>
-<span class="comment">//         //         .bits(1)</span>
-<span class="comment">//         //         .scldel()</span>
-<span class="comment">//         //         .bits(4)</span>
-<span class="comment">//         //         .sdadel()</span>
-<span class="comment">//         //         .bits(2)</span>
-<span class="comment">//         //         .sclh()</span>
-<span class="comment">//         //         .bits(scll - 4)</span>
-<span class="comment">//         //         .scll()</span>
-<span class="comment">//         //         .bits(scll)</span>
-<span class="comment">//         // });</span>
-<span class="comment">//</span>
-<span class="comment">//         i2c.oar1</span>
-<span class="comment">//             .write(|w| w.addmode().add7().add().bits((address as u16) &lt;&lt; 1));</span>
-<span class="comment">//</span>
-<span class="comment">//         i2c.cr1.modify(</span>
-<span class="comment">//             |_, w| w.pe().enabled(), // enable peripheral</span>
-<span class="comment">//         );</span>
-<span class="comment">//</span>
-<span class="comment">//         I2CSlave {</span>
-<span class="comment">//             i2c,</span>
-<span class="comment">//             transfer_buffer: [0u8; BUFFER_SIZE],</span>
-<span class="comment">//             transfer_len: 0,</span>
-<span class="comment">//             buffer_index: 0,</span>
-<span class="comment">//             register: 0,</span>
-<span class="comment">//             transfer_state: TransferState::Idle,</span>
-<span class="comment">//             state: None,</span>
-<span class="comment">//             _sda: sda,</span>
-<span class="comment">//             _scl: scl,</span>
-<span class="comment">//         }</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn is_status(&amp;self, status: Status, clear: bool) -&gt; bool {</span>
-<span class="comment">//         let isr = self.i2c.isr.read();</span>
-<span class="comment">//</span>
-<span class="comment">//         match status {</span>
-<span class="comment">//             Status::AddressMatch(dir) =&gt; {</span>
-<span class="comment">//                 if isr.addr().bit_is_set() {</span>
-<span class="comment">//                     if dir != isr.dir().bit().into() {</span>
-<span class="comment">//                         return false;</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.addrcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 } else {</span>
-<span class="comment">//                     false</span>
-<span class="comment">//                 }</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::Busy =&gt; {</span>
-<span class="comment">//                 return isr.busy().bit_is_set();</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::Timeout =&gt; {</span>
-<span class="comment">//                 if isr.timeout().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.timoutcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::Overrun =&gt; {</span>
-<span class="comment">//                 if isr.ovr().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.ovrcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::ArbitrationLost =&gt; {</span>
-<span class="comment">//                 if isr.arlo().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.arlocf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::BusError =&gt; {</span>
-<span class="comment">//                 if isr.berr().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.berrcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::TransferCompleteReload =&gt; {</span>
-<span class="comment">//                 if isr.tcr().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         defmt::error!(&quot;Cannot be cleared.&quot;);</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::Stop =&gt; {</span>
-<span class="comment">//                 if isr.stopf().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.stopcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::NACKReceived =&gt; {</span>
-<span class="comment">//                 if isr.nackf().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         self.i2c.icr.write(|w| w.nackcf().clear());</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::RxNotEmpty =&gt; {</span>
-<span class="comment">//                 if isr.rxne().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         defmt::error!(&quot;Cannot be cleared.&quot;);</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::TxDataMustBeWritten =&gt; {</span>
-<span class="comment">//                 if isr.txis().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         defmt::error!(&quot;Cannot be cleared.&quot;);</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             Status::TxEmpty =&gt; {</span>
-<span class="comment">//                 if isr.txe().bit_is_set() {</span>
-<span class="comment">//                     if clear {</span>
-<span class="comment">//                         defmt::error!(&quot;Cannot be cleared.&quot;);</span>
-<span class="comment">//                     }</span>
-<span class="comment">//                     return true;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//                 return false;</span>
-<span class="comment">//             }</span>
-<span class="comment">//         }</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn read(&amp;self) -&gt; u8 {</span>
-<span class="comment">//         self.i2c.rxdr.read().bits() as u8</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn write(&amp;self, value: u8) {</span>
-<span class="comment">//         self.i2c.txdr.write(|w| w.txdata().bits(value));</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn set_txe(&amp;self) {</span>
-<span class="comment">//         self.i2c.isr.modify(|_, w| w.txe().set_bit());</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     // pub fn send_nack(&amp;self) {</span>
-<span class="comment">//     //     self.i2c.cr2.modify(|_, w| w.nack().nack());</span>
-<span class="comment">//     // }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn enable_txie(&amp;self, enable: bool) {</span>
-<span class="comment">//         self.i2c</span>
-<span class="comment">//             .cr1</span>
-<span class="comment">//             .modify(|_, w| w.txie().bit(enable).tcie().bit(enable));</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn interrupt(&amp;mut self) {</span>
-<span class="comment">//         if self.transfer_state == TransferState::Idle {</span>
-<span class="comment">//             self.state = None;</span>
-<span class="comment">//             self.enable_txie(false);</span>
-<span class="comment">//         }</span>
-<span class="comment">//</span>
-<span class="comment">//         if self.is_status(Status::BusError, true) {</span>
-<span class="comment">//             defmt::debug!(&quot;buserr&quot;);</span>
-<span class="comment">//             self.handle_error();</span>
-<span class="comment">//             return;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::Overrun, true) {</span>
-<span class="comment">//             defmt::debug!(&quot;overrun&quot;);</span>
-<span class="comment">//             self.handle_error();</span>
-<span class="comment">//             return;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::ArbitrationLost, true) {</span>
-<span class="comment">//             defmt::debug!(&quot;arlo&quot;);</span>
-<span class="comment">//             self.handle_error();</span>
-<span class="comment">//             return;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::NACKReceived, true) {</span>
-<span class="comment">//             defmt::debug!(&quot;nack&quot;);</span>
-<span class="comment">//             self.handle_error();</span>
-<span class="comment">//             return;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::Timeout, true) {</span>
-<span class="comment">//             defmt::debug!(&quot;timeout&quot;);</span>
-<span class="comment">//             self.handle_error();</span>
-<span class="comment">//             return;</span>
-<span class="comment">//         }</span>
-<span class="comment">//</span>
-<span class="comment">//         if self.is_status(Status::RxNotEmpty, false) {</span>
-<span class="comment">//             if self.transfer_state == TransferState::Addressed {</span>
-<span class="comment">//                 self.transfer_state = TransferState::RegisterSet;</span>
-<span class="comment">//                 self.register = self.read();</span>
-<span class="comment">//             } else if self.transfer_state == TransferState::RegisterSet {</span>
-<span class="comment">//                 self.transfer_state = TransferState::Receiving;</span>
-<span class="comment">//             } else if self.transfer_state == TransferState::Receiving {</span>
-<span class="comment">//                 // do not change state, just read</span>
-<span class="comment">//                 self.transfer_buffer[self.buffer_index] = self.read();</span>
-<span class="comment">//                 self.buffer_index += 1;</span>
-<span class="comment">//             }</span>
-<span class="comment">//         }</span>
-<span class="comment">//</span>
-<span class="comment">//         if self.is_status(Status::Stop, true) {</span>
-<span class="comment">//             // handle reception</span>
-<span class="comment">//             if self.transfer_state == TransferState::Receiving {</span>
-<span class="comment">//                 self.state = Some(State::DataReceived(self.register));</span>
-<span class="comment">//             } else if self.transfer_state == TransferState::Transmitting {</span>
-<span class="comment">//                 // data was transmitted, nothing else to do</span>
-<span class="comment">//                 self.state = None;</span>
-<span class="comment">//             }</span>
-<span class="comment">//             self.i2c.isr.modify(|_, w| w.txe().set_bit()); // flush txdr</span>
-<span class="comment">//             self.transfer_state = TransferState::Idle;</span>
-<span class="comment">//         }</span>
-<span class="comment">//</span>
-<span class="comment">//         if self.is_status(Status::AddressMatch(Direction::Write), true) {</span>
-<span class="comment">//             self.transfer_state = TransferState::Addressed;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::TxDataMustBeWritten, false) {</span>
-<span class="comment">//             // this may be true more times than actual data length, ignore then</span>
-<span class="comment">//             if self.transfer_state == TransferState::Transmitting {</span>
-<span class="comment">//                 // state is not changed</span>
-<span class="comment">//                 if self.buffer_index &lt; self.transfer_len {</span>
-<span class="comment">//                     self.write(self.transfer_buffer[self.buffer_index]);</span>
-<span class="comment">//                     defmt::debug!(&quot;Transmitting: {}&quot;, self.buffer_index as u8);</span>
-<span class="comment">//                     self.buffer_index += 1;</span>
-<span class="comment">//                 } else {</span>
-<span class="comment">//                     self.enable_txie(false);</span>
-<span class="comment">//                     self.state = None;</span>
-<span class="comment">//                 }</span>
-<span class="comment">//             }</span>
-<span class="comment">//         }</span>
-<span class="comment">//         if self.is_status(Status::AddressMatch(Direction::Read), true) {</span>
-<span class="comment">//             if self.transfer_state == TransferState::RegisterSet {</span>
-<span class="comment">//                 self.enable_txie(true);</span>
-<span class="comment">//                 self.transfer_state = TransferState::Transmitting;</span>
-<span class="comment">//                 self.state = Some(State::DataRequested(self.register));</span>
-<span class="comment">//             }</span>
-<span class="comment">//         }</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     fn handle_error(&amp;mut self) {</span>
-<span class="comment">//         self.transfer_state = TransferState::Idle;</span>
-<span class="comment">//         self.state = None;</span>
-<span class="comment">//         self.transfer_len = 0;</span>
-<span class="comment">//         self.buffer_index = 0;</span>
-<span class="comment">//         self.i2c.isr.modify(|_, w| w.txe().set_bit()); // flush txdr</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn set_transmit_buffer(&amp;mut self, buffer: &amp;[u8]) {</span>
-<span class="comment">//         for (index, item) in buffer.iter().enumerate() {</span>
-<span class="comment">//             self.transfer_buffer[index] = *item;</span>
-<span class="comment">//         }</span>
-<span class="comment">//         self.transfer_len = buffer.len();</span>
-<span class="comment">//         self.buffer_index = 0;</span>
-<span class="comment">//         self.state = None</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn get_received_data(&amp;mut self) -&gt; &amp;[u8] {</span>
-<span class="comment">//         let data = &amp;self.transfer_buffer[..self.buffer_index];</span>
-<span class="comment">//         self.state = None;</span>
-<span class="comment">//         self.buffer_index = 0;</span>
-<span class="comment">//         self.transfer_len = 0;</span>
-<span class="comment">//         data</span>
-<span class="comment">//     }</span>
-<span class="comment">//</span>
-<span class="comment">//     pub fn get_state(&amp;self) -&gt; Option&lt;State&gt; {</span>
-<span class="comment">//         self.state</span>
-<span class="comment">//     }</span>
-<span class="comment">// }</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I2C</span>: <span class="ident">Instance</span>, <span class="ident">SDA</span>, <span class="ident">SCL</span><span class="op">&gt;</span> <span class="ident">I2CSlave</span><span class="op">&lt;</span><span class="ident">I2C</span>, <span class="ident">SDA</span>, <span class="ident">SCL</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">SDA</span>: <span class="ident">PinSda</span><span class="op">&lt;</span><span class="ident">I2C</span><span class="op">&gt;</span>,
+    <span class="ident">SCL</span>: <span class="ident">PinScl</span><span class="op">&lt;</span><span class="ident">I2C</span><span class="op">&gt;</span>,
+{
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">i2c</span>: <span class="ident">I2C</span>, <span class="ident">address</span>: <span class="ident">u8</span>, <span class="ident">sda</span>: <span class="ident">SDA</span>, <span class="ident">scl</span>: <span class="ident">SCL</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="comment">// RCC init taken from https://github.com/stm32-rs/stm32f4xx-hal/blob/bb160bbe8604bccf28557975131d0afdb2fa1014/src/i2c.rs#L723</span>
+        <span class="kw">unsafe</span> {
+            <span class="comment">// NOTE(unsafe) this reference will only be used for atomic writes with no side effects.</span>
+            <span class="kw">let</span> <span class="ident">rcc</span> <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="ident">RCC</span>::<span class="ident">ptr</span>());
+
+            <span class="comment">// Enable and reset clock.</span>
+            <span class="ident">I2C</span>::<span class="ident">enable_clock</span>(<span class="kw-2">&amp;</span><span class="ident">rcc</span>);
+        }
+
+        <span class="ident">i2c</span>.<span class="ident">cr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">pe</span>().<span class="ident">disabled</span>());
+
+        <span class="ident">i2c</span>.<span class="ident">oar1</span>
+            .<span class="ident">write</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">addmode</span>().<span class="ident">add7</span>().<span class="ident">add</span>().<span class="ident">bits</span>((<span class="ident">address</span> <span class="kw">as</span> <span class="ident">u16</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>));
+
+        <span class="ident">i2c</span>.<span class="ident">cr1</span>.<span class="ident">modify</span>(
+            <span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">pe</span>().<span class="ident">enabled</span>(), <span class="comment">// enable peripheral</span>
+        );
+
+        <span class="ident">i2c</span>.<span class="ident">cr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> {
+            <span class="ident">w</span>.<span class="ident">nostretch</span>()
+                .<span class="ident">enabled</span>() <span class="comment">// enable clock stretching</span>
+                .<span class="ident">ack</span>()
+                .<span class="ident">ack</span>()
+        });
+
+        <span class="kw">unsafe</span> {
+            <span class="ident">i2c</span>.<span class="ident">cr2</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> {
+                <span class="ident">w</span>.<span class="ident">itbufen</span>()
+                    .<span class="ident">enabled</span>()
+                    .<span class="ident">itevten</span>()
+                    .<span class="ident">enabled</span>()
+                    .<span class="ident">iterren</span>()
+                    .<span class="ident">enabled</span>()
+                    .<span class="ident">freq</span>()
+                    .<span class="ident">bits</span>(<span class="number">42</span>)
+            })
+        }
+
+        <span class="ident">I2CSlave</span> {
+            <span class="ident">i2c</span>,
+            <span class="ident">transfer_buffer</span>: [<span class="number">0u8</span>; <span class="ident">BUFFER_SIZE</span>],
+            <span class="ident">transfer_len</span>: <span class="number">0</span>,
+            <span class="ident">buffer_index</span>: <span class="number">0</span>,
+            <span class="ident">register</span>: <span class="number">0</span>,
+            <span class="ident">transfer_state</span>: <span class="ident">TransferState</span>::<span class="ident">Idle</span>,
+            <span class="ident">state</span>: <span class="prelude-val">None</span>,
+            <span class="ident">_sda</span>: <span class="ident">sda</span>,
+            <span class="ident">_scl</span>: <span class="ident">scl</span>,
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">addressed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Direction</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">read</span>().<span class="ident">addr</span>().<span class="ident">bit_is_clear</span>() {
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr2</span>.<span class="ident">read</span>().<span class="ident">tra</span>().<span class="ident">bit</span>().<span class="ident">into</span>())
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">rx_not_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">read</span>().<span class="ident">rx_ne</span>().<span class="ident">bit_is_set</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">tx_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">read</span>().<span class="ident">tx_e</span>().<span class="ident">bit_is_set</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">stopped</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">read</span>().<span class="ident">stopf</span>().<span class="ident">bit_is_set</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">clear_stopped</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">cr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">pe</span>().<span class="ident">enabled</span>());
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">dr</span>.<span class="ident">read</span>().<span class="ident">dr</span>().<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u8</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u8</span>) {
+        <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">dr</span>.<span class="ident">write</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">dr</span>().<span class="ident">bits</span>(<span class="ident">value</span>));
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_interrupt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C event interrupt.&quot;</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Idle</span> {
+            <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        }
+
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rx_not_empty</span>() {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Addressed</span> {
+                <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">RegisterSet</span>;
+                <span class="self">self</span>.<span class="ident">register</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>();
+                <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;Register received: {:x}&quot;</span>, <span class="self">self</span>.<span class="ident">register</span>);
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">RegisterSet</span> {
+                <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Receiving</span>;
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Receiving</span> {
+                <span class="comment">// do not change state, just read</span>
+                <span class="self">self</span>.<span class="ident">transfer_buffer</span>[<span class="self">self</span>.<span class="ident">buffer_index</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>();
+                <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;Byte read: {:x}&quot;</span>, <span class="self">self</span>.<span class="ident">transfer_buffer</span>[<span class="self">self</span>.<span class="ident">buffer_index</span>]);
+                <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+        }
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">stopped</span>() {
+            <span class="self">self</span>.<span class="ident">clear_stopped</span>();
+            <span class="comment">// handle reception</span>
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Receiving</span> {
+                <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">State</span>::<span class="ident">DataReceived</span>(<span class="self">self</span>.<span class="ident">register</span>));
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Transmitting</span> {
+                <span class="comment">// data was transmitted, nothing else to do</span>
+                <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            }
+            <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Idle</span>;
+        }
+
+        <span class="kw">let</span> <span class="ident">addressed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">addressed</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">Direction</span>::<span class="ident">Write</span>) <span class="op">=</span> <span class="ident">addressed</span> {
+            <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Slave is now Receiver.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Addressed</span>;
+            <span class="kw">return</span>;
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">Direction</span>::<span class="ident">Read</span>) <span class="op">=</span> <span class="ident">addressed</span> {
+            <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Slave is now Transmitter.&quot;</span>);
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">RegisterSet</span> {
+                <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Transmitting</span>;
+                <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">State</span>::<span class="ident">DataRequested</span>(<span class="self">self</span>.<span class="ident">register</span>));
+            }
+            <span class="kw">return</span>;
+        }
+
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tx_empty</span>() {
+            <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;txe&quot;</span>);
+            <span class="comment">// this may be true more times than actual data length, ignore then</span>
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Transmitting</span> {
+                <span class="comment">// state is not changed</span>
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">transfer_len</span> {
+                    <span class="self">self</span>.<span class="ident">write</span>(<span class="self">self</span>.<span class="ident">transfer_buffer</span>[<span class="self">self</span>.<span class="ident">buffer_index</span>]);
+                    <span class="ident">defmt</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Transmitting: {}&quot;</span>, <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="kw">as</span> <span class="ident">u8</span>);
+                    <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                } <span class="kw">else</span> {
+                    <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                }
+            }
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_interrupt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C error interrupt.&quot;</span>);
+        <span class="self">self</span>.<span class="ident">check_and_clear_error_flags</span>();
+        <span class="self">self</span>.<span class="ident">handle_error</span>();
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_error</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">transfer_state</span> <span class="op">=</span> <span class="ident">TransferState</span>::<span class="ident">Idle</span>;
+        <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="self">self</span>.<span class="ident">transfer_len</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">=</span> <span class="number">0</span>;
+    }
+
+    <span class="comment">// https://github.com/stm32-rs/stm32f4xx-hal/blob/bb160bbe8604bccf28557975131d0afdb2fa1014/src/i2c.rs#L804</span>
+    <span class="kw">fn</span> <span class="ident">check_and_clear_error_flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="comment">// Note that flags should only be cleared once they have been registered. If flags are</span>
+        <span class="comment">// cleared otherwise, there may be an inherent race condition and flags may be missed.</span>
+        <span class="kw">let</span> <span class="ident">sr1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">read</span>();
+
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">timeout</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing Timeout.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">timeout</span>().<span class="ident">clear_bit</span>());
+        }
+
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">pecerr</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing PEC.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">pecerr</span>().<span class="ident">clear_bit</span>());
+        }
+
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">ovr</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing Overrun.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">ovr</span>().<span class="ident">clear_bit</span>());
+        }
+
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">af</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing AF.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">af</span>().<span class="ident">clear_bit</span>());
+        }
+
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">arlo</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing ARLO.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">arlo</span>().<span class="ident">clear_bit</span>());
+        }
+
+        <span class="comment">// The errata indicates that BERR may be incorrectly detected. It recommends ignoring and</span>
+        <span class="comment">// clearing the BERR bit instead.</span>
+        <span class="kw">if</span> <span class="ident">sr1</span>.<span class="ident">berr</span>().<span class="ident">bit_is_set</span>() {
+            <span class="ident">defmt</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;I2C clearing BERR.&quot;</span>);
+            <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">sr1</span>.<span class="ident">modify</span>(<span class="op">|</span><span class="kw">_</span>, <span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">berr</span>().<span class="ident">clear_bit</span>());
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_transmit_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buffer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
+        <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">item</span>) <span class="kw">in</span> <span class="ident">buffer</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="self">self</span>.<span class="ident">transfer_buffer</span>[<span class="ident">index</span>] <span class="op">=</span> <span class="kw-2">*</span><span class="ident">item</span>;
+        }
+        <span class="self">self</span>.<span class="ident">transfer_len</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">len</span>();
+        <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_received_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">transfer_buffer</span>[..<span class="self">self</span>.<span class="ident">buffer_index</span>];
+        <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="self">self</span>.<span class="ident">buffer_index</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">transfer_len</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="ident">data</span>
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">state</span>
+    }
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sm4_firmware"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

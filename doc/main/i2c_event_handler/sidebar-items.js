@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Context","Execution context"],["Resources","Resources `i2c_event_handler` has access to"]]});

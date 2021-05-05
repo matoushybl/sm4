@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["SECOND",""]],"struct":[["SM4",""]]});
+initSidebarItems({"constant":[["SECOND",""]],"struct":[["SM4",""]],"trait":[["OnError",""]]});

@@ -132,6 +132,16 @@
 <span id="129">129</span>
 <span id="130">130</span>
 <span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">no_main</span>]</span>
 <span class="attribute">#![<span class="ident">no_std</span>]</span>
@@ -258,6 +268,16 @@
     <span class="attribute">#[<span class="ident">task</span>(<span class="ident">binds</span> <span class="op">=</span> <span class="ident">CAN1_RX0</span>, <span class="ident">resources</span> <span class="op">=</span> [<span class="ident">driver</span>]</span>)]
     <span class="kw">fn</span> <span class="ident">can_handler</span>(<span class="ident">cx</span>: <span class="ident">can_handler</span>::<span class="ident">Context</span>) {
         <span class="ident">cx</span>.<span class="ident">resources</span>.<span class="ident">driver</span>.<span class="ident">process_can</span>();
+    }
+
+    <span class="attribute">#[<span class="ident">task</span>(<span class="ident">binds</span> <span class="op">=</span> <span class="ident">I2C2_EV</span>, <span class="ident">resources</span> <span class="op">=</span> [<span class="ident">driver</span>]</span>)]
+    <span class="kw">fn</span> <span class="ident">i2c_event_handler</span>(<span class="ident">cx</span>: <span class="ident">i2c_event_handler</span>::<span class="ident">Context</span>) {
+        <span class="ident">cx</span>.<span class="ident">resources</span>.<span class="ident">driver</span>.<span class="ident">process_i2c_event</span>();
+    }
+
+    <span class="attribute">#[<span class="ident">task</span>(<span class="ident">binds</span> <span class="op">=</span> <span class="ident">I2C2_ER</span>, <span class="ident">resources</span> <span class="op">=</span> [<span class="ident">driver</span>]</span>)]
+    <span class="kw">fn</span> <span class="ident">i2c_error_handler</span>(<span class="ident">cx</span>: <span class="ident">i2c_error_handler</span>::<span class="ident">Context</span>) {
+        <span class="ident">cx</span>.<span class="ident">resources</span>.<span class="ident">driver</span>.<span class="ident">process_i2c_error</span>();
     }
 
     <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> {
