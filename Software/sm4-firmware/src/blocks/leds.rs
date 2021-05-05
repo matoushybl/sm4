@@ -23,4 +23,14 @@ impl LEDs {
         self.status_led
             .enqueue(blinq::patterns::blinks::SHORT_ON_OFF);
     }
+
+    pub fn heartbeat(&mut self) {
+        self.status_led
+            .enqueue(blinq::patterns::blinks::SHORT_ON_OFF);
+    }
+
+    pub fn signalize_can_error(&mut self) {
+        self.error_led
+            .enqueue(blinq::patterns::blinks::MEDIUM_OFF_ON);
+    }
 }

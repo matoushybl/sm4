@@ -1,4 +1,6 @@
 use crate::can::{CANOpen, CANOpenMessage};
+use crate::prelude::LEDs;
+use crate::sm4::OnError;
 use crate::state::DriverState;
 use bxcan::Frame;
 use core::convert::TryFrom;
@@ -7,7 +9,7 @@ use sm4_shared::prelude::{
     TxPDO3, TxPDO4, Velocity,
 };
 
-pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>) {
+pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>, leds: &mut LEDs) {
     let pdo = TxPDO1 {
         battery_voltage: (state.object_dictionary().battery_voltage() * 1000.0) as u16,
         temperature: (state.object_dictionary().temperature() * 10.0) as u16,
@@ -15,7 +17,8 @@ pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>) {
     bus.send(
         CANOpenMessage::TxPDO1,
         &pdo.to_raw().unwrap()[..TxPDO1::len()],
-    );
+    )
+    .on_error(|_| leds.signalize_can_error());
 
     let pdo = TxPDO2 {
         axis1_velocity: state
@@ -32,7 +35,8 @@ pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>) {
     bus.send(
         CANOpenMessage::TxPDO2,
         &pdo.to_raw().unwrap()[..TxPDO2::len()],
-    );
+    )
+    .on_error(|_| leds.signalize_can_error());
 
     let pdo = TxPDO3 {
         revolutions: state
@@ -49,7 +53,8 @@ pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>) {
     bus.send(
         CANOpenMessage::TxPDO3,
         &pdo.to_raw().unwrap()[..TxPDO3::len()],
-    );
+    )
+    .on_error(|_| leds.signalize_can_error());
 
     let pdo = TxPDO4 {
         revolutions: state
@@ -66,7 +71,8 @@ pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>) {
     bus.send(
         CANOpenMessage::TxPDO4,
         &pdo.to_raw().unwrap()[..TxPDO4::len()],
-    );
+    )
+    .on_error(|_| leds.signalize_can_error());
 }
 
 pub fn nmt_received<const R: u32>(id: u8, frame: &Frame, state: &mut DriverState<R>) {
@@ -127,6 +133,7 @@ pub fn rx_pdo1<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
         defmt::warn!("Malformed RxPDO1 received.");
     }
 }
+
 pub fn rx_pdo2<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
     if frame.data().is_none() {
         defmt::warn!("Invalid RxPDO2 received.");

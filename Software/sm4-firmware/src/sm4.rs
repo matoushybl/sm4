@@ -1,4 +1,5 @@
 use crate::can::{CANOpen, CANOpenMessage};
+use crate::i2c::{I2CSlave, State};
 use crate::prelude::config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R};
 use crate::prelude::definitions::{Axis1, Axis2};
 use crate::prelude::*;
@@ -11,6 +12,23 @@ use stm32f4xx_hal as hal;
 
 const SECOND: u32 = 168_000_000;
 
+pub trait OnError {
+    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
+    where
+        Self: Sized;
+}
+
+impl<T, E> OnError for Result<T, E> {
+    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
+    where
+        Self: Sized,
+    {
+        if self.is_err() {
+            closure(self)
+        }
+    }
+}
+
 pub struct SM4 {
     leds: LEDs,
     usb: USBProtocol,
@@ -19,6 +37,11 @@ pub struct SM4 {
     state: DriverState<{ ENCODER_RESOLUTION }>,
     axis1: Axis1,
     axis2: Axis2,
+    i2c: I2CSlave<
+        stm32f4xx_hal::pac::I2C2,
+        crate::board::definitions::SDA,
+        crate::board::definitions::SCL,
+    >,
 }
 
 impl SM4 {
@@ -103,6 +126,7 @@ impl SM4 {
             state,
             axis1,
             axis2,
+            i2c: I2CSlave::new(device.I2C2, 0x55, gpio.sda, gpio.scl),
         }
     }
 
@@ -133,10 +157,13 @@ impl SM4 {
     }
 
     pub fn heartbeat_tick(&mut self) {
-        self.can.send(
-            CANOpenMessage::NMTNodeMonitoring,
-            &[u8::from(self.state.nmt_state())],
-        )
+        self.leds.heartbeat();
+        self.can
+            .send(
+                CANOpenMessage::NMTNodeMonitoring,
+                &[u8::from(self.state.nmt_state())],
+            )
+            .on_error(|_| self.leds.signalize_can_error());
     }
 
     pub fn blink_leds(&mut self) {
@@ -170,7 +197,7 @@ impl SM4 {
                 CANOpenMessage::GlobalFailsafeCommand => {}
                 CANOpenMessage::Sync => {
                     self.leds.signalize_sync();
-                    crate::protocol::canopen::sync(&mut self.can, &mut self.state);
+                    crate::protocol::canopen::sync(&mut self.can, &mut self.state, &mut self.leds);
                 }
                 CANOpenMessage::Emergency => {}
                 CANOpenMessage::TimeStamp => {}
@@ -190,6 +217,21 @@ impl SM4 {
                 _ => {}
             }
         }
+    }
+
+    pub fn process_i2c_event(&mut self) {
+        self.i2c.event_interrupt();
+        match self.i2c.get_state() {
+            None => {}
+            Some(State::DataRequested(register)) => {
+                self.i2c.set_transmit_buffer(&[0x40]);
+            }
+            Some(State::DataReceived(register)) => {}
+        }
+    }
+
+    pub fn process_i2c_error(&mut self) {
+        self.i2c.error_interrupt();
     }
 
     pub const fn blink_period() -> u32 {

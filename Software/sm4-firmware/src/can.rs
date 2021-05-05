@@ -45,12 +45,12 @@ impl CANOpen {
         }
     }
 
-    pub fn send(&mut self, message: CANOpenMessage, data: &[u8]) {
+    pub fn send(&mut self, message: CANOpenMessage, data: &[u8]) -> Result<(), ()> {
         let frame = Frame::new_data(
             message.message_id_with_device(self.id),
             Data::new(data).unwrap(),
         );
-        nb::block!(self.bus.transmit(&frame)).map(|_| ()).unwrap()
+        self.bus.transmit(&frame).map(|_| ()).map_err(|_| ())
     }
 }
 

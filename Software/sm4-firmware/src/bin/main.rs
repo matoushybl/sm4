@@ -125,6 +125,16 @@ const APP: () = {
         cx.resources.driver.process_can();
     }
 
+    #[task(binds = I2C2_EV, resources = [driver])]
+    fn i2c_event_handler(cx: i2c_event_handler::Context) {
+        cx.resources.driver.process_i2c_event();
+    }
+
+    #[task(binds = I2C2_ER, resources = [driver])]
+    fn i2c_error_handler(cx: i2c_error_handler::Context) {
+        cx.resources.driver.process_i2c_error();
+    }
+
     extern "C" {
         fn EXTI0();
     }
