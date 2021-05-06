@@ -21,7 +21,25 @@ The changes are:
     \item Attempt to utilize async Rust for easier development.
 \end{itemize}
 
-\section{Demonstration \#1 - Small Mobile Robot for Indoor Mapping}
+\section{Demonstration \#1 - Linear Rail Actuator for Camera Movement}
+\label{sec:dem2}
+The second demonstration for the SM4 motor controller is controlling a single axis linear rail actuator.
+This actuator was provided by the thesis supervisor and is equipped with a NEMA17 stepper motor that drives a belt with attached table.
+Originally, this rail was meant to be used for camera movement when recording a musician.
+
+This demonstration is again controlled using a Raspberry Pi 4B, but this time the SM4 motor controller is controlled using I\textsuperscript{2}C.
+This showcase aims to demonstrate the controller's ability to control in position mode and therefore to position the table on the rail according to the commands of the higher-level system.
+In the future, this demonstration will be equipped with a second axis allowing for tilting the mounted camera.
+The finished demonstrator can be seen in the Figure~\ref{fig:rail_demonstrator}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{obrazky/rail}
+    \caption{The MAP-bot robot - the first demonstration of the SM4 stepper motor controller.}
+    \label{fig:rail_demonstrator}
+\end{figure}
+
+\section{Demonstration \#2 - Small Mobile Robot for Indoor Mapping}
 \label{sec:dem1}
 \epigraph{
     Any exploration program which "just happens" to include a new launch vehicle is, de facto, a launch vehicle program. \\ \\
@@ -44,21 +62,3 @@ The finalized robot can be seen in the Figure~\ref{fig:map_bot}.
 \end{figure}
 
 As part of the demonstration, the Raspberry Pi SBC controls the robot to move forward, backward and rotate via CANOpen control of the SM4 stepper motor controller.
-
-\section{Demonstration \#2 - Linear Rail Actuator for Camera Movement}
-\label{sec:dem2}
-The second demonstration for the SM4 motor controller is controlling a single axis linear rail actuator.
-This actuator was provided by the thesis supervisor and is equipped with a NEMA17 stepper motor that drives a belt with attached table.
-Originally, this rail was meant to be used for camera movement when recording a musician.
-
-This demonstration is again controlled using a Raspberry Pi 4B, but this time the SM4 motor controller is controlled using I\textsuperscript{2}C.
-This showcase aims to demonstrate the controller's ability to control in position mode and therefore to position the table on the rail according to the commands of the higher-level system.
-In the future, this demonstration will be equipped with a second axis allowing for tilting the mounted camera.
-The finished demonstrator can be seen in the Figure~\ref{fig:rail_demonstrator}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{obrazky/rail}
-    \caption{The MAP-bot robot - the first demonstration of the SM4 stepper motor controller.}
-    \label{fig:rail_demonstrator}
-\end{figure}

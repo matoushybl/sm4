@@ -1,13 +1,66 @@
 \section{Embedded Rust}
 \label{sec:embedded_rust}
-% nostd nomain, cite std on F7, alloc
-% embedded targets - availability, riscv, avr, xtensa, relation to LLVM support
+Embedded Rust is enabled by two crate-level attributes - \textbf{no\_main} and \textbf{no\_std}.
+The \textbf{no\_main} attribute indicates, that the compiler will not emit a main symbol automatically, but instead expects the crate to define it itself\cite{noauthor_crates_2021}.
+The \textbf{no\_std} attribute on the other hand indicates that the final program will not link against the std crate (containing functions usable with operating systems and heap allocation), but instead will link against the core crate, which contains only those parts of the standard library that are platform agnostic.
+The core crate includes for example language primitives, such as floats, slices and support for atomic instructions.
+Rust program with the \textbf{no\_std} attribute and therefore linking to core library can be used for bootstrapping code like bootloaders, firmware or kernels\cite{rust_embedded_wg_introduction_2021}.
+
+Using the \textbf{no\_main} requires the programmer to write their own program entry point and some other functions, such as the reset handler and panic handlers, an example of such low-level project bring-up can be seen in~\cite{munns_zero_2019}.
+That can be quite hard and is usually platform dependent.
+Thankfully, for the supported \acs{mcu}s this is already pre-implemented by processor low-level access crates and their startup and runtime crates.
+
+We've mentioned that developing \textbf{no\_std} does not by default use heap allocation.
+Heap allocation can however be added to \textbf{no\_std} programs by implementing a custom allocator such as the \textbf{alloc-cortex-m} crate\cite{noauthor_rust-embeddedalloc-cortex-m_2021}, that implements an allocator for Cortex-M \acs{mcu}s.
+Using heap allocation, it is possible to use structures like \textbf{vec} and \textbf{Box<T>}\cite{noauthor_alloc_nodate}.
+It also seems to be possible to run a subset of the Rust std library directly on a \acs{mcu}\cite{hutt_using_nodate}, but this approach is still in the early stages of development.
+
+\subsection{Platform Support}
+\label{subsec:platform_support}
+In order to compile Rust programs for specific \acs{mcu} core, it is required that a target support for it is first available in LLVM and second that a target for it exists within the Rust ecosystem (existence of a target means, that the rust compiler and other tools and can be built for the target).
+Rust targets are also split into tiers differentiating different amounts of support from the Rust teams, where majority of the embedded targets are in Tier 2, meaning that the compilation of the tools must succeed for every change in the compiler, but automated tests of the builds are not guaranteed to run.
+As of now, there is support for different \acs{arm} architectures, such as aarch64, armv7, armv6, thumbv8, thumbv7, thumbv6 (both with hardware FPU and without) etc\cite{noauthor_platform_nodate}.
+Apart from \acs{arm} support, there is also support for \acs{risc}-V targets, Tier 3 also contains support for AVR\cite{noauthor_platform_nodate, rahul_how_nodate}, MSP430.
+There also seems to be some effort into bringing the Xtensa architecture (ESP8266 and ESP32)\cite{mabin_mabezdevxtensa-rust-quickstart_2021} into the Rust ecosystem as the work of supporting the architecture in LLVM seems to be done.
+
+\subsection{Embedded Working Group}
+\label{subsec:embedded_wg}
 % embedded wg - documentation - embedonomicon, debugonomicon
 % hal, dma, cortex-m(rt), risc-v(rt)
-% device hals, svd2rust - better methods, linux-hal
-% knurling
-% mutable shared state
-% async
+
+\subsection{Register Access}
+\label{subsec:register_access}
+% svd2rust - better methods
+\cite{noauthor_rust-embeddedsvd2rust_2021}
+\cite{noauthor_stm32-rsstm32-rs_2021}
+
+\subsection{embedded-hal}
+\label{subsec:embedded_hal}
+% device hals, linux-hal
+
+\subsection{Mutable Shared State}
+\label{subsec:mut_shared_state}
+\cite{rtic}
+\cite{egger_look_nodate}
+
+\subsection{Async}
+\label{subsec:async}
+\cite{aparicio_concurrency_nodate}
+\cite{schattinger_asyncawait_2020} % avr
+
+\subsection{Ecosystem}
+\label{subsec:ecosystem}
 % crate ecosystem - device drivers, usb, ethernet
-% testing, CI
-% C/C++ interop
+
+\subsection{C/C++ Interoperability}
+\label{subsec:ccpp_interop}
+
+\subsection{Tooling}
+\label{subsec:tooling}
+% knurling
+
+\subsection{Testing and CI}
+\label{subsec:testing_ci}
+
+\section{Why We Believe Embedded Rust Is the Right Choice}
+\label{sec:embedded_rust_reasoning}
