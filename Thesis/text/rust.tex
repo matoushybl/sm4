@@ -1,0 +1,275 @@
+\section{Rust programming language}
+\label{sec:rust}
+Rust is a multi-paradigm systems programming language originally developed by Mozilla\cite{rust_authorship} in an effort to create language suitable for development of a safe and performant multi-threaded CSS rendering engine for the Firefox browser\cite{servo}.
+In the recent months the oversight of the language is done by the language's own foundation and is therefore independent on Mozilla\cite{rust_foundation}.
+
+The language itself is designed to be performant and memory efficient - it doesn't feature a garbage collector, memory is managed semi-manually with the leverage of many smart pointer types.
+The semi-automatic memory management and its type systems provides guarantees about memory and thread safety, that can be evaluated at compile time, promising that these kinds of potential bugs are found in development rather in production.
+
+% FIXME talk about llvm
+
+The language itself is a part, albeit an important part, of a larger ecosystem, making the language and its tooling extremely usable with tools almost for everything - it features seamless package management and build system, documentation system, integrated testing, defined coding-style and more.
+
+As we said before, the language is a multi-paradigm language, meaning that the language features parts of the functional languages paradigm and object oriented-paradigm.
+
+% FIXME describe motivation for using Rust programming language
+
+In the following sections, some features of the language are described in order to provide some introduction into the semantics and syntax of the language.
+\subsection{Variables and Mutability}
+\label{subsec:var_mut}
+In Rust, all variables are defined as immutable by default, promoting defensive programming - no variable can be unintentionally changed.
+The variables are declared using the keyword \textbf{let} and variable's mutability must be explicitly declared using the \textbf{mut} suffix.
+The type of a variably doesn't need to be explicitly specified in most cases as the language features type inference that is possible thanks to its powerful and strong type system.
+As for the provided types, the language
+An example can be seen in the following code snippet.
+
+\begin{lstlisting}
+let a = 10; // declares an immutable variable, whose type is automatically inferred to i32
+a = 11; // produces a compile-time error
+let mut b: u8 = 0x12; // declares a mutable variable with explicit u8 type
+b = 0x24; // this is ok
+\end{lstlisting}
+
+Rust also supports compile time constant evaluation using constants and constant functions.
+This can be achieved by using the \textbf{const} keyword, but describing this functionality is beyond the scope of this thesis.
+
+\subsection{Ownership and Borrow Checker}
+\label{subsec:borrow}
+The languages semi-automatic memory management system comprises of the ownership concept, move-by-default semantics and the borrow checker.
+
+The concept of ownership is described by these rules\cite{klabnik_rust_nodate}:
+\begin{itemize}
+    \item Each value in Rust has a variable that's called its \textit{owner}.
+    \item There cane be only one owner at a time.
+    \item When the owner goes out of scope, the value will be dropped.
+\end{itemize}
+For value passing, the Rust language uses \textbf{move-by-default} semantics as opposed to \textbf{copy-by-default} present in C++.
+The reasoning for it is that while move is almost zero-cost, copy almost never is.
+
+The borrow checker is a mechanism that references to variables are always in correct state - pointing to an existing value.
+There are three rules to the borrow checker:
+\begin{itemize}
+    \item There can be only one mutable reference to a value.
+    \item There can be unlimited immutable references to a value.
+    \item The first two rules are mutually exclusive - Rust forbids having both immutable an mutable reference to the same value.
+\end{itemize}
+
+The programming language also statically checks for reference lifetimes, making sure that the reference doesn't point to nonexistent memory, which is useful for returning references from functions or storing references to values in structs.
+
+\subsection{Enums and Pattern Matching}
+\label{subsec:enum}
+In Rust, enums are much more powerful than in C/C++.
+There are two big differences - Rust enums allow adding methods and functions to them and also allow for having associated values.
+Consider the following code snippet:
+
+\begin{lstlisting}
+enum Value {
+    Integer(i64),
+    Float(f64)
+}
+
+let int_value = Value::Integer(15);
+let float_value = Value::Float(3.14);
+
+impl Value {
+    fn parse(raw: &str) -> Value {}; // code omitted
+}
+let raw_value = server.get_value();
+let value = Value::parse(raw_value);
+\end{lstlisting}
+
+First, we declare the enum to have two possible values - \textbf{Integer}, with the associated value of \textbf{i64} and \textbf{Float}, with the associated value of \textbf{f64}.
+Then, we add a function that parses a reference to a string into our enum \textbf{Value} and then we parse a received string into a value.
+The parsed Value will be one of the two values with the real numeric value embedded.
+Associated values in enums are a powerful concept for for example state machines and error handling.
+To access the associated value, the \textbf{match} or \textbf{if} keywords may be used as can be seen in the following snippet:
+
+\begin{lstlisting}
+match value {
+    Value::Integer(raw) => println!("Raw integer found: {}", raw),
+    Value::Float(raw) => println!("Raw float found: {}", raw),
+}
+if let Value::Integer(raw) = value {
+    println!("Raw integer found: {}", raw);
+}
+\end{lstlisting}
+
+\subsection{Data Structures}
+\label{subsec:struct}
+In order to store data, the language leverages the concept of structures.
+These structures allow storing data with different data types.
+Apart from storing data, interfaces can have implementations associated with them which provides the ability for functions, methods and constructors.
+In a broader sense these properties conform to the object-oriented-programming paradigm where objects have properties (stored values) and behaviors (associated methods).
+Let's have a look at an example of a structure definition.
+
+\begin{lstlisting}
+// Define a structure representing a state of a motor axis.
+struct AxisState {
+    pub target_velocity: f32, // define fields that are publicly accessible and with f32 type
+    pub actual_velocity: f32,
+}
+
+let mut state = AxisState {
+    target_velocity: 1.0,
+    actual_velocity: 0.0,
+}; // create an mutable instance of the AxisState structure with values assigned to the fields
+
+state.target_velocity = -1.0; // assign value to a field of the structure instance
+\end{lstlisting}
+
+In order to add methods to the structure, an \textbf{impl} block needs to be defined, as can be seen in the following example, where we add a constructor and getter and setter methods.
+\newpage
+\begin{lstlisting}
+// crate a block for defining methods on the AxisState structure
+impl AxisState {
+    // define a constructor - a method that return the AxisState structure
+    pub fn new(target_velocity: f32, actual_velocity: f32) -> Self {
+        Self {
+            target_velocity,
+            actual_velocity,
+        }
+    }
+    // create a setter for the target_velocity, note the reference to mutable self which denotes that it is a method and not a function
+    pub fn set_target(&mut self, target: f32) {
+        self.target_velocity = target;
+    }
+    // create a getter which takes an immutable reference to the structure and returns the value of the target velocity
+    pub fn target(&self) -> f32 {
+        self.target_velocity // no return is needed as Rust is also an expression based language
+    }
+}
+
+let mut state = AxisState::new(1.0, 0.0); // use the new function (constructor) to create an instance of the AxisState state structure
+state.set_target(5.1); // set the value of the target_velocity field
+println!("target velocity: {}", state.target()); // print thevalue of the target_velocity field
+\end{lstlisting}
+
+\subsection{Traits and Generics}
+\label{subsec:traits}
+Traits are a way to implement shared behavior (interface) for different types.
+Traits are similar to Java's interfaces or Swift's protocols.
+Together with generics types allow for creating algorithms whose inputs and outputs are generic, but conform to some defined properties defined in the traits.
+
+Let's have a look on how a motion controller can be defined and implemented using generic values.
+
+\begin{lstlisting}
+trait Encoder {
+    fn get_speed(&self) -> f32;
+}
+
+trait Motor {
+    fn set_speed(&mut self, speed: f32);
+}
+
+struct MotionController<E: Encoder, M: Motor> {
+    encoder: E,
+    motor: M
+}
+
+impl<E: Encoder, M: Motor> MotionController<E, M> {
+    fn sample(&mut self, target_speed: f32) {
+        let e = target_speed - self.encoder.get_speed();
+        // use controller to get target speed
+        let speed = psd.calculate(e);
+        self.motor.set_speed(speed);
+    }
+}
+\end{lstlisting}
+
+Such a motion controller can be used with whichever encoder and motor, that implements the \textbf{Encoder} and \textbf{Motor} traits.
+Traits and generics are vital for implementing HALs that are further described in the section ~\ref{subsec:embedded_rust}.
+
+\newpage
+\subsection{Macros}
+\label{subsec:macros}
+Another feature important for embedded Rust are macros.
+There two types of macros in Rust - declarative macros (similar to C macros) and procedural macros, that can be used for code generation.
+The main distinction between C and Rust macros is that Rust macros have support for a simple type system which limits what can be passed as a function parameter - be it identifiers, expressions, etc.
+Macros are useful for metaprogramming - declaring code to be generated and a lot of standard library features are implemented using macros.
+An example of macro use can be seen in the following snippet.
+\begin{lstlisting}
+let vector = vec![0.5, 0.6, 0.7]; // instantiates a vector with the defined values
+println!("Value of vector is {:?}", vector); // prints values contained in the vector
+\end{lstlisting}
+
+An important thing to note is that the macro processor is very capable - for example of evaluating values passed to them in case of the \textbf{println} macro, which doesn't allow passing incompatible types.
+In embedded Rust, macros are used for generating code for different peripherals.
+
+\subsection{Standard Library}
+\label{subsec:std_lib}
+The Rust programming language has a rich standard library, that supports widely used collections such as vectors, maps, sets etc., communication primitives such as sockets for UDP and TCP, threads and sychronization and much more.
+This makes the language ready to use on many systems out of the box, without the need to implement these primitives ourselves, that are potentially buggy.
+The following example shows simple UDP communication loopback implemented using the standard library features.
+
+\begin{lstlisting}
+use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
+fn main() {
+    let socket = UdpSocket::bind(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 1234))
+        .expect("Failed to bind the socket.");
+    let mut buffer = [0; 1500];
+    loop {
+        match socket.recv_from(&mut buffer) {
+            Ok((len, address)) => {
+                socket
+                    .send_to(&buffer[..len], address)
+                    .expect("Failed to send data to the sender.");
+            }
+            Err(_) => {
+                println!("Failed to receive data from the socket.");
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Testing}
+\label{subsec:testing}
+The Rust programming language has support for testing built-in, meaning that to start writing test for your code, no external library is needed.
+Tests can be written as part of modules allowing for testing of private members or out of the defining modules allowing for integration testing.
+A simple unit testing example as a part of the defining module can be seen in the following example.
+
+\begin{lstlisting}
+fn adder(a: i32, b: i32) -> i32 {
+    a + b
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_adding() {
+        let result = adder(1, 2);
+        assert_eq!(result, 3);
+    }
+}
+\end{lstlisting}
+
+\newpage
+\subsection{Cargo}
+\label{subsec:cargo}
+Cargo is Rust's build and dependency management system.
+It handles creating, building, testing and running projects using single command without the need to call rustc and lld directly, as can be seen in the following snippet.
+
+\begin{lstlisting}
+$ cargo new sm4 --bin # creates a new Rust binary project
+$ cargo new sm4-shared --lib # creates a new Rust library project
+$ cargo build # builds the project in the working directory
+$ cargo test # runs all the tests included the project in the working directory
+$ cargo run # runs the project in the working directory
+$ cargo doc # generate documentation for the project in the working directory
+\end{lstlisting}
+
+Apart from the projects development cycle, Cargo is also a dependency manager that allows for including external libraries to the project simply by specifying dependency name and version in a file called \textbf{Cargo.toml} which serves as the main project configuration file.
+An example \textbf{Cargo.toml} file can be seen in the following snippet.
+
+\begin{lstlisting}
+[package]
+name = "playground"
+version = "0.1.0"
+authors = ["Matous Hybl <hyblmatous@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.11.1"
+\end{lstlisting}
+
+Cargo also supports other features of project management, such as enabling conditional compilation using features, etc., but the description of these features are beyond the scope of this thesis.

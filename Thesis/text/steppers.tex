@@ -101,41 +101,11 @@ Microstepping is nowadays the prevalent way of stepper motor control as it allow
 \subsection{NEMA17 style stepper motor}
 \label{subsec:nema}
 
-\subsection{Stepper motor driver IC comparison}
-\label{subsec:stepper_ic}
-In order to select a proper driver IC for the SM4 stepper motor controller a simplified comparison was performed.
-Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{prusa_original_2017,prusa_original_2019,3daddict_stepper_2020}  for them and we wanted to secure silent function of the motor controller.
-With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100 as we aimed for as simple chip as possible, while the second hardware revision utilizes the TMC2226, which is a more modern, and fully featured stepper motor driver, which also has higher peak current.
-By selecting these two stepper driver ICs, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
-The comparison can be seen in the following table:
-
-\begin{sidewaystable}
-    \centering
-    \begin{tabular}{ |p{2.5cm}|p{2cm}|p{2cm}|p{2cm}|p{2.5cm}|p{2.5cm}|p{2cm}|p{4cm}| }
-        \hline
-        Name & Operating Voltage & Maximum current & Control Interface & Configuration Interface & Microstepping & Package & Advanced Features \\
-        \hline
-        \hline
-        DRV8825\cite{texas_instruments_drv8825_2014} & 8.2-45~V & max 2.5~A (properly cooled, at 24~V, 25~\textdegree) & STEP/DIR & GPIO & up to 32 & HTSSOP28 & None \\
-        \hline
-        A4988\cite{allegro_microsystems_a4988_2014} & max 35~V & max 2 A & STEP/DIR & GPIO & up to 16 & QFN28ET & None \\
-        \hline
-        TMC2100\cite{trinamic_tmc2100-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & GPIO & up to 256 & TQFP48 / QFN36 & MicroPlyer\texttrademark, SpreadCycle\texttrademark, StealthChop\texttrademark \\
-        \hline
-        TMC2130\cite{trinamic_tmc2130-datasheet_2018} & max 46~V & max 2 A (2.5 A peaks, properly cooled) & STEP/DIR & SPI & up to 256 & TQFP48 / QFN36 & MicroPlyer, SpreadCycle\texttrademark, StealthChop\texttrademark, ChopSync\texttrademark, CoolStep\texttrademark, StallGuard\texttrademark \\
-        \hline
-        TMC2209\cite{trinamic_tmc2209_2019} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & QFN28 & MicroPlyer\texttrademark, SpreadCycle\texttrademark, StealthChop2\texttrademark, CoolStep\texttrademark, StallGuard4\texttrademark \\
-        \hline
-        TMC2226\cite{trinamic_tmc2226_2020} & max 29~V & max 2 A (2.8 A peaks) & STEP/DIR & UART & up to 256 & HTSSOP28 & MicroPlyer\texttrademark, SpreadCycle, StealthChop2\texttrademark, CoolStep\texttrademark, StallGuard4\texttrademark \\
-        \hline
-    \end{tabular}
-    \caption{Comparison of stepper motor driver ICs}
-    \label{tab:driver_ic_comparison}
-\end{sidewaystable}
-\newpage
 \subsection{Trinamic motion control technologies}
 \label{subsec:trinamic_tech}
-Since we decided to utilize the Trinamic driver ICs and their stepper control technologies, it is vital to describe these technologies as they have immediate impact on the driver performance and properties.
+% FIXME use different wording
+Based on the comparison in the Section~\ref{subsec:stepper_ic}, we decided to utilize Trinamic made driver \acs{ic}s and their stepper control technologies.
+It is vital to describe these technologies as they have immediate impact on the driver performance and properties.
 
 \subsubsection{MicroPlyer\texttrademark}
 MicroPlyer\texttrademark is a microstepping interpolator.
