@@ -1,4 +1,3 @@
-
 \subsection{Persistent storage using EEPROM emulation}
 \label{subsec:eeprom}
 The SM4 stepper motor controller needs persistent storage to save configuration and data.
@@ -25,8 +24,8 @@ The working principle is described in the following paragraphs and can be seen i
 In the beginning, both of the sectors are erased and one of them is marked as active.
 Data are then written to the first sector into simulated cells.
 The cells contain a header (which can be understood as a key or a virtual address) and the data.
-When a new write is requested the data are appended behind the already stored data.
-When a data with is read using the virtual address or a key, the sector is traversed from its end, searching for the first occurrence of the key or address.
+When a new write is requested, the data are appended behind the already stored data.
+When a data with is read using the virtual address, or a key, the sector is traversed from its end, searching for the first occurrence of the key or address.
 The first occurrence is the most recent value of the cell marked by the key.
 This way we are able to store the value with a specific identifier (key, virtual address) in the flash multiple times.
 

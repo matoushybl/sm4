@@ -1,12 +1,12 @@
 \chapter{Related Work}
 \label{ch:related_work}
-This chapter describes the current state of the stepper motor controllers in the Robotics group and the efforts to improve it.
-Ongoing efforts to use program embedded systems in the Rust programming language is also described, both in the context of our research group and also in general.
-Finally, similar projects - either software or hardware wise are reported.
+This chapter describes the current state of the stepper motor controllers in the Robotics group, and the efforts to improve it.
+Ongoing efforts to use program embedded systems in the Rust programming language are also described, both in the context of our research group and also in general.
+Finally, similar projects - either software or hardware-wise are reported.
 
 \section{KM2}
 \label{sec:km2}
-In the Robotics and AI research group, currently a second generation of the KM2 stepper motor controller is widely in use.
+Nowadays, a second generation of the KM2 stepper motor controller is widely in use in the Robotics and \acs{ai} research group.
 A render of the KM2 controller can be seen in the figure~\ref{fig:km2render}.
 It is used primarily by the students of the BPC-PRP course for driving a simple differentially driven robot.
 The controller utilizes an ATMega8 paired with two stepper motor controllers DRV8825, that are utilized in the form of breakout boards generally used in the now obsolete RAMPS boards.
@@ -23,7 +23,7 @@ The second shortcoming are the used driver chips, that are quite loud and do not
 
 \section{KM3}
 \label{sec:km3}
-The KM3 (or KM2-C) was supposed to be a successor to the previously described KM2 controllers and it aimed to mainly solve the clock stretching problem by utilizing an STM32F031 MCU.
+The KM3 (or KM2-C) was supposed to be a successor to the previously described KM2 controllers and it aimed to mainly solve the clock stretching problem by utilizing an STM32F031 \acs{mcu}.
 Another advantage of this revision was that the breakout boards for motor driver chips were replaced with driver chips soldered directly on the driver PCB (Printed Circuit Board).
 The controller can be seen in the figure~\ref{fig:km3}.
 Even though the new MCU was an improvement over the ATMega8, it proved to be the bottleneck for implementing new functionality to the motor controller as the MCU has very limited memory, both FLASH and RAM and peripherals.
@@ -94,6 +94,7 @@ The past stepper motor development efforts in the Robotics \& AI research group 
 \begin{itemize}
     \item The project shall use a powerful, modern and capable MCU to be capable to fully support various features of the controller even in the future.
     \item The project shall use the state-of-art motor controller ICs.
+    \item The project shall use the Rust programming language for firmware and control software development.
 \end{itemize}
 
 The DC Motor project showed us, that writing a fully functional embedded firmware is not only a possible but a very viable option.
