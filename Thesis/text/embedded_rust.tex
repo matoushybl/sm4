@@ -25,8 +25,10 @@ There also seems to be some effort into bringing the Xtensa architecture (ESP826
 
 \subsection{Embedded Working Group}
 \label{subsec:embedded_wg}
-% embedded wg - documentation - embedonomicon, debugonomicon
-% hal, dma, cortex-m(rt), risc-v(rt)
+Embedded Rust is one of the official goals of the Rust Language project, and the development of Rust for embedded devices is governed by the Embedded Devices Working Group\cite{noauthor_embedded_nodate}.
+Apart from target maintenance, the working group is directly responsible for creating and maintaining documentation - such as the Embedded Rust book\cite{rust_embedded_devices_wg_introduction_2021}, the Discovery book\cite{rust_embedded_devices_wg_introduction_nodate} and the Embedonomicon book\cite{rust_embedded_devices_wg_preface_nodate} and is also responsible for developing several of the critical tools and libraries - such as \textbf{svd2rust}, \textbf{embedded-hal} or \textbf{embedded-dma}.
+
+The working group also governs the work on low level \acs{mcu} core access crates and minimal runtimes for these cores such as the \textbf{cortex-m} and \textbf{cortex-m-rt} or \textbf{risc-v} and \textbf{riscv-rt}.
 
 \subsection{Register Access}
 \label{subsec:register_access}
