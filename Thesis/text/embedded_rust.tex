@@ -4,14 +4,14 @@ Embedded Rust is enabled by two crate-level attributes - \textbf{no\_main} and \
 The \textbf{no\_main} attribute indicates, that the compiler will not emit a main symbol automatically, but instead expects the crate to define it itself\cite{noauthor_crates_2021}.
 The \textbf{no\_std} attribute on the other hand indicates that the final program will not link against the std crate (containing functions usable with operating systems and heap allocation), but instead will link against the core crate, which contains only those parts of the standard library that are platform agnostic.
 The core crate includes for example language primitives, such as floats, slices and support for atomic instructions.
-Rust program with the \textbf{no\_std} attribute and therefore linking to core library can be used for bootstrapping code like bootloaders, firmware or kernels\cite{rust_embedded_wg_introduction_2021}.
+Rust program with the \textbf{no\_std} attribute and therefore linking to core library can be used for bootstrapping code like bootloaders, firmware or kernels\cite{rust_embedded_devices_wg_introduction_2021}.
 
 Using the \textbf{no\_main} requires the programmer to write their own program entry point and some other functions, such as the reset handler and panic handlers, an example of such low-level project bring-up can be seen in~\cite{munns_zero_2019}.
 That can be quite hard and is usually platform dependent.
 Thankfully, for the supported \acs{mcu}s this is already pre-implemented by processor low-level access crates and their startup and runtime crates.
 
 We've mentioned that developing \textbf{no\_std} does not by default use heap allocation.
-Heap allocation can however be added to \textbf{no\_std} programs by implementing a custom allocator such as the \textbf{alloc-cortex-m} crate\cite{noauthor_rust-embeddedalloc-cortex-m_2021}, that implements an allocator for Cortex-M \acs{mcu}s.
+Heap allocation can however be added to \textbf{no\_std} programs by implementing a custom allocator such as the \textbf{alloc-cortex-m} crate\cite{rust_embedded_devices_wg_rust-embeddedalloc-cortex-m_2021}, that implements an allocator for Cortex-M \acs{mcu}s.
 Using heap allocation, it is possible to use structures like \textbf{vec} and \textbf{Box<T>}\cite{noauthor_alloc_nodate}.
 It also seems to be possible to run a subset of the Rust std library directly on a \acs{mcu}\cite{hutt_using_nodate}, but this approach is still in the early stages of development.
 
@@ -32,12 +32,51 @@ The working group also governs the work on low level \acs{mcu} core access crate
 
 \subsection{Register Access}
 \label{subsec:register_access}
-% svd2rust - better methods
-\cite{noauthor_rust-embeddedsvd2rust_2021}
-\cite{noauthor_stm32-rsstm32-rs_2021}
+Peripheral and core register access is one of the most vital operations on embedded systems.
+Generally, in C/C++ this is done either by operating on a pointer to an integer value or by modifying a struct that contains the configuration.
+In embedded Rust, there are two approaches to this problem
+
+The first approach is the \textbf{svd2rust}\cite{rust_embedded_devices_wg_rust-embeddedsvd2rust_2021} tool.
+This tool uses the manufacturer provided \acs{svd} files, that describe registers and their bits and converts them into a Rust \acs{api}.
+There are several advantages to this approach - no code needs to be written manually, the resulting register access is compile time safe, allows for named bit settings instead of non-descriptive setting to logical 1 or zero and when there is ambiguity for example in integer size, it enforces adding the unsafe keyword, marking that the code should be thoroughly reviewed.
+An example of setting a register values using this approach can be seen in the following Listing~\ref{lst:svd2rust}, where we are configuring channel of an advanced control timer.
+The disadvantage of this approach is that given the size of the \acs{svd} files, and number of \acs{mcu}s, the compilation is quite long and given the resulting \acs{api} complexity, the contemporary \acs{svd}s have problems resolving it for autocomplete.
+This approach is prevalent with the majority of the \acs{pac}s (\acl{pac}s), for example with the \textbf{stm32-rs} crate\cite{noauthor_stm32-rsstm32-rs_2021}.
+
+\begin{lstlisting}[caption={Using svd2rust generated API for register access.},label=lst:svd2rust]
+timer.ccmr2_output().modify(|_, w| {
+    w.cc4s()
+        .output() // channel 4 as output
+        .oc4fe()
+        .set_bit() // enable fast output
+        .oc4pe()
+        .set_bit() // enable preloading
+        .oc4m()
+        .toggle() // set mode (3bit wide register part)
+});
+\end{lstlisting}
+
+Another and more lightweight approach is utilization of RAL (Register Access Layer) crates, for example the \textbf{stm32ral}\cite{stm32_ral}.
+This approach also parsed the \acs{svd} files, but generates simpler structures, and \acs{api}.
+An example of using this approach can be seen in the Listing~\ref{lst:ral}.
+\begin{lstlisting}[caption={Using RAL API for register access\cite{stm32-ral}.},label=lst:ral]
+timer.ccmr2_output().modify(|_, w| {
+    w.cc4s()
+        .output() // channel 4 as output
+        .oc4fe()
+        .set_bit() // enable fast output
+        .oc4pe()
+        .set_bit() // enable preloading
+        .oc4m()
+        .toggle() // set mode (3bit wide register part)
+});
+\end{lstlisting}
 
 \subsection{embedded-hal}
 \label{subsec:embedded_hal}
+The \textbf{embedded-hal} project\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021} is one of the project developed by the Embedded Devices Working Group.
+Its aim is to provide a \acs{hal} (\acl{hal}) abstract enough that device drivers using it may be shared not only between different \acs{mcu}s but also different platforms (\acs{mcu} and Embedded Linux).
+This is achieved by utilizing traits, described earlier in the Section~\ref{subsec:traits}.
 % device hals, linux-hal
 
 \subsection{Mutable Shared State}
