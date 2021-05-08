@@ -56,10 +56,10 @@ timer.ccmr2_output().modify(|_, w| {
 });
 \end{lstlisting}
 
-Another and more lightweight approach is utilization of RAL (Register Access Layer) crates, for example the \textbf{stm32ral}\cite{stm32_ral}.
+Another and more lightweight approach is utilization of RAL (Register Access Layer) crates, for example the \textbf{stm32ral}\cite{greig_adamgreigstm32ral_2021}.
 This approach also parsed the \acs{svd} files, but generates simpler structures, and \acs{api}.
 An example of using this approach can be seen in the Listing~\ref{lst:ral}.
-\begin{lstlisting}[caption={Using RAL API for register access\cite{stm32-ral}.},label=lst:ral]
+\begin{lstlisting}[caption={Using RAL API for register access\cite{greig_adamgreigstm32ral_2021}.},label=lst:ral]
 modify_reg!(rcc, rcc, AHB1ENR, GPIOAEN: Enabled);
 modify_reg!(gpio, gpioa, MODER, MODER1: Input, MODER2: Output, MODER3: Input);
 \end{lstlisting}
@@ -69,9 +69,11 @@ modify_reg!(gpio, gpioa, MODER, MODER1: Input, MODER2: Output, MODER3: Input);
 The \textbf{embedded-hal} project\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021} is one of the projects developed by the Embedded Devices Working Group.
 Its aim is to provide a \acs{hal} (\acl{hal}) abstract enough that device drivers using it may be shared not only between different \acs{mcu}s but also different platforms (\acs{mcu} and Embedded Linux).
 This is achieved by utilizing traits, described earlier in the Section~\ref{subsec:traits}.
-% device hals, linux-hal
+An example of such device driver developed using the traits available in the \textbf{embedded-hal} can be seen in the Listing~\ref{lst:hal_usage}.
+As can be seen in the Listing, the driver will work with any type that implements the \textbf{WriteRead} trait.
+Currently, the \textbf{embedded-hal} defines traits for common embedded functionality (such as \acs{gpio}, \acs{adc}) and buses (I\textsuperscript{2}C, \acs{spi}), but only their blocking variants.
 
-\begin{lstlisting}[caption={Using RAL API for register access\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021}.},label=lst:hal_usage]
+\begin{lstlisting}[caption={Example of an device driver utilizing embedded-hal traits\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021}.},label=lst:hal_usage]
 use embedded_hal::blocking::i2c::{TenBitAddress, WriteRead};
 const ADDR: u16  = 0x158;
 const TEMP_REGISTER: u8 = 0x1;
@@ -95,22 +97,84 @@ where
 }
 \end{lstlisting}
 
+The traits from the \textbf{embedded-hal} are implemented by device \acs{hal}s, such as the \textbf{stm32f4xx-hal}\cite{noauthor_stm32-rsstm32f4xx-hal_2021}, which implements the provided traits for the peripherals of the STM32F4xx \acs{mcu}s.
+
+A crate similar to the \textbf{embedded-hal} is the \textbf{embedded-dma} defining traits for unified \acs{dma} access, so that development of unified device drivers utilizing \acs{dma} is possible.
+DMA itself is not that easy problem when aiming for Rust's memory safety\cite{aparicio_memory_nodate}, but a lot of work has been done on its support and perfecting it for safety.
+
 \subsection{Mutable Shared State}
 \label{subsec:mut_shared_state}
-\cite{rtic}
-\cite{egger_look_nodate}
+The Rust programming considers mutable static variables unsafe as they may cause data races in concurrency\cite{noauthor_static_nodate}.
+This approach is valid, but causes ergonomics problems with embedded programs where storing data in static variables is used for interchanging data between interrupts and blocking code.
+In order to write correct, data race free code, the shared state needs to be at least wrapped in a mutex, that will synchronize access to the shared resource, this however is not enough as the borrow checker will object with invalid access to a shared resource.
+Also, when using mutex on embedded systems, the block holding the lock need to be wrapped in a critical section, otherwise the lock would never be freed.
+The situation get more complicated with different interrupt priorities.
+An overview of ways of solving this problem can be found in an excellent blogpost by one of the members of the Embedded Devices Working group here\cite{egger_look_nodate}.
 
-\subsection{Async}
+We decided to use the \acs{rtic} (\acl{rtic}) framework\cite{noauthor_preface_nodate} as a solution to this problem as according to us, the approach is very well thought out.
+The framework aims to solve the problem by providing a \acs{dsl} (\acl{dsl}) based on Rust's procedural macros for concurrency on embedded systems.
+In short, the \acs{rtic} framework lets the user define shared resources and allows different tasks (either software tasks, or interrupt triggered) to access those resources in a safe way, removing boilerplate code needed for shared resource handling.
+Imagine, that there are two interrupt triggered tasks with different priority wanting to access a shared resource.
+The high priority task can easily access the resource without need for any explicit locking as it has privilege to do so, given its priority.
+On the other hand, the lower priority task needs to perform locking in order to access the shared resource, to avoid the resource being accessed temporarily by the higher resource task, which could lead to a data race.
+This behavior is compile-time enforced and checked bringing another level of safety and security to embedded systems.
+Apart from providing safe access to shared resources, this framework also contains a simple scheduler for timed tasks.
+Thanks to these features, this framework is nowadays the base of many embedded systems developed in Rust.
+
+\subsection{async/await}
 \label{subsec:async}
-\cite{aparicio_concurrency_nodate}
-\cite{schattinger_asyncawait_2020} % avr
+Async/await is a concurrency model utilizing cooperative tasks.
+Cooperative tasks are tasks that yield control back to the scheduler at determined points\cite{aparicio_concurrency_nodate} and these points are when task switching occurs.
+Tasks can yield for example to wait for a blocking operation.
+
+This concurrency model may prove extremely useful for embedded systems as it allows for concurrent code to be written in an imperative way, which increases code readability.
+Imagine a device driver task that resumes its operation when new data is received, but doesn't use any blocking waits and the code can be read as an sequence of operations instead of for example a state machine.
+
+Async/await in the Rust programming language builds upon the \textbf{Future} trait.
+A future can be polled and polling results in reporting whether the \textbf{Future} can resume executing or not.
+An executor takes care of periodically (or as an reaction to an event) polling \textbf{Futures} and resumes their execution if needed.
+Given the design of async/await, this can be easily used in a \textbf{no\_std} environment, even on low computing power devices, such as the Atmel AVR\cite{schattinger_asyncawait_2020}.
+As of now there are several async runtimes for embedded systems, the most advanced one being \textbf{embassy}, the downside being that it currently requires nightly Rust to build.
+
+An example of utilizing async/await for timed tasks and \textbf{embassy} can be seen in the Listing~\ref{lst:embassy}
+
+\begin{lstlisting}[caption={Timed tasks using async/await and embassy\cite{noauthor_embassy-rsembassy_2021}.},label=lst:embassy]
+#[embassy::task]
+async fn run1() {
+    loop {
+        info!("BIG INFREQUENT TICK");
+        Timer::after(Duration::from_ticks(64000)).await;
+    }
+}
+
+#[embassy::task]
+async fn run2() {
+    loop {
+        info!("tick");
+        Timer::after(Duration::from_ticks(13000)).await;
+    }
+}
+
+#[embassy::main]
+async fn main(spawner: Spawner) {
+    unwrap!(spawner.spawn(run1()));
+    unwrap!(spawner.spawn(run2()));
+}
+\end{lstlisting}
 
 \subsection{Ecosystem}
 \label{subsec:ecosystem}
-% crate ecosystem - device drivers, usb, ethernet
+The Embedded Rust ecosystem is nowadays very vast.
+Apart from the Embedded Devices Working Group, there are many smaller organizations governing development for specific platforms or projects.
+There are organization and groups developing crates for \acs{mcu} support (STM32, RISC-V, AVR, RP2040, iMXrt, SAMD etc.), universal device drivers (using the embedded-hal described earlier) and much more.
+The ecosystem also consists of tooling and documentation, which is also under active development, with some tools surpassing traditional tools for embedded development.
+More importantly, given Rust's focus on performance and security, eliminating most common bugs, the developers are able to work on the "harder" problems in embedded - for example drivers for USB\cite{noauthor_stm32-rsstm32-usbd_2021} or Ethernet\cite{noauthor_stm32-rsstm32-eth_2021}.
 
 \subsection{C/C++ Interoperability}
 \label{subsec:ccpp_interop}
+Thanks to Rust's \acs{ffi} (\acl{ffi}), it is possible to combine code written in C and Rust, even both ways\cite{rust_embedded_devices_wg_interoperability_nodate}.
+For example, it is possible to utilize Rust's serialization and deserialization crates in an existing Zephyr project\cite{wolff_embedding_nodate}.
+This is especially useful for bringing Rust into existing embedded codebase, but also for integrating existing C/C++ codebase into new Rust project.
 
 \subsection{Tooling}
 \label{subsec:tooling}
