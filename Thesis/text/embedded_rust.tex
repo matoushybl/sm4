@@ -60,24 +60,40 @@ Another and more lightweight approach is utilization of RAL (Register Access Lay
 This approach also parsed the \acs{svd} files, but generates simpler structures, and \acs{api}.
 An example of using this approach can be seen in the Listing~\ref{lst:ral}.
 \begin{lstlisting}[caption={Using RAL API for register access\cite{stm32-ral}.},label=lst:ral]
-timer.ccmr2_output().modify(|_, w| {
-    w.cc4s()
-        .output() // channel 4 as output
-        .oc4fe()
-        .set_bit() // enable fast output
-        .oc4pe()
-        .set_bit() // enable preloading
-        .oc4m()
-        .toggle() // set mode (3bit wide register part)
-});
+modify_reg!(rcc, rcc, AHB1ENR, GPIOAEN: Enabled);
+modify_reg!(gpio, gpioa, MODER, MODER1: Input, MODER2: Output, MODER3: Input);
 \end{lstlisting}
 
 \subsection{embedded-hal}
 \label{subsec:embedded_hal}
-The \textbf{embedded-hal} project\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021} is one of the project developed by the Embedded Devices Working Group.
+The \textbf{embedded-hal} project\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021} is one of the projects developed by the Embedded Devices Working Group.
 Its aim is to provide a \acs{hal} (\acl{hal}) abstract enough that device drivers using it may be shared not only between different \acs{mcu}s but also different platforms (\acs{mcu} and Embedded Linux).
 This is achieved by utilizing traits, described earlier in the Section~\ref{subsec:traits}.
 % device hals, linux-hal
+
+\begin{lstlisting}[caption={Using RAL API for register access\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021}.},label=lst:hal_usage]
+use embedded_hal::blocking::i2c::{TenBitAddress, WriteRead};
+const ADDR: u16  = 0x158;
+const TEMP_REGISTER: u8 = 0x1;
+pub struct TemperatureSensorDriver<I2C> {
+    i2c: I2C,
+}
+
+impl<I2C, E> TemperatureSensorDriver<I2C>
+where
+    I2C: WriteRead<TenBitAddress, Error = E>,
+{
+    pub fn read_temperature(&mut self) -> Result<u8, E> {
+        let mut temp = [0];
+        self.i2c.write_read(
+                ADDR,
+                &[TEMP_REGISTER],
+                &mut temp
+            )
+            .and(Ok(temp[0]))
+    }
+}
+\end{lstlisting}
 
 \subsection{Mutable Shared State}
 \label{subsec:mut_shared_state}
