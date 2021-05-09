@@ -19,6 +19,7 @@ The changes are:
     \item Improve encoder connector placement, select appropriate connectors.
     \item Remove compatibility resistors around the CAN transceiver.
     \item Attempt to utilize async Rust for easier development.
+    \item Rework the schematic to include more information, such as maximal capacitor voltages, add reasoning about component values.
 \end{itemize}
 
 \section{Demonstration \#1 - Linear Rail Actuator for Camera Movement}
@@ -47,6 +48,13 @@ The finished demonstrator can be seen in the Figure~\ref{fig:rail_demonstrator}.
 1)  No new launch vehicles. \\
 2)  No new launch vehicles. \\
 3)  Whatever you do, don't develop any new launch vehicles.}{Akin's Laws of Spacecraft Design\cite{akin_akins_nodate}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{obrazky/mapbot_block_diag}
+    \caption{Designing the MCU connections using STM32CubeMX.}
+    \label{fig:mapbot_block}
+\end{figure}
 
 The first demonstration, where we showcase the SM4 stepper motor controller, is a small differentially driven robot aimed for indoor mapping and self-localization.
 The chassis is differential with one motor on two sides of the robot, which showcases the driver's ability to control both of the motor and calculate odometry.

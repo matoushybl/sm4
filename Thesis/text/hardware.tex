@@ -1,17 +1,31 @@
-\section{Hardware development}
+\section{Electronics Design}
 \label{sec:hardware}
-This section describes the development of the hardware of the stepper motor controller.
-Firstly, the critical components are selected and preliminary design is done based on the requirements stated in the Section ~\ref{sec:requirements}.
-Secondly, both of the hardware revisions and their design are described.
+
+This section describes the of the electronics of the SM4 stepper motor controller.
+First, the critical components are selected and preliminary design is done based on the requirements stated in the Section~\ref{sec:requirements}.
+Second, both of the hardware revisions and their design are described.
+
+In the Figure~\ref{fig:sm4diagram}, we can see the block diagram of the controller.
+The central part is the \acs{mcu}, which is connected to the two stepper motor drivers and encoders (hardware encoders are only available in the second electronics revision).
+Further there are also peripheral chips and components used to utilize the \acs{can}, I\textsuperscript{2}C and \acs{usb} buses.
+The whole controller is powered by the power system providing correct voltages and electrical protection.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/sm4_block_diagram}
+    \caption{The block diagram of the SM4 stepper motor controller.}
+    \label{fig:sm4diagram}
+\end{figure}
+
 
 \subsection{Hardware Design Choices}
 \label{subsec:hardware_design_choices}
 In this section, we describe the choices made in the beginning of the design process, ones that are vital to the functionality of the whole system.
-The design choices are based on the requirements~\ref{sec:requirements}, the related work described in the Chapter~\ref{ch:related_work} and our prior experience.
+The design choices are based on the requirements stated in the Section~\ref{sec:requirements}, the related work described in the Chapter~\ref{ch:related_work} and our prior experience.
 
 \subsubsection{MCU}
 \label{subsubsec:mcu}
-One of the critical components of the stepper controller is the MCU.
+The most critical component of the stepper controller is the \acs{mcu}.
 The MCU needs to accommodate for the outer communication interfaces as well as the internal ones.
 That means that as for the outer communication interfaces, it needs to have peripherals for CAN bus, I\textsuperscript{2}C and USB, as stated in the requirement \textbf{C-03}.
 The internal communication interfaces are revision dependent, however the stepper controllers generally require, GPIOs, PWM outputs, serial interfaces and for the possible future encoder support it should require incremental encoder interfaces and SPIs for SSI bitbanging (as stated in requirement \textbf{FR-08}).
@@ -28,26 +42,14 @@ The block diagram of the MCU with the core features and peripherals can be seen 
     \label{fig:stm32f405_block_diagram}
 \end{figure}
 
-This MCU conforms to all of the requirement and has enough peripherals to support future development.
+This MCU conforms to all the requirement and has enough peripherals to support future development.
 
-% FIXME reference Stepper Driver ic comparison
-\subsubsection{Stepper driver}
-\label{subsubsec:stepper_driver}
-As per the requirements \textbf{C-01} and \textbf{C-02}, the stepper driver shall be able to drive stepper motors with current of up to 2A and feature silent operation.
-We decided to use the stepper motor driver ICs developed by Trinamic.
-These drivers are nowadays being used for motion control of 3D printers~\cite{prusa_original_2017, prusa_original_2019} and allow for silent operation with their StealthChop\texttrademark technology.
-When selecting the driver ICs there were different priorities in mind - first the package should be solderable by hand, secondly with the first revision of the SM4 stepper motor controller we aimed for the ability to power the drivers via a 10-cell Li-Ion power pack, which required maximal input voltage of more than 42 Volts.
-The first hardware revision features the TMC2100-TA driver IC.
-With the second hardware revision, the priorities have shifted and higher phase current was required (\textbf{C-01}) even at the expense of the supply voltage.
-The second hardware revision features the TMC2226-SA driver IC.
-
-
-\subsection{Stepper motor driver IC comparison}
+\subsection{Stepper motor driver IC}
 \label{subsec:stepper_ic}
 In order to select a proper driver IC for the SM4 stepper motor controller a simplified comparison was performed.
 Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{prusa_original_2017,prusa_original_2019,3daddict_stepper_2020} for them, and we wanted to secure silent function of the motor controller.
-With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100 as we aimed for as simple chip as possible, while the second hardware revision utilizes the TMC2226, which is a more modern, and fully featured stepper motor driver, which also has higher peak current.
-By selecting these two stepper driver ICs, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
+With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100-TA as we aimed for as simple chip as possible and also maximum voltage of about 50~V, while the second hardware revision utilizes the TMC2226-SA, which is a more modern, and a fully featured stepper motor driver \acs{ic}, which also has higher peak current.
+By selecting these two stepper driver \acs{ic}s, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
 The comparison can be seen in the following table:
 
 \begin{sidewaystable}
@@ -104,14 +106,14 @@ In the future revisions, the input protection circuits may be replaced by an eFu
     \label{fig:power}
 \end{figure}
 
-\subsubsection{PCB Design}
+\subsubsection{PCB}
 \label{subsubsec:pcb_design}
-In order for this project to serve as a testbed for new manufacturing technologies, the PCB (Printed Circuit Board) was designed as 4-layer.
-The ability to design the board as a 4-layer one was enabled by the 4-layer PCB manufacturing price decrease by China-based PCB manufacturing companies.
-Big advantage of designing the PCB as 4-layer one was speedup of hardware development - the 4-layer stackup can be utilized so that there is no need to route power to the ICs.
-In our case we chose the inner layers to be filled with copper planes - one connected to GND and the other one connected to +3.3~V.
-This way whenever a connection to +3.3V or GND was required, simply connecting the pad to new via close-by was sufficient.
-Apart from being used for power distribution, the large copper planes allow for better PCB cooling and also for some minor signal connections in cases routing using the outer layers would prove difficult.
+In order for this project to serve as a testbed for new manufacturing technologies, the \acs{pcb} (\acl{pcb}) was designed as 4-layer.
+The ability to design the board as a 4-layer one was enabled by the 4-layer \acs{pcb} manufacturing price decrease by China-based \acs{pcb} manufacturing companies.
+Big advantage of designing the \acs{pcb} as 4-layer one was speedup of hardware development - the 4-layer stackup can be utilized so that there is no need to route power to the \acs{ic}s.
+In our case we chose the inner layers to be filled with copper planes - one connected to \acs{gnd} and the other one connected to +3.3~V.
+This way whenever a connection to +3.3V or \acs{gnd} was required, simply connecting the pad to new via close-by was sufficient.
+Apart from being used for power distribution, the large copper planes allow for better \acs{pcb} cooling and also for some minor signal connections in cases routing using the outer layers would prove difficult.
 The used stackup can be seen in the Figure~\ref{fig:stackup}.
 
 \begin{figure}[H]
@@ -127,4 +129,3 @@ This not-only saved a lot of time with manual assembly, but also enabled us to u
 As for testing out EDA (Electronic Design Aid) software, the KiCAD EDA was used instead of the well-known Eagle.
 The KiCAD EDA has improved dramatically in the past years (version 5 and soon to be released version 6), making it great competitor to conventional EDA suites.
 The big advantage of KiCAD is a large footprint and symbol library, which often contains even the 3D models and KiCAD itself is able to seamlessly integrate them and render a 3D view of the designed PCB.
-

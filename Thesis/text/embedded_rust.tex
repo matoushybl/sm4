@@ -197,13 +197,13 @@ Instead of transferring the whole strings, only their identifiers and optional a
 This logging technique relies on the fast RTT transfer from \textbf{probe-rs} described earlier.
 The end result is a logging interface that is fast and efficient enough to debug extremely fast and timing sensitive interfaces, such as \acs{usb}.
 
-\subsubsection{probe-run}
+\subsubsection{probe\textendash run}
 \textbf{probe-run} is a runner for Rust programs\cite{knurling_project_knurling-rsprobe-run_2021}, that automatically flashes the firmware binary when \textbf{cargo run} is run and opens a terminal which prints \textbf{defmt} encoded messages transferred over \acs{rtt}.
 Another feature is that it can print stack back traces when the firmware encounters an exception or on a breakpoint.
 
 As of now, the runner doesn't support debugging via GDB, but there has been some developments recently about simultaneous defmt logging and debugging with GDB, that stated that GDB support should be possible in the near future\cite{aparicio_using_nodate}.
 
-\subsubsection{defmt-test}
+\subsubsection{defmt\textendash test}
 \label{subsubsec:defmttest}
 \textbf{defmt-test} is a component of the \textbf{defmt} tool, that can be used for running integration and unit tests directly on the target \acs{mcu}.
 We believe that this brings new possibilities for reliability in embedded systems and software/hardware in the loop testing.
@@ -235,7 +235,7 @@ mod tests {
 }
 \end{lstlisting}
 
-\subsubsection{flip-link}
+\subsubsection{flip\textendash link}
 The last Knurling tool is \textbf{flip-link}, which is a linker that adds zero-cost stack overflow protection\cite{knurling_project_knurling-rsflip-link_2021}.
 The stack overflow protection works by smartly changing the order of \textbf{.stack} and \textbf{.bss+.data} segments of \acs{ram} in a way that when the stack overflows, it doesn't interfere with static variables, but instead triggers a hardware exception, and doesn't produce corrupted memory.
 The change in the memory layout can be seen in the Figures~\ref{fig:fliplink_orig} and \ref{fig:fliplink_changed}.
