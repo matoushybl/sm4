@@ -22,5 +22,7 @@ jobs:
 
       - name: format
         run: |
-          cd Software/sm4-firmware
+          cd Software
+          cargo fmt --all -- --check
+          cd embedded
           cargo fmt --all -- --check

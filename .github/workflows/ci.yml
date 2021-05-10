@@ -32,5 +32,7 @@ jobs:
 
       - name: cargo build release
         run: |
-          cd Software/sm4-firmware
+          cd Software
+          cargo build --release
+          cd embedded
           cargo build --release

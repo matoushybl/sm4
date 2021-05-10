@@ -41,17 +41,15 @@ impl Velocity {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    const ENCODER_RESOLUTION: u32 = 4;
+
     #[test]
     fn test_velocity() {
-        let position1 = Position::<ENCODER_RESOLUTION> {
-            revolutions: 0,
-            angle: 0,
-        };
+        let position1 = Position::<{ ENCODER_RESOLUTION }>::zero();
 
-        let position2 = Position::<ENCODER_RESOLUTION> {
-            revolutions: 0,
-            angle: 1,
-        };
+        let position2 = Position::<{ ENCODER_RESOLUTION }>::new(0, 1);
 
         let velocity = Velocity::from_positions(&position2, &position1, Microseconds(10));
         assert_eq!(velocity.rps, 25000.0);
@@ -59,9 +57,9 @@ mod tests {
         let velocity = Velocity::from_positions(&position1, &position2, Microseconds(10));
         assert_eq!(velocity.rps, -25000.0);
 
-        let position1 = Position::<ENCODER_RESOLUTION>::new(0, ENCODER_RESOLUTION - 1);
+        let position1 = Position::<{ ENCODER_RESOLUTION }>::new(0, ENCODER_RESOLUTION - 1);
 
-        let position2 = Position::<ENCODER_RESOLUTION>::new(1, 0);
+        let position2 = Position::<{ ENCODER_RESOLUTION }>::new(1, 0);
 
         let velocity = Velocity::from_positions(&position2, &position1, Microseconds(10));
         assert_eq!(velocity.rps, 25000.0);

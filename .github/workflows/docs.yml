@@ -29,23 +29,23 @@ jobs:
 
       - name: Run cargo doc
         run: |
-          cd Software/sm4-firmware
+          cd Software/embedded
           cargo doc --no-deps --document-private-items
           ls target
           ls target/thumbv7em-none-eabihf
 
       - name: move to output directory
         run: |
-          cd Software/sm4-firmware
+          cd Software/embedded
           mkdir public && mv target/thumbv7em-none-eabihf/doc public
 
       - name: create index output directory
-        run: cp .github/index.html Software/sm4-firmware/public
+        run: cp .github/index.html Software/embedded/public
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: Software/sm4-firmware/public # The folder the action should deploy.
+          FOLDER: Software/embedded/public # The folder the action should deploy.
           CLEAN: true # Automatically remove deleted files from the deploy branch

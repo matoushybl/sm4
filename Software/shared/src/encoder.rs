@@ -88,6 +88,7 @@ pub trait Encoder<const RESOLUTION: u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use embedded_time::duration::Microseconds;
 
     const ENCODER_RESOLUTION: u32 = 4;
 

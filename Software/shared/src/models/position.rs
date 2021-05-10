@@ -22,7 +22,7 @@ impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::zero();
+    /// let position = Position::<{4}>::zero();
     /// assert_eq!(position.get_resolution(), 4);
     /// assert_eq!(position.get_revolutions(), 0);
     /// assert_eq!(position.get_angle(), 0);
@@ -45,17 +45,17 @@ impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// # Example
     /// ```
     /// use sm4_shared::prelude::Position;
-    /// let position = Position::new(5, 2);
+    /// let position = Position::<{4}>::new(5, 2);
     ///
     /// assert_eq!(position.get_resolution(), 4);
     /// assert_eq!(position.get_revolutions(), 5);
     /// assert_eq!(position.get_angle(), 2);
     ///
-    /// let invalid_position = Position::new(1, 7);
+    /// let invalid_position = Position::<{4}>::new(1, 7);
     /// assert_eq!(invalid_position.get_revolutions(), 2);
     /// assert_eq!(invalid_position.get_angle(), 3);
     ///
-    /// let invalid_position = Position::new(-1, 2);
+    /// let invalid_position = Position::<{4}>::new(-1, 2);
     /// assert_eq!(invalid_position.get_revolutions(), -1);
     /// assert_eq!(invalid_position.get_angle(), 2);
     /// ```
@@ -87,10 +87,10 @@ impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::new(1, 2);
+    /// let position = Position::<{4}>::new(1, 2);
     /// assert_eq!(position.get_increments(), 6);
     ///
-    /// let position = Position::new(-1, 2);
+    /// let position = Position::<{4}>::new(-1, 2);
     /// assert_eq!(position.get_increments(), -2);
     /// ```
     pub fn get_increments(&self) -> i32 {
@@ -102,10 +102,10 @@ impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let position = Position::new(1, 2);
+    /// let position = Position::<{4}>::new(1, 2);
     /// assert_eq!(position.get_relative_revolutions(), 1.5);
     ///
-    /// let position = Position::new(-1, 2);
+    /// let position = Position::<{4}>::new(-1, 2);
     /// assert_eq!(position.get_relative_revolutions(), -0.5);
     /// ```
     pub fn get_relative_revolutions(&self) -> f32 {
@@ -136,7 +136,7 @@ impl<const RESOLUTION: u32> AddAssign<i32> for Position<RESOLUTION> {
     /// ```
     /// use sm4_shared::prelude::Position;
     ///
-    /// let mut position = Position::zero();
+    /// let mut position = Position::<{4}>::zero();
     /// position += 1;
     ///
     /// assert_eq!(position.get_increments(), 1);
@@ -172,8 +172,8 @@ impl<const RESOLUTION: u32> SubAssign<i32> for Position<RESOLUTION> {
 /// ```
 /// use sm4_shared::prelude::Position;
 ///
-/// let position = Position::zero();
-/// let new_position = position + &Position::new(3, 1);
+/// let position = Position::<{4}>::zero();
+/// let new_position = position + &Position::<{4}>::new(3, 1);
 ///
 /// assert_eq!(new_position.get_revolutions(), 3);
 /// assert_eq!(new_position.get_angle(), 1);
@@ -220,10 +220,13 @@ impl<const RESOLUTION: u32> SubAssign<&Position<RESOLUTION>> for Position<RESOLU
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    const ENCODER_RESOLUTION: u32 = 4;
 
     #[test]
     fn position_manipulation() {
-        let mut position = Position::<ENCODER_RESOLUTION>::zero();
+        let mut position = Position::<{ ENCODER_RESOLUTION }>::zero();
         position += 6;
         assert_eq!(position.revolutions, 1);
         assert_eq!(position.angle, 2);
@@ -241,32 +244,32 @@ mod tests {
         assert_eq!(position.angle, 2);
         assert_eq!(position.get_increments(), -2);
 
-        let position = Position::<ENCODER_RESOLUTION>::zero();
+        let position = Position::<{ ENCODER_RESOLUTION }>::zero();
         let new_position = position + &Position::new(3, 1);
         assert_eq!(new_position.get_revolutions(), 3);
         assert_eq!(new_position.get_angle(), 1);
 
-        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let position = Position::<{ ENCODER_RESOLUTION }>::new(1, 1);
         let new_position = position + &Position::new(3, 1);
         assert_eq!(new_position.get_revolutions(), 4);
         assert_eq!(new_position.get_angle(), 2);
 
-        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let position = Position::<{ ENCODER_RESOLUTION }>::new(1, 1);
         let new_position = position + &Position::new(3, 3);
         assert_eq!(new_position.get_revolutions(), 5);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let position = Position::<{ ENCODER_RESOLUTION }>::new(1, 1);
         let new_position = position - &Position::new(0, 1);
         assert_eq!(new_position.get_revolutions(), 1);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let position = Position::<{ ENCODER_RESOLUTION }>::new(1, 1);
         let new_position = position - &Position::new(1, 1);
         assert_eq!(new_position.get_revolutions(), 0);
         assert_eq!(new_position.get_angle(), 0);
 
-        let position = Position::<ENCODER_RESOLUTION>::new(1, 1);
+        let position = Position::<{ ENCODER_RESOLUTION }>::new(1, 1);
         let new_position = position - &Position::new(1, 2);
         assert_eq!(new_position.get_revolutions(), -1);
         assert_eq!(new_position.get_angle(), 3);

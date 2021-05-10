@@ -33,7 +33,7 @@ improving tooling used to develop for embedded systems.
 
 ## License
 
-Licensed under MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT).
+Licensed under MIT license ([LICENSE-MIT](../LICENSE-MIT) or http://opensource.org/licenses/MIT).
 
 
 [Knurling]: https://knurling.ferrous-systems.com

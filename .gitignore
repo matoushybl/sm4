@@ -5,7 +5,7 @@
 /Hardware/rev2/out2/
 /Software/Deps/
 /Software/.idea
-/Software/sm4-controller/.idea
-/Software/sm4-firmware/.idea
+/Software/controller/.idea
+/Software/embedded/.idea
 /Thesis/out
 /out/

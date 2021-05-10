@@ -20,5 +20,7 @@ jobs:
           components: clippy
       - name: cargo build release
         run: |
-          cd Software/sm4-firmware
+          cd Software
+          cargo clippy
+          cd embedded
           cargo clippy
