@@ -3,7 +3,10 @@
 
 This section describes the of the electronics of the SM4 stepper motor controller.
 First, the critical components are selected and preliminary design is done based on the requirements stated in the Section~\ref{sec:requirements}.
-Second, both of the hardware revisions and their design are described.
+Second, the design of the electronics is described.
+There were two electronics revisions, where different stepper motor driver \acs{ic} was used in each of them and there were some also some minor changes.
+In the description the second revision is prioritized with the the exception of the design of the circuit of the stepper motor controller \acs{ic} where both of the revisions are described.
+Further, manufacturing of the \acs{pcb} and assembly in JLCPCB is described.
 
 In the Figure~\ref{fig:sm4diagram}, we can see the block diagram of the controller.
 The central part is the \acs{mcu}, which is connected to the two stepper motor drivers and encoders (hardware encoders are only available in the second electronics revision).
@@ -48,7 +51,7 @@ This MCU conforms to all the requirement and has enough peripherals to support f
 \label{subsec:stepper_ic}
 In order to select a proper driver IC for the SM4 stepper motor controller a simplified comparison was performed.
 Since the beginning we were aiming at using the Trinamic made stepper motor driver ICs since there are very good references from the 3D printing community\cite{prusa_original_2017,prusa_original_2019,3daddict_stepper_2020} for them, and we wanted to secure silent function of the motor controller.
-With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100-TA as we aimed for as simple chip as possible and also maximum voltage of about 50~V, while the second hardware revision utilizes the TMC2226-SA, which is a more modern, and a fully featured stepper motor driver \acs{ic}, which also has higher peak current.
+With the prior experience with DRV8825 and the A4988 modules described in the Chapter on Related work~\ref{ch:related_work}, we decided to select two drivers from Trinamic - the first hardware revision utilizes the TMC2100-TA as we aimed for as simple chip as possible and also maximum voltage of about 43~V, while the second hardware revision utilizes the TMC2226-SA, which is a more modern, and a fully featured stepper motor driver \acs{ic}, which also has higher peak current.
 By selecting these two stepper driver \acs{ic}s, we are conforming to the requirements \textbf{C-01} and \textbf{C-02}.
 The comparison can be seen in the following table:
 
