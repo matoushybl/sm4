@@ -17,5 +17,10 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           working_directory: Thesis
+          args: -pdf -file-line-error -interaction=nonstopmode -outdir=out -f
           root_file: |
             thesis.tex
+      - uses: actions/upload-artifact@v2
+        with:
+          name: PDF
+          path: Thesis/out/thesis.pdf
