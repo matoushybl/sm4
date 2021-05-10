@@ -19,9 +19,10 @@ jobs:
           mkdir -p out/text
       - name: build
         uses: xu-cheng/latex-action@v2
+        continue-on-error: true
         with:
           working_directory: Thesis
-          args: -pdf -file-line-error -interaction=nonstopmode -outdir=out -f
+          args: -pdf -file-line-error -interaction=nonstopmode -outdir=out -f -silent
           root_file: |
             thesis.tex
       - uses: actions/upload-artifact@v2
