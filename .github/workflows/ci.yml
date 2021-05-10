@@ -33,6 +33,6 @@ jobs:
       - name: cargo build release
         run: |
           cd Software
-          cargo build --release
+#          cargo build --release
           cd embedded
           cargo build --release

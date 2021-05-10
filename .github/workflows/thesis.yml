@@ -1,0 +1,20 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+name: Build thesis
+
+jobs:
+  thesis:
+    name: Latex-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: build
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: |
+            Thesis/thesis.tex
