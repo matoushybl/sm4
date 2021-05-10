@@ -16,5 +16,6 @@ jobs:
       - name: build
         uses: xu-cheng/latex-action@v2
         with:
+          working_directory: Thesis
           root_file: |
             Thesis/thesis.tex

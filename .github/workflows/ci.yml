@@ -32,7 +32,5 @@ jobs:
 
       - name: cargo build release
         run: |
-          cd Software
-#          cargo build --release
-          cd embedded
+          cd Software/embedded
           cargo build --release

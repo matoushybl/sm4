@@ -20,7 +20,5 @@ jobs:
           components: clippy
       - name: cargo build release
         run: |
-          cd Software
-#          cargo clippy
-          cd embedded
+          cd Software/embedded
           cargo clippy
