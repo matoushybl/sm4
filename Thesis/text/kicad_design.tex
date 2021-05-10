@@ -36,7 +36,7 @@ As for the analog filtering circuit, a simple low-pass filter utilizing a ferrit
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{obrazky/schem_mcu_power_filter}
+    \includegraphics[width=0.5\textwidth]{obrazky/schem_mcu_power_filter}
     \caption{The MCU power supply filtering schematic.}
     \label{fig:schem_mcu_power}
 \end{figure}
@@ -66,6 +66,30 @@ The feed resistor value was also used as it was in the example project, but the 
     \includegraphics[width=0.4\textwidth]{obrazky/schem_mcu_aux}
     \caption{Auxiliary circuits for the MCU - boot mode, reset and oscillator.}
     \label{fig:schem_mcu_aux}
+\end{figure}
+
+\subsection{Power System}
+\label{subsec:power_system}
+As was discussed in the Section~\ref{subsubsec:power_design}, the power system consists of two rails - the power electronics rail and the 5~V rail for the \acs{mcu} and supplementary circuits.
+In both cases, the rail should be filtered and should employ some safety features.
+
+As for the power electronics rail, only input voltage filtering using capacitors was utilized.
+The main reasoning being that this should be fused on the side of the power source and that reverse-voltage protection would require quite large components.
+
+The situation is different with the 5~V power rail for peripherals and the \acs{mcu}.
+This power rail utilizes 500~mA \acs{ptc} fuse, reverse-voltage protection implemented using P-channel MOSFET and a low-pass filter comprising of a ferrite bead and a capacitor.
+This power rail is connected to the connectors with CAN bus and I\textsuperscript{2}C.
+The output of the filtered power rail is merged with a 5~V power coming from the USB-C connector (which is also fused using a 500~mA PTC fuse) using Schottky diodes.
+For powering the MCU with 3.3~V, the 5~V is regulated with an LDO (Low-Dropout) regulator.
+The whole power rail can be seen in the schematic in the Figure~\ref{fig:power}.
+
+In the future revisions, the input protection circuits may be replaced by an eFuse\cite{greatscott_best_2021,texas_instruments_efuse_2021}, an IC integrating the input power protection circuits such as overvoltage protection, undervoltage protection, overcurrent protection and reverse-voltage protection.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{obrazky/schem_power}
+    \caption{The 5~V power rail for powering the MCU and peripherals.}
+    \label{fig:power}
 \end{figure}
 
 \subsection{CAN Bus Circuitry}
@@ -115,6 +139,29 @@ Both of the circuits were adapted from the \acs{ic} datasheet\cite{trinamic_tmc2
 The datasheet recommends motor voltage filtering using quite large electrolytic capacitors (100~\textmu F), in order to save vertical space, these capacitors were replaced using 10~\textmu F capacitors with maximal voltage of 50~V.
 
 \subsubsection{Revision 1}
+The schematic for the circuit of the first revision can be seen in the Figure~\ref{fig:schem_driver1}.
+This revision utilized the TMC2100-TA driver \acs{ic}.
+This driver is configured using \acs{gpio} and it is configured in the following way:
+\begin{itemize}
+    \item use internal sense resistor with \textbf{AIN} as current reference for internal sense resistors or use external sense resistors with \textbf{AIN} for scaling,
+    \item use either SpreadCycle\texttrademark or StealthChop\texttrademark with interpolation and 16 microsteps,
+    \item shortest slow decay phase,
+    \item recommended chopper hysteresis - low hysteresis with 4\% of full scale current,
+    \item shortest chopper blank time,
+\end{itemize}
+These values were chosen by following the recommended values from the datasheet.
+In the schematic, which was adapted from the recommended schematic in the datasheet\cite{trinamic_tmc2100-datasheet_2018}, we can see motor power rail filtering capacitor composed from five 10~\textmu F capacitors, then there are some more filtering capacitors and capacitors for the integrated charge pump.
+In the center of the schematic, there is the driver \acs{ic} itself.
+The driver \acs{ic} is controlled using the \textbf{REF, EN, STEP, DIR} and \textbf{MODE} signals, to indicate for an error, the \textbf{ERR} signal is consumed by the \acs{mcu}.
+The current sensing resistor values are set to 0.22~\textohm, allowing for driving motors with 0.96~A RMS phase current.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{obrazky/schem_driver_rev1}
+    \caption{The schematic of the stepper motor driver IC in the first revision.}
+    \label{fig:schem_driver1}
+\end{figure}
+
 \subsubsection{Revision 2}
 In the Figure~\ref{fig:schem_driver2}, we can see the schematic of the second hardware revision with the TMC2226-SA stepper motor driver \acs{ic}.
 On the top, we can see the motor power rail filtering capacitors and also some auxiliary capacitors required by the datasheet.
@@ -124,12 +171,12 @@ There are also some other configuration pins, but these have not been connected 
 For controlling the driver \acs{ic}, the \textbf{STEP} and \textbf{DIR} pins are utilized.
 Finally, in the bottom right corner there are the current sensing resistors for the motor phases current.
 Their value was chosen by the datasheet so support the maximal RMS phase current of 1.92 A - 0.1~\textohm.
-It is important to select resistors with the proper power rating, in this case $P = R*I^2 = 0.1\Omega * (1.92 A)^2 = 0.4 W$, therefore we need resistors rated for at 0.5 W of power dissipation.
+It is important to select resistors with the proper power rating, in this case $P = R * I^2 = 0.1\Omega * (1.92 A)^2 = 0.4 W$, therefore we need resistors rated for at 0.5 W of power dissipation.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{obrazky/schem_driver_rev2}
-    \caption{Designing the MCU connections using STM32CubeMX.}
+    \caption{The schematic of the stepper motor driver IC in the second revision.}
     \label{fig:schem_driver2}
 \end{figure}
 
@@ -149,23 +196,47 @@ Another reason is that the student boards have Zener diodes limiting the voltage
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{obrazky/schem_aux}
-    \caption{Designing the MCU connections using STM32CubeMX.}
+    \includegraphics[width=0.5\textwidth]{obrazky/schem_aux}
+    \caption{Auxiliary circuits schematic - LEDs, I\textsuperscript{2}C, motor voltage measurement.}
     \label{fig:schem_aux}
 \end{figure}
 
+We wanted to future-proof the SM4 driver and therefore we added three connectors which will enable expanding the controller in the future.
+The connectors' schematic is depicted in the Figure~\ref{fig:schem_enc_gpio}.
+The first connector on the left is a connector designed to add two incremental encoders to the stepper driver.
+It supports quadrature encoders with index pulse.
+The second connector in the middle is the \acs{gpio} connector, which can be used to expand the driver's capabilities using five logic signals.
+Finally, on the right, there is a connector with two \acs{spi} buses broken out, which should allow for connecting SSI absolute encoders by bit-banging the SSI bus.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{obrazky/schem_enc_gpio}
-    \caption{Designing the MCU connections using STM32CubeMX.}
+    \caption{Schematic of connectors that allow for connecting incremental and absolute encoders and extending the driver with logic signals.}
     \label{fig:schem_enc_gpio}
 \end{figure}
-% leds, conns, voltage divider
 
 \subsection{PCB Design}
 \label{subsec:pcb_design}
+When the schematic design was done, we went on to route the \acs{pcb}.
+As for the layer stackup, we utilized the four-layer one, with internal layers used for \acs{gnd} and 3.3~V routing and the outside layers for signals.
+The stackup was previously described in the Section~\ref{subsec:hardware_design_choices}.
+With trace widths and via sizes, we aimed for compatibility with the technologies provided by the JLCPCB manufacturing house, but with some margin to be safe there are not problems with manufacturing, which meant 0.2~mm minimal trace width and 0.8~mm wide vias, with 0.4~mm via drill size.
+Given limitations with the assembly service, all of the components are placed on the top side of the \acs{pcb}.
+The \acs{pcb} was designed to fit the area on the Raspberry Pi behind the ethernet and \acs{usb} ports and is therefore 65x56~mm.
+When designing we also aimed to have the power and communication connectors along a single side of the \acs{pcb} and connectors for the motors on another one.
+The final \acs{pcb} design for both of the revisions can be seen in the Figures~\ref{fig:pcb1} and~\ref{fig:pcb2}.
 
-\subsection{Manufacturing}
-\label{subsec:manufacturing}
-
+\begin{figure}[H]
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{obrazky/pcb_rev1}
+        \caption{Rendered first revision PCB.}
+        \label{fig:pcb1}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{obrazky/pcb_rev2}
+        \caption{Rendered second revision PCB.}
+        \label{fig:pcb2}
+    \end{minipage}
+\end{figure}

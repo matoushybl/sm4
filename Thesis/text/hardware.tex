@@ -80,33 +80,23 @@ The comparison can be seen in the following table:
 \end{sidewaystable}
 \newpage
 
-% TODO read and refactor
 \subsubsection{SM4 power design}
 \label{subsubsec:power_design}
 The power design of the SM4 stepper motor controller is fairly simple.
 According to the requirements, the only requirement for it is to provide basic electrical safety features, such as fuses and reverse voltage protection \textbf{FR-07}.
 The controller features two power rails - one for the power electronics, that can utilize quite high voltages and one 5~V for the MCU and the peripheral circuits.
 With the first revision, we were considering using a single power-rail with all voltages derived from the power electronics one.
-This was however dismissed as a buck converter from quite a high voltage would be required and designing a buck converter is out of the scope of this project and also the motor controller was never meant to be use as a standalone device, meaning that another device could provide the power for the 5~V rail.
-The buck converter would also pose EMI (ElectroMagnetic Interference) problems and would increase the price of the motor controller.
-
-As for the power electronics, only input voltage filtering using capacitors was utilized.
-The main reasoning being that this should be fused on the side of the power source and that reverse-voltage protection would require quite large components.
-
-The situation is different with the 5~V power rail for peripherals and the MCU.
-This power rail utilizes 500~mA PTC fuse, reverse-voltage protection implemented using P-channel MOSFET and a low-pass filter comprising of a ferrite bead and a capacitor.
-This power rail is connected to the connectors with CAN bus and I\textsuperscript{2}C.
-The output of the filtered power rail is merged with a 5~V power coming from the USB-C connector (which is also fused using a 500~mA PTC fuse) using Schottky diodes.
-For powering the MCU with 3.3~V, the 5~V is regulated with an LDO (Low-Dropout) regulator.
-The whole power rail can be seen in the schematic in the Figure~\ref{fig:power}.
-
-In the future revisions, the input protection circuits may be replaced by an eFuse\cite{greatscott_best_2021,texas_instruments_efuse_2021}, an IC integrating the input power protection circuits such as overvoltage protection, undervoltage protection, overcurrent protection and reverse-voltage protection.
+This was however dismissed as a buck converter from quite a high voltage would be required and designing a buck converter is out of the scope of this project and also the motor controller was never meant to be used as a standalone device, meaning that another device could provide the power for the 5~V rail.
+The buck converter would also pose \acs{emi} (\acl{emi}) problems and would increase the price of the motor controller.
+In the end, the 5~V power rail is properly fused, filtered and given that the voltage may come from different sources also merged using diodes.
+The power electronics rail on the other hand is only filtered.
+A block diagram depicting the power system can be seen in the Figure~\ref{fig:power_diagram}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{obrazky/power}
-    \caption{The 5~V power rail for powering the MCU and peripherals.}
-    \label{fig:power}
+    \includegraphics[width=0.9\textwidth]{obrazky/power_block_diagram}
+    \caption{The block diagram of the power system.}
+    \label{fig:power_diagram}
 \end{figure}
 
 \subsubsection{PCB}

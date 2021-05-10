@@ -3373,10 +3373,10 @@ Wire Wire Line
 Wire Wire Line
 	6450 1450 6450 1500
 $Comp
-L Transistor_FET:ZXMP4A16G Q?
+L Transistor_FET:ZXMP4A16G Q1
 U 1 1 60AD0E01
 P 6450 1250
-F 0 "Q?" V 6792 1250 50  0000 C CNN
+F 0 "Q1" V 6792 1250 50  0000 C CNN
 F 1 "NDT2955" V 6701 1250 50  0000 C CNN
 F 2 "Package_TO_SOT_SMD:SOT-223-3_TabPin2" H 6650 1175 50  0001 L CIN
 F 3 "https://www.diodes.com/assets/Datasheets/ZXMP4A16G.pdf" H 6450 1250 50  0001 L CNN
@@ -3384,4 +3384,6 @@ F 4 "C194179" V 6450 1250 50  0001 C CNN "LCSC"
 	1    6450 1250
 	0    -1   -1   0   
 $EndComp
+Text GLabel 11425 5825 0    50   Input ~ 0
+SCL
 $EndSCHEMATC
