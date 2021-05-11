@@ -3,8 +3,11 @@ use sm4_shared::prelude::*;
 use stm32f4xx_hal::stm32;
 use stm32f4xx_hal::stm32::{TIM2, TIM5};
 
+/// Trait used to abstract STEP pulse and other counters.
 pub trait Counter {
+    /// Return the current value of the counter.
     fn get_value(&self) -> u32;
+    /// Resets the value of the counter.
     fn reset_value(&mut self);
 }
 

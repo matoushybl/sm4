@@ -53,7 +53,7 @@ Using the 128~kilobyte sectors would also be possible, but given their size copy
 
 There is however a problem with using the sectors in the beginning of the flash memory as that is where the firmware is usually stored.
 The solution to this problem is by leaving the first sector (Sector 0) for the vector table and instructing the linker to place the \textbf{.text} section of the program further in the memory.
-According to the documentation of the \textbf{cortex-m} Rust crate~\cite{rust_embedded_wg_rust-embeddedcortex-m-rt_nodate}, this can be achieved by adding the line \textbf{\_stext = ORIGIN(FLASH) + OFFSET} to the linker script, where the \textbf{OFFSET} shall be replaced with the offset of the target sector where we want our program to be stored, in our case \textbf{0x0000C000}, which indicates the start of the Sector 3.
+According to the documentation of the \textbf{cortex-m} Rust crate~\cite{rust_embedded_devices_wg_rust-embeddedcortex-m_2021}, this can be achieved by adding the line \textbf{\_stext = ORIGIN(FLASH) + OFFSET} to the linker script, where the \textbf{OFFSET} shall be replaced with the offset of the target sector where we want our program to be stored, in our case \textbf{0x0000C000}, which indicates the start of the Sector 3.
 
 As for the actual implementation of the emulation for the STM32F405, we decided to develop our own, as no suitable Rust crate was available for it.
 The development was inspired by a crate that implemented the emulation for STM32F103~\cite{dubrov_idubroveeprom_2020} and by following the implementation in the Application Note.

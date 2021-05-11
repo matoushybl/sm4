@@ -1,6 +1,8 @@
-\section{Development of the bare metal firmware}
+\section{Development of the Bare-Metal Firmware}
 \label{sec:firmware}
 This Section describes the development of the bare-metal firmware.
+First, we go ove the firmware architecture, where we describe the technology stack and the architecture itself.
+Second, we go over some of the components of the firmware that are either crucial to the firmware or their implementation stands out in any way.
 
 \subsection{Firmware Architecture}
 \label{subsec:firmware-arch}
@@ -122,8 +124,7 @@ where
         ))
     }
     fn set_current(&mut self, current: f32) {
-        let voltage =
-            (current.abs() * MAX_V_REF as f32 / V_FS * (self.sense_r + R_OFFSET) / 0.707) as u16;
+        let voltage = (current.abs() * MAX_V_REF as f32 / V_FS * (self.sense_r + R_OFFSET) / 0.707) as u16;
         self.current_dac.set_output_voltage(voltage.min(MAX_V_REF));
     }
 }
@@ -131,6 +132,68 @@ where
 
 \subsection{Simulated encoders}
 \label{subsec:simulated_encoders}
+The SM4 stepper motor controller is meant to be used without hardware encoder in its default hardware configuration.
+This requirement was caused by the reasoning that the motor controller is also targeted for the BPC-PRP course, where students use the distance driven by the wheels to calculate the robot's position in the world's reference frame.
+Thankfully, with stepper motor, it is quite easy to simulate encoders by counting the number of microsteps the motor was supposed to move by.
+The simulated encoders do not provide real feedback from the system, on the other hand when some conditions are met (no step skipping - no motor overloading), the measurement from them can be quite reliable.
+
+As we already discussed in the Section~\ref{subsec:stepper_control}, we decided to not use counting the microsteps in software, but in hardware instead.
+This is done by chaining timers in the \acs{mcu}.
+We already mentioned that the timers used to generate \textbf{STEP} signal are configured to be the clock source for other timers, and by counting the clock cycles, we are able to count the number of microsteps the motor was commanded to turn by.
+
+The working principle is really simple and also saves computational power of the \acs{mcu}, but has one disadvantage - the amount of microsteps per sampling period is too low to be used for velocity control, as the difference between the consecutive position reads is usually zero and only sometimes 1.
+This poses a big problem for motor control systems of any kind.
+
+Let's have a look at the implementation.
+Similarly to what we did with the \textbf{STEP} signal generators, we also declared a trait to abstract away the thing that counts the pulses, so that on the outside it doesn't matter how the counting works.
+The trait can be seen in the Listing~\ref{lst:step_counter}.
+
+\begin{lstlisting}[caption={Counter trait for counting STEP pulses.},label=lst:step_counter]
+/// Trait used to abstract STEP pulse and other counters.
+pub trait Counter {
+    /// Return the current internal value of the counter.
+    fn get_value(&self) -> u32;
+    /// Resets the internal value of the counter.
+    fn reset_value(&mut self);
+}
+\end{lstlisting}
+The trait was implemented for the timers 2 and 5 of the \acs{mcu}.
+
+Apart from this trait, an abstraction over the whole encoded was developed.
+The abstraction utilizes const generics to define encoder resolution and can be seen in the Listing~\ref{lst:encoder_trait}.
+
+\begin{lstlisting}[caption={Encoder trait for abstracting encoders.},label=lst:encoder_trait]
+/// A trait abstracting common encoder functionality.
+/// It is suitable for both incremental and absolute encoders.
+/// It is designed so its [`Self::sample()`] shall be periodically called with known fixed period,
+/// which allows for velocity calculations.
+pub trait Encoder<const RESOLUTION: u32> {
+    /// Returns the velocity measured by the encoder.
+    /// This value is generally calculated from consecutive position readings.
+    fn get_velocity(&self) -> Velocity;
+
+    /// Returns the current position of the shaft.
+    fn get_position(&self) -> Position<RESOLUTION>;
+
+    /// Sets the sampled position to zero.
+    /// This is applicable only with incremental encoders.
+    /// Absolute encoders might offset the zero by software.
+    fn reset_position(&mut self) -> Position<RESOLUTION>;
+
+    /// This functions shall be periodically called to sample the encoder.
+    /// Sampled values are used for position and velocity readings.
+    fn sample(&mut self);
+
+    /// This method shall be called with non-directional encoders whenever there is a change of rotation direction.
+    /// # Arguments
+    /// * `direction` - indicates whether the shaft is now turning in the clockwise or counterclockwise direction.
+    fn notify_direction_changed(&mut self, direction: Direction);
+}
+\end{lstlisting}
+
+Based on this trait and the Counter trait a simulated encoder was developed.
+The big advantage being that the the simulated encoder can be easily replaced by another, hardware or software realized encoders.
+This Encoder trait is further used in the motion controller.
 
 \subsection{Device Monitoring}
 \label{subsec:device_monitoring}
