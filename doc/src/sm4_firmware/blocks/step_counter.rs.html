@@ -135,14 +135,20 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>::{<span class="ident">TIM2</span>, <span class="ident">TIM5</span>};
 
+<span class="doccomment">/// Trait used to abstract STEP pulse and other counters.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Counter</span> {
+    <span class="doccomment">/// Return the current value of the counter.</span>
     <span class="kw">fn</span> <span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span>;
+    <span class="doccomment">/// Resets the value of the counter.</span>
     <span class="kw">fn</span> <span class="ident">reset_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>);
 }
 
