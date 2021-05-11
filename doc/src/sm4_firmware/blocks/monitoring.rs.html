@@ -91,7 +91,6 @@
 <span id="88">88</span>
 <span id="89">89</span>
 <span id="90">90</span>
-<span id="91">91</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">board</span>::<span class="ident">definitions</span>::<span class="ident">BatteryVoltage</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">adc</span>::<span class="ident">config</span>::{<span class="ident">AdcConfig</span>, <span class="ident">Dma</span>, <span class="ident">SampleTime</span>, <span class="ident">Scan</span>, <span class="ident">Sequence</span>};
@@ -149,11 +148,10 @@
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">transfer_ongoing</span> {
             <span class="kw">return</span>;
         }
-        <span class="self">self</span>.<span class="ident">transfer_ongoing</span> <span class="op">=</span> <span class="bool-val">true</span>;
-
         <span class="self">self</span>.<span class="ident">transfer</span>.<span class="ident">start</span>(<span class="op">|</span><span class="ident">adc</span><span class="op">|</span> {
             <span class="ident">adc</span>.<span class="ident">start_conversion</span>();
         });
+        <span class="self">self</span>.<span class="ident">transfer_ongoing</span> <span class="op">=</span> <span class="bool-val">true</span>;
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">transfer_complete</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
