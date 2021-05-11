@@ -26,7 +26,7 @@ impl<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32>
         }
     }
 
-    pub fn ramp(&mut self, global_disable: bool, dictionary: &mut AxisDictionary<RESOLUTION>) {
+    pub fn ramp(&mut self, global_disable: bool, dictionary: &mut dyn AxisDictionary<RESOLUTION>) {
         self.encoder.sample();
         dictionary.set_actual_position(self.encoder.get_position());
 
@@ -56,7 +56,11 @@ impl<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32>
         self.driver.set_current(current);
     }
 
-    pub fn control(&mut self, global_disable: bool, dictionary: &mut AxisDictionary<RESOLUTION>) {
+    pub fn control(
+        &mut self,
+        global_disable: bool,
+        dictionary: &mut dyn AxisDictionary<RESOLUTION>,
+    ) {
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {
                 AxisMode::Velocity => dictionary.target_velocity(),

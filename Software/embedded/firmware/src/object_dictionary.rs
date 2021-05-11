@@ -1,42 +1,60 @@
 use sm4_shared::prelude::*;
 
-/// The object dictionary struct represents the global state of the driver
-#[derive(Copy, Clone)]
-pub struct ObjectDictionary<const RESOLUTION: u32> {
-    battery_voltage: f32,
-    temperature: f32,
-    axis1: AxisDictionary<RESOLUTION>,
-    axis2: AxisDictionary<RESOLUTION>,
+pub trait IObjectDictionary<const RESOLUTION: u32> {
+    fn axis1(&self) -> &dyn AxisDictionary<RESOLUTION>;
+
+    fn axis1_mut(&mut self) -> &mut dyn AxisDictionary<RESOLUTION>;
+
+    fn axis2(&self) -> &dyn AxisDictionary<RESOLUTION>;
+
+    fn axis2_mut(&mut self) -> &mut dyn AxisDictionary<RESOLUTION>;
 }
 
-impl<const RESOLUTION: u32> ObjectDictionary<RESOLUTION> {
-    pub fn new() -> Self {
+/// The object dictionary struct represents the global state of the driver
+#[derive(Copy, Clone)]
+pub struct ObjectDictionary<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> {
+    battery_voltage: f32,
+    temperature: f32,
+    axis1: PersistentStoreAxisDictionary<STORAGE, RESOLUTION>,
+    axis2: PersistentStoreAxisDictionary<STORAGE, RESOLUTION>,
+}
+
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32>
+    ObjectDictionary<STORAGE, RESOLUTION>
+{
+    pub fn new(storage: STORAGE) -> Self {
         Self {
             battery_voltage: 0.0,
             temperature: 0.0,
-            axis1: AxisDictionary::new(),
-            axis2: AxisDictionary::new(),
+            axis1: PersistentStoreAxisDictionary::new(storage),
+            axis2: PersistentStoreAxisDictionary::new(storage),
         }
     }
 }
 
-impl<const RESOLUTION: u32> ObjectDictionary<RESOLUTION> {
-    pub fn axis1(&self) -> &AxisDictionary<RESOLUTION> {
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> IObjectDictionary<RESOLUTION>
+    for ObjectDictionary<STORAGE, RESOLUTION>
+{
+    fn axis1(&self) -> &dyn AxisDictionary<RESOLUTION> {
         &self.axis1
     }
 
-    pub fn axis1_mut(&mut self) -> &mut AxisDictionary<RESOLUTION> {
+    fn axis1_mut(&mut self) -> &mut dyn AxisDictionary<RESOLUTION> {
         &mut self.axis1
     }
 
-    pub fn axis2(&self) -> &AxisDictionary<RESOLUTION> {
+    fn axis2(&self) -> &dyn AxisDictionary<RESOLUTION> {
         &self.axis2
     }
 
-    pub fn axis2_mut(&mut self) -> &mut AxisDictionary<RESOLUTION> {
+    fn axis2_mut(&mut self) -> &mut dyn AxisDictionary<RESOLUTION> {
         &mut self.axis2
     }
+}
 
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32>
+    ObjectDictionary<STORAGE, RESOLUTION>
+{
     pub fn battery_voltage(&self) -> f32 {
         self.battery_voltage
     }

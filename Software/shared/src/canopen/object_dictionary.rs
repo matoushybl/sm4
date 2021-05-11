@@ -31,8 +31,44 @@ impl Default for CurrentSettings {
     }
 }
 
+pub trait AxisDictionary<const RESOLUTION: u32> {
+    fn mode(&self) -> AxisMode;
+    fn enabled(&self) -> bool;
+    fn target_velocity(&self) -> Velocity;
+    fn actual_velocity(&self) -> Velocity;
+    fn target_position(&self) -> Position<{ RESOLUTION }>;
+    fn actual_position(&self) -> Position<{ RESOLUTION }>;
+    fn current(&self) -> CurrentSettings;
+    fn velocity_controller_settings(&self) -> ControllerSettings;
+    fn position_controller_settings(&self) -> ControllerSettings;
+    fn velocity_feedback_control_enabled(&self) -> bool;
+    fn set_mode(&mut self, mode: AxisMode);
+    fn set_enabled(&mut self, enabled: bool);
+    fn set_target_velocity(&mut self, target_velocity: Velocity);
+    fn set_actual_velocity(&mut self, actual_velocity: Velocity);
+    fn set_target_position(&mut self, target_position: Position<RESOLUTION>);
+    fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>);
+    fn set_current(&mut self, current: CurrentSettings);
+    fn set_velocity_controller_settings(
+        &mut self,
+        velocity_controller_settings: ControllerSettings,
+    );
+    fn set_position_controller_settings(
+        &mut self,
+        position_controller_settings: ControllerSettings,
+    );
+    fn set_velocity_feedback_control_enabled(&mut self, velocity_feedback_control_enabled: bool);
+    fn acceleration(&self) -> f32;
+    fn set_acceleration(&mut self, acceleration: f32);
+}
+
+pub trait ObjectDictionaryStorage {
+    fn save_f32(&mut self, value: f32);
+    fn load_f32(&mut self) -> Option<f32>;
+}
+
 #[derive(Copy, Clone)]
-pub struct AxisDictionary<const RESOLUTION: u32> {
+pub struct PersistentStoreAxisDictionary<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> {
     mode: AxisMode,
     enabled: bool,
     target_velocity: Velocity,
@@ -44,10 +80,13 @@ pub struct AxisDictionary<const RESOLUTION: u32> {
     position_controller_settings: ControllerSettings,
     velocity_feedback_control_enabled: bool,
     acceleration: f32,
+    storage: STORAGE,
 }
 
-impl<const RESOLUTION: u32> AxisDictionary<RESOLUTION> {
-    pub fn new() -> Self {
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32>
+    PersistentStoreAxisDictionary<STORAGE, RESOLUTION>
+{
+    pub fn new(storage: STORAGE) -> Self {
         Self {
             mode: Default::default(),
             enabled: false,
@@ -60,86 +99,86 @@ impl<const RESOLUTION: u32> AxisDictionary<RESOLUTION> {
             position_controller_settings: ControllerSettings::new(3.0, 0.001, 0.0001, 3.0),
             velocity_feedback_control_enabled: false,
             acceleration: 50.0,
+            storage,
         }
     }
 }
 
-impl<const RESOLUTION: u32> AxisDictionary<RESOLUTION> {
-    pub fn mode(&self) -> AxisMode {
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> AxisDictionary<{ RESOLUTION }>
+    for PersistentStoreAxisDictionary<STORAGE, RESOLUTION>
+{
+    fn mode(&self) -> AxisMode {
         self.mode
     }
-    pub fn enabled(&self) -> bool {
+    fn enabled(&self) -> bool {
         self.enabled
     }
-    pub fn target_velocity(&self) -> Velocity {
+    fn target_velocity(&self) -> Velocity {
         self.target_velocity
     }
-    pub fn actual_velocity(&self) -> Velocity {
+    fn actual_velocity(&self) -> Velocity {
         self.actual_velocity
     }
-    pub fn target_position(&self) -> Position<RESOLUTION> {
+    fn target_position(&self) -> Position<RESOLUTION> {
         self.target_position
     }
-    pub fn actual_position(&self) -> Position<RESOLUTION> {
+    fn actual_position(&self) -> Position<RESOLUTION> {
         self.actual_position
     }
-    pub fn current(&self) -> CurrentSettings {
+    fn current(&self) -> CurrentSettings {
         self.current
     }
-    pub fn velocity_controller_settings(&self) -> ControllerSettings {
+    fn velocity_controller_settings(&self) -> ControllerSettings {
         self.velocity_controller_settings
     }
-    pub fn position_controller_settings(&self) -> ControllerSettings {
+    fn position_controller_settings(&self) -> ControllerSettings {
         self.position_controller_settings
     }
-    pub fn velocity_feedback_control_enabled(&self) -> bool {
+    fn velocity_feedback_control_enabled(&self) -> bool {
         self.velocity_feedback_control_enabled
     }
 
-    pub fn set_mode(&mut self, mode: AxisMode) {
+    fn set_mode(&mut self, mode: AxisMode) {
         self.mode = mode;
     }
-    pub fn set_enabled(&mut self, enabled: bool) {
+    fn set_enabled(&mut self, enabled: bool) {
         self.enabled = enabled;
     }
-    pub fn set_target_velocity(&mut self, target_velocity: Velocity) {
+    fn set_target_velocity(&mut self, target_velocity: Velocity) {
         self.target_velocity = target_velocity;
     }
-    pub fn set_actual_velocity(&mut self, actual_velocity: Velocity) {
+    fn set_actual_velocity(&mut self, actual_velocity: Velocity) {
         self.actual_velocity = actual_velocity;
     }
-    pub fn set_target_position(&mut self, target_position: Position<RESOLUTION>) {
+    fn set_target_position(&mut self, target_position: Position<RESOLUTION>) {
         self.target_position = target_position;
     }
-    pub fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>) {
+    fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>) {
         self.actual_position = actual_position;
     }
-    pub fn set_current(&mut self, current: CurrentSettings) {
+    fn set_current(&mut self, current: CurrentSettings) {
         self.current = current;
     }
-    pub fn set_velocity_controller_settings(
+    fn set_velocity_controller_settings(
         &mut self,
         velocity_controller_settings: ControllerSettings,
     ) {
         self.velocity_controller_settings = velocity_controller_settings;
     }
-    pub fn set_position_controller_settings(
+    fn set_position_controller_settings(
         &mut self,
         position_controller_settings: ControllerSettings,
     ) {
         self.position_controller_settings = position_controller_settings;
     }
-    pub fn set_velocity_feedback_control_enabled(
-        &mut self,
-        velocity_feedback_control_enabled: bool,
-    ) {
+    fn set_velocity_feedback_control_enabled(&mut self, velocity_feedback_control_enabled: bool) {
         self.velocity_feedback_control_enabled = velocity_feedback_control_enabled;
     }
-    pub fn acceleration(&self) -> f32 {
+    fn acceleration(&self) -> f32 {
         self.acceleration
     }
 
-    pub fn set_acceleration(&mut self, acceleration: f32) {
+    fn set_acceleration(&mut self, acceleration: f32) {
         self.acceleration = acceleration;
     }
 }

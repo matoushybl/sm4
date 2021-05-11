@@ -1,4 +1,5 @@
 use crate::can::{CANOpen, CANOpenMessage};
+use crate::object_dictionary::IObjectDictionary;
 use crate::prelude::LEDs;
 use crate::sm4::OnError;
 use crate::state::DriverState;
@@ -9,7 +10,11 @@ use sm4_shared::prelude::{
     TxPDO3, TxPDO4, Velocity,
 };
 
-pub fn sync<const R: u32>(bus: &mut CANOpen, state: &mut DriverState<R>, leds: &mut LEDs) {
+pub fn sync<const R: u32>(
+    bus: &mut CANOpen,
+    state: &mut dyn IObjectDictionary<R>,
+    leds: &mut LEDs,
+) {
     let pdo = TxPDO1 {
         battery_voltage: (state.object_dictionary().battery_voltage() * 1000.0) as u16,
         temperature: (state.object_dictionary().temperature() * 10.0) as u16,

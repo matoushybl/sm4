@@ -1,20 +1,20 @@
 use crate::prelude::ObjectDictionary;
-use sm4_shared::prelude::NMTState;
+use sm4_shared::prelude::{NMTState, ObjectDictionaryStorage};
 
 const SPEED_COMMAND_RESET_INTERVAL: u8 = 10; // ticks of a failsafe timer
 
 #[derive(Copy, Clone)]
-pub struct DriverState<const RESOLUTION: u32> {
+pub struct DriverState<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> {
     nmt_state: NMTState,
-    object_dictionary: ObjectDictionary<RESOLUTION>,
+    object_dictionary: ObjectDictionary<STORAGE, RESOLUTION>,
     last_received_speed_command_down_counter: u8,
 }
 
-impl<const RESOLUTION: u32> DriverState<RESOLUTION> {
-    pub fn new() -> Self {
+impl<STORAGE: ObjectDictionaryStorage, const RESOLUTION: u32> DriverState<STORAGE, RESOLUTION> {
+    pub fn new(storage: STORAGE) -> Self {
         Self {
             nmt_state: NMTState::default(),
-            object_dictionary: ObjectDictionary::new(),
+            object_dictionary: ObjectDictionary::new(storage),
             last_received_speed_command_down_counter: 0,
         }
     }
@@ -56,7 +56,7 @@ impl<const RESOLUTION: u32> DriverState<RESOLUTION> {
         self.last_received_speed_command_down_counter = SPEED_COMMAND_RESET_INTERVAL;
     }
 
-    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary<RESOLUTION> {
+    pub fn object_dictionary(&mut self) -> &mut ObjectDictionary<STORAGE, RESOLUTION> {
         &mut self.object_dictionary
     }
 }
