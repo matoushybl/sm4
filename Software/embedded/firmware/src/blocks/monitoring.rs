@@ -54,11 +54,10 @@ impl Monitoring {
         if self.transfer_ongoing {
             return;
         }
-        self.transfer_ongoing = true;
-
         self.transfer.start(|adc| {
             adc.start_conversion();
         });
+        self.transfer_ongoing = true;
     }
 
     pub fn transfer_complete(&mut self) {

@@ -1,6 +1,12 @@
 use embedded_time::rate::Hertz;
 
+/// This trait is an abstraction over hardware/software that is capable of generating square wave signal of specific frequency.
+/// It is generally implemented by timers.
 pub trait StepGenerator {
+    /// Sets output frequency of the generator.
+    ///
+    /// # Arguments
+    /// * `frequency` - frequency of the output square wave signal
     fn set_step_frequency(&mut self, frequency: Hertz);
 }
 

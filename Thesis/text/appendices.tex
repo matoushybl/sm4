@@ -219,41 +219,32 @@
 %
 %\bigskip
 %
-%{\small
-%%
-%\dirtree{%.
-%.1 /\DTcomment{kořenový adresář přiloženého archivu}.
-%.2 logo\DTcomment{loga školy a fakulty}.
-%.3 BUT\_abbreviation\_color\_PANTONE\_EN.pdf.
-%.3 BUT\_color\_PANTONE\_EN.pdf.
-%.3 FEEC\_abbreviation\_color\_PANTONE\_EN.pdf.
-%.3 FEKT\_zkratka\_barevne\_PANTONE\_CZ.pdf.
-%.3 UTKO\_color\_PANTONE\_CZ.pdf.
-%.3 UTKO\_color\_PANTONE\_EN.pdf.
-%.3 VUT\_barevne\_PANTONE\_CZ.pdf.
-%.3 VUT\_symbol\_barevne\_PANTONE\_CZ.pdf.
-%.3 VUT\_zkratka\_barevne\_PANTONE\_CZ.pdf.
-%.2 obrazky\DTcomment{ostatní obrázky}.
-%.3 soucastky.png.
-%.3 spoje.png.
-%.3 ZlepseneWilsonovoZrcadloNPN.png.
-%.3 ZlepseneWilsonovoZrcadloPNP.png.
-%.2 pdf\DTcomment{pdf stránky generované informačním systémem}.
-%.3 student-desky.pdf.
-%.3 student-titulka.pdf.
-%.3 student-zadani.pdf.
-%.2 text\DTcomment{zdrojové textové soubory}.
-%.3 literatura.tex.
-%.3 prilohy.tex.
-%.3 reseni.tex.
-%.3 uvod.tex.
-%.3 vysledky.tex.
-%.3 zaver.tex.
-%.3 zkratky.tex.
-%%.2 navod-sablona\_FEKT.pdf\DTcomment{návod na používání šablony}.
-%.2 sablona-obhaj.tex\DTcomment{hlavní soubor pro sazbu prezentace k~obhajobě}.
-%%.2 readme.txt\DTcomment{soubor s~popisem obsahu CD}.
-%.2 thesis.tex\DTcomment{hlavní soubor pro sazbu kvalifikační práce}.
-%.2 thesis.sty\DTcomment{balíček pro sazbu kvalifikačních prací}.
-%}
-%}
+\chapter{Contents of the Enclosed Electronic Appendix}
+\label{ch:flash_contents}
+{\small
+%
+\dirtree{%.
+.1 /\DTcomment{Root}.
+.2 .github\DTcomment{CI workflows and auxiliary files}.
+.2 Hardware\DTcomment{Hardware resources for both HW revisions}.
+.3 Cube\DTcomment{STM32CubeMX project for pin assigment}.
+.3 Docs\DTcomment{Datasheets of components}.
+.3 Libs\DTcomment{KiCAD component and footprint libraries}.
+.3 rev1\DTcomment{KiCAD project for the first revision}.
+.3 rev2\DTcomment{KiCAD project for the second revision}.
+.2 Poster\DTcomment{Source file for a future poster}.
+.3 poster\_template.pptx.
+.2 Software\DTcomment{Software projects and source code}.
+.3 controller\DTcomment{The control software}.
+.3 embedded\DTcomment{Workspace containing cross-compiled projects}.
+.4 firmware\DTcomment{The motor controller's firmware}.
+.4 testsuite\DTcomment{Tests for the motor controller's firmware}.
+.3 shared\DTcomment{Project with code shared between firmware and controller}.
+.3 Cargo.toml\DTcomment{Cargo project file}.
+.3 Cargo.lock\DTcomment{Cargo project file lock}.
+.3 LICENSE-MIT\DTcomment{Software License}.
+.3 README.md\DTcomment{Read me for software}.
+.2 Thesis\DTcomment{Source code for this thesis}.
+.2 README.md\DTcomment{Readme for this master's project}.
+}
+}
