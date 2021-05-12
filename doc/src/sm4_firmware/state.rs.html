@@ -63,24 +63,28 @@
 <span id="60">60</span>
 <span id="61">61</span>
 <span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">ObjectDictionary</span>;
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="ident">NMTState</span>;
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::{<span class="ident">NMTState</span>, <span class="ident">ObjectDictionary</span>};
 
 <span class="kw">const</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">10</span>; <span class="comment">// ticks of a failsafe timer</span>
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DriverState</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DriverState</span><span class="op">&lt;</span><span class="ident">ObjectDictionary</span>, <span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> {
     <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>,
-    <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span>,
+    <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>,
     <span class="ident">last_received_speed_command_down_counter</span>: <span class="ident">u8</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">DriverState</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">OD</span>, <span class="kw">const</span> <span class="ident">RESOLUTION</span>: <span class="ident">u32</span><span class="op">&gt;</span> <span class="ident">DriverState</span><span class="op">&lt;</span><span class="ident">OD</span>, <span class="ident">RESOLUTION</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">OD</span>: <span class="ident">ObjectDictionary</span><span class="op">&lt;</span>{ <span class="ident">RESOLUTION</span> }<span class="op">&gt;</span>,
+{
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">object_dictionary</span>: <span class="ident">OD</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">nmt_state</span>: <span class="ident">NMTState</span>::<span class="ident">default</span>(),
-            <span class="ident">object_dictionary</span>: <span class="ident">ObjectDictionary</span>::<span class="ident">new</span>(),
+            <span class="ident">object_dictionary</span>,
             <span class="ident">last_received_speed_command_down_counter</span>: <span class="number">0</span>,
         }
     }
@@ -122,7 +126,7 @@
         <span class="self">self</span>.<span class="ident">last_received_speed_command_down_counter</span> <span class="op">=</span> <span class="ident">SPEED_COMMAND_RESET_INTERVAL</span>;
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">object_dictionary</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">object_dictionary</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ObjectDictionary</span><span class="op">&lt;</span><span class="ident">RESOLUTION</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">object_dictionary</span>
     }
 }

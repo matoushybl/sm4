@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl ObjectDictionaryStorage for <a class=\"struct\" href=\"sm4_firmware/blocks/eeprom/struct.Storage.html\" title=\"struct sm4_firmware::blocks::eeprom::Storage\">Storage</a>","synthetic":false,"types":["sm4_firmware::blocks::eeprom::Storage"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

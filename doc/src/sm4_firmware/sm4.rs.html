@@ -261,6 +261,18 @@
 <span id="258">258</span>
 <span id="259">259</span>
 <span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">i2c</span>::{<span class="ident">I2CSlave</span>, <span class="ident">State</span>};
@@ -268,10 +280,12 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">definitions</span>::{<span class="ident">Axis1</span>, <span class="ident">Axis2</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">state</span>::<span class="ident">DriverState</span>;
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">cell</span>::<span class="ident">RefCell</span>;
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
 <span class="kw">use</span> <span class="ident">hal</span>::<span class="ident">dma</span>::<span class="ident">StreamsTuple</span>;
 <span class="kw">use</span> <span class="ident">hal</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">spin</span>::<span class="ident">Mutex</span>;
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span> <span class="kw">as</span> <span class="ident">hal</span>;
 
 <span class="kw">const</span> <span class="ident">SECOND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">168_000_000</span>;
@@ -298,7 +312,10 @@
     <span class="ident">usb</span>: <span class="ident">USBProtocol</span>,
     <span class="ident">can</span>: <span class="ident">CANOpen</span>,
     <span class="ident">monitoring</span>: <span class="ident">Monitoring</span>,
-    <span class="ident">state</span>: <span class="ident">DriverState</span><span class="op">&lt;</span>{ <span class="ident">ENCODER_RESOLUTION</span> }<span class="op">&gt;</span>,
+    <span class="ident">state</span>: <span class="ident">DriverState</span><span class="op">&lt;</span>
+        <span class="ident">PersistentStoreObjectDictionary</span><span class="op">&lt;</span><span class="ident">Storage</span>, { <span class="ident">ENCODER_RESOLUTION</span> }<span class="op">&gt;</span>,
+        { <span class="ident">ENCODER_RESOLUTION</span> },
+    <span class="op">&gt;</span>,
     <span class="ident">axis1</span>: <span class="ident">Axis1</span>,
     <span class="ident">axis2</span>: <span class="ident">Axis2</span>,
     <span class="ident">i2c</span>: <span class="ident">I2CSlave</span><span class="op">&lt;</span>
@@ -377,11 +394,18 @@
             <span class="ident">sampling_period</span>,
         );
 
-        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;init done&quot;</span>);
+        <span class="kw">static</span> <span class="ident">STORAGE</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Storage</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">Storage</span>::<span class="ident">new</span>()));
+        <span class="ident">STORAGE</span>
+            .<span class="ident">lock</span>()
+            .<span class="ident">borrow_mut</span>()
+            .<span class="ident">init</span>()
+            .<span class="ident">on_error</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Initialization of storage failed.&quot;</span>));
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">DriverState</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="ident">od</span> <span class="op">=</span> <span class="ident">PersistentStoreObjectDictionary</span>::<span class="op">&lt;</span><span class="kw">_</span>, { <span class="ident">ENCODER_RESOLUTION</span> }<span class="op">&gt;</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">STORAGE</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">DriverState</span>::<span class="ident">new</span>(<span class="ident">od</span>);
         <span class="ident">state</span>.<span class="ident">go_to_preoperational_if_needed</span>();
 
+        <span class="ident">defmt</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Init done.&quot;</span>);
         <span class="self">Self</span> {
             <span class="ident">can</span>,
             <span class="ident">leds</span>,
@@ -397,22 +421,22 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">axis1</span>.<span class="ident">control</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis1_mut</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>),
         );
         <span class="self">self</span>.<span class="ident">axis2</span>.<span class="ident">control</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis2_mut</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>),
         );
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ramp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">axis1</span>.<span class="ident">ramp</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis1_mut</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>),
         );
         <span class="self">self</span>.<span class="ident">axis2</span>.<span class="ident">ramp</span>(
             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_movement_blocked</span>(),
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis2_mut</span>(),
+            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">object_dictionary</span>().<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>),
         );
     }
 

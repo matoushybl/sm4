@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"sm4_firmware/blocks/flash/struct.FLASH.html\" title=\"struct sm4_firmware::blocks::flash::FLASH\">FLASH</a>","synthetic":false,"types":["sm4_firmware::blocks::flash::FLASH"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

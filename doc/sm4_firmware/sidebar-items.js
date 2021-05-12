@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["panic",""]],"mod":[["blocks",""],["board",""],["can",""],["i2c",""],["object_dictionary",""],["prelude",""],["protocol",""],["sm4",""],["state",""]],"static":[["COUNT",""]],"struct":[["SM4",""]]});
+initSidebarItems({"fn":[["panic",""]],"mod":[["blocks",""],["board",""],["can",""],["i2c",""],["prelude",""],["protocol",""],["sm4",""],["state",""]],"static":[["COUNT",""]],"struct":[["SM4",""]]});
