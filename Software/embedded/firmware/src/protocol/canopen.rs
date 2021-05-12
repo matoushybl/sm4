@@ -1,13 +1,9 @@
 use crate::can::{CANOpen, CANOpenMessage};
 use crate::prelude::LEDs;
-use crate::sm4::OnError;
 use crate::state::DriverState;
 use bxcan::Frame;
 use core::convert::TryFrom;
-use sm4_shared::prelude::{
-    Axis, NMTRequestedState, ObjectDictionary, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4,
-    SerializePDO, TxPDO1, TxPDO2, TxPDO3, TxPDO4, Velocity,
-};
+use sm4_shared::prelude::*;
 
 pub fn sync<OD, const R: u32>(bus: &mut CANOpen, state: &mut DriverState<OD, R>, leds: &mut LEDs)
 where

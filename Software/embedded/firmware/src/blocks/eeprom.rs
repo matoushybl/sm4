@@ -1,8 +1,7 @@
 use crate::blocks::flash;
 use crate::blocks::flash::{FlashExt, MemIter, UnlockedFlash};
-use crate::sm4::OnError;
 use core::convert::TryInto;
-use sm4_shared::prelude::{ObjectDictionaryKey, ObjectDictionaryStorage};
+use sm4_shared::prelude::*;
 
 use super::flash::FLASH;
 

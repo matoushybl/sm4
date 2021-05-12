@@ -22,6 +22,31 @@ impl ControllerSettings {
             max_output_amplitude,
         }
     }
+
+    pub fn proportional(&self) -> f32 {
+        self.proportional
+    }
+    pub fn integral(&self) -> f32 {
+        self.integral
+    }
+    pub fn derivative(&self) -> f32 {
+        self.derivative
+    }
+    pub fn max_output_amplitude(&self) -> f32 {
+        self.max_output_amplitude
+    }
+    pub fn set_proportional(&mut self, proportional: f32) {
+        self.proportional = proportional;
+    }
+    pub fn set_integral(&mut self, integral: f32) {
+        self.integral = integral;
+    }
+    pub fn set_derivative(&mut self, derivative: f32) {
+        self.derivative = derivative;
+    }
+    pub fn set_max_output_amplitude(&mut self, max_output_amplitude: f32) {
+        self.max_output_amplitude = max_output_amplitude;
+    }
 }
 
 #[derive(Copy, Clone)]

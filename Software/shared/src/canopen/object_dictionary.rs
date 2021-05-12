@@ -28,15 +28,21 @@ pub trait AxisDictionary<const RESOLUTION: u32> {
     fn set_actual_velocity(&mut self, actual_velocity: Velocity);
     fn set_target_position(&mut self, target_position: Position<RESOLUTION>);
     fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>);
-    fn set_current(&mut self, current: CurrentSettings);
-    fn set_velocity_controller_settings(
-        &mut self,
-        velocity_controller_settings: ControllerSettings,
-    );
-    fn set_position_controller_settings(
-        &mut self,
-        position_controller_settings: ControllerSettings,
-    );
+
+    fn set_accelerating_current(&mut self, current: f32);
+    fn set_standstill_current(&mut self, current: f32);
+    fn set_constant_velocity_current(&mut self, current: f32);
+
+    fn set_velocity_controller_p(&mut self, value: f32);
+    fn set_velocity_controller_s(&mut self, value: f32);
+    fn set_velocity_controller_d(&mut self, value: f32);
+    fn set_velocity_controller_max_output(&mut self, value: f32);
+
+    fn set_position_controller_p(&mut self, value: f32);
+    fn set_position_controller_s(&mut self, value: f32);
+    fn set_position_controller_d(&mut self, value: f32);
+    fn set_position_controller_max_output(&mut self, value: f32);
+
     fn set_velocity_feedback_control_enabled(&mut self, velocity_feedback_control_enabled: bool);
     fn acceleration(&self) -> f32;
     fn set_acceleration(&mut self, acceleration: f32);
@@ -53,9 +59,25 @@ pub enum Key {
     AcceleratingCurrent,
     StandStillCurrent,
     ConstantVelocityCurrent,
+    VelocityP,
+    VelocityS,
+    VelocityD,
+    VelocityMaxAction,
+    PositionP,
+    PositionS,
+    PositionD,
+    PositionMaxAction,
 }
 
 impl Key {
+    fn parse(index: u16, subindex: u8) -> Option<(Axis, Key)> {
+        None
+    }
+
+    fn parse_i2c(value: u8) -> Option<(Axis, Key)> {
+        None
+    }
+
     fn value(&self) -> u16 {
         match self {
             Key::Acceleration => 0x01,
@@ -63,6 +85,14 @@ impl Key {
             Key::AcceleratingCurrent => 0x03,
             Key::StandStillCurrent => 0x04,
             Key::ConstantVelocityCurrent => 0x05,
+            Key::VelocityP => 0x06,
+            Key::VelocityS => 0x07,
+            Key::VelocityD => 0x08,
+            Key::VelocityMaxAction => 0x09,
+            Key::PositionP => 0x0a,
+            Key::PositionS => 0x0b,
+            Key::PositionD => 0x0c,
+            Key::PositionMaxAction => 0x0d,
         }
     }
 
@@ -92,6 +122,18 @@ pub struct CurrentSettings {
 }
 
 impl CurrentSettings {
+    pub fn new(
+        standstill_current: f32,
+        accelerating_current: f32,
+        constant_velocity_current: f32,
+    ) -> Self {
+        Self {
+            standstill_current,
+            accelerating_current,
+            constant_velocity_current,
+        }
+    }
+
     pub fn standstill_current(&self) -> f32 {
         self.standstill_current
     }
@@ -100,6 +142,16 @@ impl CurrentSettings {
     }
     pub fn constant_velocity_current(&self) -> f32 {
         self.constant_velocity_current
+    }
+
+    pub fn set_standstill_current(&mut self, standstill_current: f32) {
+        self.standstill_current = standstill_current;
+    }
+    pub fn set_accelerating_current(&mut self, accelerating_current: f32) {
+        self.accelerating_current = accelerating_current;
+    }
+    pub fn set_constant_velocity_current(&mut self, constant_velocity_current: f32) {
+        self.constant_velocity_current = constant_velocity_current;
     }
 }
 

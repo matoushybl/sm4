@@ -14,23 +14,6 @@ use stm32f4xx_hal as hal;
 
 const SECOND: u32 = 168_000_000;
 
-pub trait OnError {
-    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
-    where
-        Self: Sized;
-}
-
-impl<T, E> OnError for Result<T, E> {
-    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
-    where
-        Self: Sized,
-    {
-        if self.is_err() {
-            closure(self)
-        }
-    }
-}
-
 pub struct SM4 {
     leds: LEDs,
     usb: USBProtocol,

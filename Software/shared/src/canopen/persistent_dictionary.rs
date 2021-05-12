@@ -98,6 +98,67 @@ impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
             .borrow()
             .load_bool(Key::VelocityFeedbackControlEnabled.for_axis(axis))
             .unwrap_or(false);
+        let current = CurrentSettings::new(
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::StandStillCurrent.for_axis(axis))
+                .unwrap_or(0.4),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::AcceleratingCurrent.for_axis(axis))
+                .unwrap_or(0.7),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::ConstantVelocityCurrent.for_axis(axis))
+                .unwrap_or(0.6),
+        );
+        let velocity_controller_settings = ControllerSettings::new(
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::VelocityP.for_axis(axis))
+                .unwrap_or(1.0),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::VelocityS.for_axis(axis))
+                .unwrap_or(0.1),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::VelocityD.for_axis(axis))
+                .unwrap_or(0.0),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::VelocityMaxAction.for_axis(axis))
+                .unwrap_or(3.0),
+        );
+        let position_controller_settings = ControllerSettings::new(
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::PositionP.for_axis(axis))
+                .unwrap_or(3.0),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::PositionS.for_axis(axis))
+                .unwrap_or(0.001),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::PositionD.for_axis(axis))
+                .unwrap_or(0.0001),
+            storage
+                .lock()
+                .borrow()
+                .load_f32(Key::PositionMaxAction.for_axis(axis))
+                .unwrap_or(3.0),
+        );
         Self {
             axis,
             mode: Default::default(),
@@ -106,9 +167,9 @@ impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
             actual_velocity: Velocity::zero(),
             target_position: Position::zero(),
             actual_position: Position::zero(),
-            current: CurrentSettings::default(),
-            velocity_controller_settings: ControllerSettings::new(1.0, 0.1, 0.0, 3.0),
-            position_controller_settings: ControllerSettings::new(3.0, 0.001, 0.0001, 3.0),
+            current,
+            velocity_controller_settings,
+            position_controller_settings,
             velocity_feedback_control_enabled,
             acceleration,
             storage,
@@ -168,29 +229,111 @@ impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
     fn set_actual_position(&mut self, actual_position: Position<RESOLUTION>) {
         self.actual_position = actual_position;
     }
-    fn set_current(&mut self, current: CurrentSettings) {
-        self.current = current;
+    fn set_accelerating_current(&mut self, current: f32) {
+        self.current.set_accelerating_current(current);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::AcceleratingCurrent.for_axis(self.axis), current);
     }
-    fn set_velocity_controller_settings(
-        &mut self,
-        velocity_controller_settings: ControllerSettings,
-    ) {
-        self.velocity_controller_settings = velocity_controller_settings;
+    fn set_standstill_current(&mut self, current: f32) {
+        self.current.set_standstill_current(current);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::StandStillCurrent.for_axis(self.axis), current);
     }
-    fn set_position_controller_settings(
-        &mut self,
-        position_controller_settings: ControllerSettings,
-    ) {
-        self.position_controller_settings = position_controller_settings;
+    fn set_constant_velocity_current(&mut self, current: f32) {
+        self.current.set_constant_velocity_current(current);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::ConstantVelocityCurrent.for_axis(self.axis), current);
     }
+
+    fn set_velocity_controller_p(&mut self, value: f32) {
+        self.velocity_controller_settings.set_proportional(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::VelocityP.for_axis(self.axis), value);
+    }
+
+    fn set_velocity_controller_s(&mut self, value: f32) {
+        self.velocity_controller_settings.set_integral(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::VelocityS.for_axis(self.axis), value);
+    }
+
+    fn set_velocity_controller_d(&mut self, value: f32) {
+        self.velocity_controller_settings.set_derivative(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::VelocityD.for_axis(self.axis), value);
+    }
+
+    fn set_velocity_controller_max_output(&mut self, value: f32) {
+        self.velocity_controller_settings
+            .set_max_output_amplitude(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::VelocityMaxAction.for_axis(self.axis), value);
+    }
+
+    fn set_position_controller_p(&mut self, value: f32) {
+        self.position_controller_settings.set_proportional(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::PositionP.for_axis(self.axis), value);
+    }
+
+    fn set_position_controller_s(&mut self, value: f32) {
+        self.position_controller_settings.set_integral(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::PositionS.for_axis(self.axis), value);
+    }
+
+    fn set_position_controller_d(&mut self, value: f32) {
+        self.position_controller_settings.set_derivative(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::PositionD.for_axis(self.axis), value);
+    }
+
+    fn set_position_controller_max_output(&mut self, value: f32) {
+        self.position_controller_settings
+            .set_max_output_amplitude(value);
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::PositionMaxAction.for_axis(self.axis), value);
+    }
+
     fn set_velocity_feedback_control_enabled(&mut self, velocity_feedback_control_enabled: bool) {
         self.velocity_feedback_control_enabled = velocity_feedback_control_enabled;
+        self.storage.lock().borrow_mut().save_bool(
+            Key::VelocityFeedbackControlEnabled.for_axis(self.axis),
+            velocity_feedback_control_enabled,
+        );
     }
+
     fn acceleration(&self) -> f32 {
         self.acceleration
     }
 
     fn set_acceleration(&mut self, acceleration: f32) {
         self.acceleration = acceleration;
+        self.storage
+            .lock()
+            .borrow_mut()
+            .save_f32(Key::Acceleration.for_axis(self.axis), acceleration);
     }
 }

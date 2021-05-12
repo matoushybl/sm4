@@ -23,4 +23,22 @@ pub mod prelude {
     pub use crate::psd::PSDController;
     pub use crate::ramp::TrapRampGen;
     pub use crate::tmc2100::TMC2100;
+    pub use crate::OnError;
+}
+
+pub trait OnError {
+    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
+    where
+        Self: Sized;
+}
+
+impl<T, E> OnError for Result<T, E> {
+    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
+    where
+        Self: Sized,
+    {
+        if self.is_err() {
+            closure(self)
+        }
+    }
 }
