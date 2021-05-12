@@ -1,5 +1,6 @@
 use crate::models::{Axis, AxisMode, Position, Velocity};
 use crate::psd::ControllerSettings;
+use core::convert::TryFrom;
 
 pub trait ObjectDictionary<const RESOLUTION: u32> {
     fn battery_voltage(&self) -> f32;
@@ -53,7 +54,13 @@ pub trait ObjectDictionaryKey {
 }
 
 #[derive(Copy, Clone)]
-pub enum Key {
+pub enum AxisKey {
+    Mode,
+    Enabled,
+    TargetVelocity,
+    ActualVelocity,
+    TargetPosition,
+    ActualPosition,
     Acceleration,
     VelocityFeedbackControlEnabled,
     AcceleratingCurrent,
@@ -69,41 +76,113 @@ pub enum Key {
     PositionMaxAction,
 }
 
-impl Key {
-    fn parse(index: u16, subindex: u8) -> Option<(Axis, Key)> {
-        None
-    }
-
-    fn parse_i2c(value: u8) -> Option<(Axis, Key)> {
-        None
-    }
-
-    fn value(&self) -> u16 {
+impl ObjectDictionaryKey for AxisKey {
+    fn raw(&self) -> u16 {
         match self {
-            Key::Acceleration => 0x01,
-            Key::VelocityFeedbackControlEnabled => 0x02,
-            Key::AcceleratingCurrent => 0x03,
-            Key::StandStillCurrent => 0x04,
-            Key::ConstantVelocityCurrent => 0x05,
-            Key::VelocityP => 0x06,
-            Key::VelocityS => 0x07,
-            Key::VelocityD => 0x08,
-            Key::VelocityMaxAction => 0x09,
-            Key::PositionP => 0x0a,
-            Key::PositionS => 0x0b,
-            Key::PositionD => 0x0c,
-            Key::PositionMaxAction => 0x0d,
+            AxisKey::Mode => 0x01,
+            AxisKey::Enabled => 0x02,
+            AxisKey::TargetVelocity => 0x03,
+            AxisKey::ActualVelocity => 0x04,
+            AxisKey::TargetPosition => 0x05,
+            AxisKey::ActualPosition => 0x06,
+            AxisKey::Acceleration => 0x07,
+            AxisKey::VelocityFeedbackControlEnabled => 0x08,
+            AxisKey::AcceleratingCurrent => 0x09,
+            AxisKey::StandStillCurrent => 0x0a,
+            AxisKey::ConstantVelocityCurrent => 0x0b,
+            AxisKey::VelocityP => 0x0c,
+            AxisKey::VelocityS => 0x0d,
+            AxisKey::VelocityD => 0x0e,
+            AxisKey::VelocityMaxAction => 0x0f,
+            AxisKey::PositionP => 0x10,
+            AxisKey::PositionS => 0x11,
+            AxisKey::PositionD => 0x12,
+            AxisKey::PositionMaxAction => 0x13,
         }
-    }
-
-    pub fn for_axis(&self, axis: Axis) -> u16 {
-        axis.object_dictionary_offset() + self.value()
     }
 }
 
-impl ObjectDictionaryKey for u16 {
+impl TryFrom<u8> for AxisKey {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0x01 => Ok(AxisKey::Mode),
+            0x02 => Ok(AxisKey::Enabled),
+            0x03 => Ok(AxisKey::TargetVelocity),
+            0x04 => Ok(AxisKey::ActualVelocity),
+            0x05 => Ok(AxisKey::TargetPosition),
+            0x06 => Ok(AxisKey::ActualPosition),
+            0x07 => Ok(AxisKey::Acceleration),
+            0x08 => Ok(AxisKey::VelocityFeedbackControlEnabled),
+            0x09 => Ok(AxisKey::AcceleratingCurrent),
+            0x0a => Ok(AxisKey::StandStillCurrent),
+            0x0b => Ok(AxisKey::ConstantVelocityCurrent),
+            0x0c => Ok(AxisKey::VelocityP),
+            0x0d => Ok(AxisKey::VelocityS),
+            0x0e => Ok(AxisKey::VelocityD),
+            0x0f => Ok(AxisKey::VelocityMaxAction),
+            0x10 => Ok(AxisKey::PositionP),
+            0x11 => Ok(AxisKey::PositionS),
+            0x12 => Ok(AxisKey::PositionD),
+            0x13 => Ok(AxisKey::PositionMaxAction),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub enum Key {
+    BatteryVoltage,
+    Temperature,
+    Axis1(AxisKey),
+    Axis2(AxisKey),
+}
+
+impl Key {
+    fn parse(index: u16, subindex: u8) -> Option<Key> {
+        let index = index & 0xff00;
+        match index {
+            0x0000 => match subindex {
+                0x01 => Some(Key::BatteryVoltage),
+                0x02 => Some(Key::Temperature),
+                _ => None,
+            },
+            0x6100 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis1(k))),
+            0x6200 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis2(k))),
+            _ => None,
+        }
+    }
+
+    fn parse_i2c(value: u8) -> Option<Key> {
+        None
+    }
+
+    fn offset(&self) -> u16 {
+        match self {
+            Key::BatteryVoltage => 0x0000,
+            Key::Temperature => 0x0000,
+            Key::Axis1(_) => 0x6100,
+            Key::Axis2(_) => 0x6200,
+        }
+    }
+
+    pub fn key_for_axis(key: AxisKey, axis: Axis) -> Self {
+        match axis {
+            Axis::Axis1 => Self::Axis1(key),
+            Axis::Axis2 => Self::Axis2(key),
+        }
+    }
+}
+
+impl ObjectDictionaryKey for Key {
     fn raw(&self) -> u16 {
-        *self
+        match self {
+            Key::BatteryVoltage => 0x0001,
+            Key::Temperature => 0x0002,
+            Key::Axis1(key) => self.offset() + key.raw(),
+            Key::Axis2(key) => self.offset() + key.raw(),
+        }
     }
 }
 
