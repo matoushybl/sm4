@@ -18,7 +18,7 @@ pub mod prelude {
     pub use crate::canopen::*;
     pub use crate::encoder::*;
     pub use crate::hal::*;
-    pub use crate::models::{AxisMode, Position, Velocity};
+    pub use crate::models::{Axis, AxisMode, Position, Velocity};
     pub use crate::motion_controller::AxisMotionController;
     pub use crate::psd::PSDController;
     pub use crate::ramp::TrapRampGen;

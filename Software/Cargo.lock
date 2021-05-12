@@ -1047,6 +1047,7 @@ dependencies = [
  "embedded-hal",
  "embedded-time",
  "num-traits",
+ "spin",
 ]
 
 [[package]]
@@ -1068,6 +1069,15 @@ dependencies = [
  "libc",
  "log",
  "nix 0.15.0",
+]
+
+[[package]]
+name = "spin"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b87bbf98cb81332a56c1ee8929845836f85e8ddd693157c30d76660196014478"
+dependencies = [
+ "lock_api",
 ]
 
 [[package]]

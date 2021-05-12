@@ -1,20 +1,18 @@
 use crate::can::{CANOpen, CANOpenMessage};
-use crate::object_dictionary::IObjectDictionary;
 use crate::prelude::LEDs;
 use crate::sm4::OnError;
 use crate::state::DriverState;
 use bxcan::Frame;
 use core::convert::TryFrom;
 use sm4_shared::prelude::{
-    NMTRequestedState, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4, SerializePDO, TxPDO1, TxPDO2,
-    TxPDO3, TxPDO4, Velocity,
+    Axis, NMTRequestedState, ObjectDictionary, Position, RxPDO1, RxPDO2, RxPDO3, RxPDO4,
+    SerializePDO, TxPDO1, TxPDO2, TxPDO3, TxPDO4, Velocity,
 };
 
-pub fn sync<const R: u32>(
-    bus: &mut CANOpen,
-    state: &mut dyn IObjectDictionary<R>,
-    leds: &mut LEDs,
-) {
+pub fn sync<OD, const R: u32>(bus: &mut CANOpen, state: &mut DriverState<OD, R>, leds: &mut LEDs)
+where
+    OD: ObjectDictionary<R>,
+{
     let pdo = TxPDO1 {
         battery_voltage: (state.object_dictionary().battery_voltage() * 1000.0) as u16,
         temperature: (state.object_dictionary().temperature() * 10.0) as u16,
@@ -28,12 +26,12 @@ pub fn sync<const R: u32>(
     let pdo = TxPDO2 {
         axis1_velocity: state
             .object_dictionary()
-            .axis1()
+            .axis(Axis::Axis1)
             .actual_velocity()
             .get_rps(),
         axis2_velocity: state
             .object_dictionary()
-            .axis2()
+            .axis(Axis::Axis2)
             .actual_velocity()
             .get_rps(),
     };
@@ -46,12 +44,12 @@ pub fn sync<const R: u32>(
     let pdo = TxPDO3 {
         revolutions: state
             .object_dictionary()
-            .axis1()
+            .axis(Axis::Axis1)
             .actual_position()
             .get_revolutions(),
         angle: state
             .object_dictionary()
-            .axis1()
+            .axis(Axis::Axis1)
             .actual_position()
             .get_angle() as u32,
     };
@@ -64,12 +62,12 @@ pub fn sync<const R: u32>(
     let pdo = TxPDO4 {
         revolutions: state
             .object_dictionary()
-            .axis2()
+            .axis(Axis::Axis1)
             .actual_position()
             .get_revolutions(),
         angle: state
             .object_dictionary()
-            .axis2()
+            .axis(Axis::Axis2)
             .actual_position()
             .get_angle() as u32,
     };
@@ -80,7 +78,10 @@ pub fn sync<const R: u32>(
     .on_error(|_| leds.signalize_can_error());
 }
 
-pub fn nmt_received<const R: u32>(id: u8, frame: &Frame, state: &mut DriverState<R>) {
+pub fn nmt_received<OD, const R: u32>(id: u8, frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
     if frame.dlc() != 2 {
         defmt::error!("Malformed NMT node control data received.");
         return;
@@ -112,7 +113,10 @@ pub fn nmt_received<const R: u32>(id: u8, frame: &Frame, state: &mut DriverState
     }
 }
 
-pub fn rx_pdo1<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
+pub fn rx_pdo1<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
     if frame.data().is_none() {
         defmt::warn!("Invalid RxPDO1 received.");
         return;
@@ -120,26 +124,29 @@ pub fn rx_pdo1<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
     if let Ok(pdo) = RxPDO1::try_from(frame.data().unwrap().as_ref()) {
         state
             .object_dictionary()
-            .axis1_mut()
+            .axis_mut(Axis::Axis1)
             .set_mode(pdo.axis1_mode);
         state
             .object_dictionary()
-            .axis2_mut()
+            .axis_mut(Axis::Axis2)
             .set_mode(pdo.axis2_mode);
         state
             .object_dictionary()
-            .axis1_mut()
+            .axis_mut(Axis::Axis1)
             .set_enabled(pdo.axis1_enabled);
         state
             .object_dictionary()
-            .axis2_mut()
+            .axis_mut(Axis::Axis2)
             .set_enabled(pdo.axis2_enabled);
     } else {
         defmt::warn!("Malformed RxPDO1 received.");
     }
 }
 
-pub fn rx_pdo2<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
+pub fn rx_pdo2<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
     if frame.data().is_none() {
         defmt::warn!("Invalid RxPDO2 received.");
         return;
@@ -147,11 +154,11 @@ pub fn rx_pdo2<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
     if let Ok(pdo) = RxPDO2::try_from(frame.data().unwrap().as_ref()) {
         state
             .object_dictionary()
-            .axis1_mut()
+            .axis_mut(Axis::Axis1)
             .set_target_velocity(Velocity::new(pdo.axis1_velocity));
         state
             .object_dictionary()
-            .axis2_mut()
+            .axis_mut(Axis::Axis2)
             .set_target_velocity(Velocity::new(pdo.axis2_velocity));
 
         state.invalidate_last_received_speed_command_counter();
@@ -159,7 +166,10 @@ pub fn rx_pdo2<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
         defmt::warn!("Malformed RxPDO2 received.");
     }
 }
-pub fn rx_pdo3<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
+pub fn rx_pdo3<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
     if frame.data().is_none() {
         defmt::warn!("Invalid RxPDO1 received.");
         return;
@@ -167,13 +177,16 @@ pub fn rx_pdo3<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
     if let Ok(pdo) = RxPDO3::try_from(frame.data().unwrap().as_ref()) {
         state
             .object_dictionary()
-            .axis1_mut()
+            .axis_mut(Axis::Axis1)
             .set_target_position(Position::new(pdo.revolutions, pdo.angle));
     } else {
         defmt::warn!("Malformed RxPDO3 received.");
     }
 }
-pub fn rx_pdo4<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
+pub fn rx_pdo4<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
     if frame.data().is_none() {
         defmt::warn!("Invalid RxPDO4 received.");
         return;
@@ -181,7 +194,7 @@ pub fn rx_pdo4<const R: u32>(frame: &Frame, state: &mut DriverState<R>) {
     if let Ok(pdo) = RxPDO4::try_from(frame.data().unwrap().as_ref()) {
         state
             .object_dictionary()
-            .axis2_mut()
+            .axis_mut(Axis::Axis2)
             .set_target_position(Position::new(pdo.revolutions, pdo.angle));
     } else {
         defmt::warn!("Malformed RxPDO4 received.");

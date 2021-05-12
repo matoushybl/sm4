@@ -3,6 +3,7 @@
 //! Some of the PDOs are abstracted into the PositionPDO or VelocityPDO to keep the code DRY.
 
 mod object_dictionary;
+mod persistent_dictionary;
 mod position_pdo;
 mod rx_pdo1;
 mod tx_pdo1;
@@ -12,8 +13,9 @@ pub use pdos::{RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2, TxPDO3, TxPDO4};
 
 use core::convert::TryFrom;
 pub use object_dictionary::{
-    AxisDictionary, ObjectDictionaryStorage, PersistentStoreAxisDictionary,
+    AxisDictionary, ObjectDictionary, ObjectDictionaryKey, ObjectDictionaryStorage,
 };
+pub use persistent_dictionary::{PersistentStoreAxisDictionary, PersistentStoreObjectDictionary};
 
 mod pdos {
     use crate::canopen::position_pdo::PositionPDO;

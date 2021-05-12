@@ -1,6 +1,10 @@
 use crate::blocks::flash;
 use crate::blocks::flash::{FlashExt, MemIter, UnlockedFlash};
+use crate::sm4::OnError;
 use core::convert::TryInto;
+use sm4_shared::prelude::{ObjectDictionaryKey, ObjectDictionaryStorage};
+
+use super::flash::FLASH;
 
 #[derive(Copy, Clone)]
 enum Page {
@@ -53,12 +57,33 @@ const CELL_SIZE: usize = 6;
 const EMPTY_KEY: u16 = 0xffff;
 
 pub struct Storage {
-    flash: stm32f4xx_hal::stm32::FLASH,
+    flash: crate::blocks::flash::FLASH,
+}
+
+impl ObjectDictionaryStorage for Storage {
+    fn save_f32<KEY: ObjectDictionaryKey>(&mut self, key: KEY, value: f32) {
+        self.write_raw(key.raw(), &value.to_le_bytes())
+            .on_error(|_| defmt::error!("Failed to write value to store."))
+    }
+
+    fn save_bool<KEY: ObjectDictionaryKey>(&mut self, key: KEY, value: bool) {
+        self.write_raw(key.raw(), &[value as u8])
+            .on_error(|_| defmt::error!("Failed to write value to store."))
+    }
+
+    fn load_f32<KEY: ObjectDictionaryKey>(&self, key: KEY) -> Option<f32> {
+        self.read(key.raw())
+            .map(|u| unsafe { *(u.to_le_bytes().as_ptr() as *const f32) })
+    }
+
+    fn load_bool<KEY: ObjectDictionaryKey>(&self, key: KEY) -> Option<bool> {
+        self.read(key.raw()).map(|u| u > 0)
+    }
 }
 
 impl Storage {
-    pub fn new(flash: stm32f4xx_hal::stm32::FLASH) -> Storage {
-        Self { flash }
+    pub const fn new() -> Storage {
+        Self { flash: FLASH {} }
     }
 
     pub fn init(&mut self) -> Result<(), flash::Error> {
@@ -88,18 +113,9 @@ impl Storage {
         self.find_by_key(&active_page, key)
     }
 
-    pub fn read_f32(&self, key: u16) -> Option<f32> {
-        self.read(key)
-            .map(|u| unsafe { *(u.to_le_bytes().as_ptr() as *const f32) })
-    }
-
     pub fn write_raw(&mut self, key: u16, raw: &[u8]) -> Result<(), flash::Error> {
         let integer = raw.as_ptr() as *const u32;
         self.write(key, unsafe { *integer })
-    }
-
-    pub fn write_f32(&mut self, key: u16, value: f32) -> Result<(), flash::Error> {
-        self.write_raw(key, &value.to_le_bytes())
     }
 
     pub fn write(&mut self, key: u16, value: u32) -> Result<(), flash::Error> {

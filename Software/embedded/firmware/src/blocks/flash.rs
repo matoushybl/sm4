@@ -1,6 +1,5 @@
-use core::{ptr, slice};
+use core::{ops::Deref, ptr, slice};
 use stm32f4xx_hal::signature::FlashSize;
-use stm32f4xx_hal::stm32::FLASH;
 
 pub struct MemIter<const SIZE: usize> {
     data: [u8; SIZE],
@@ -24,6 +23,23 @@ impl<const SIZE: usize> Iterator for MemIter<SIZE> {
         } else {
             None
         }
+    }
+}
+
+pub struct FLASH {}
+unsafe impl Send for FLASH {}
+impl FLASH {
+    #[doc = r"Returns a pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const stm32f4xx_hal::pac::flash::RegisterBlock {
+        0x4002_3c00 as *const _
+    }
+}
+impl Deref for FLASH {
+    type Target = stm32f4xx_hal::pac::flash::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*FLASH::ptr() }
     }
 }
 

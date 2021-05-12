@@ -6,6 +6,21 @@ mod velocity;
 pub use position::Position;
 pub use velocity::Velocity;
 
+#[derive(Copy, Clone)]
+pub enum Axis {
+    Axis1,
+    Axis2,
+}
+
+impl Axis {
+    pub fn object_dictionary_offset(&self) -> u16 {
+        match self {
+            Axis::Axis1 => 0x6100,
+            Axis::Axis2 => 0x6200,
+        }
+    }
+}
+
 /// `AxisMode` enum represents the control mode of an axis - either velocity control or position control
 /// In raw data, the [Self::Velocity] variant is represented as a zero and the [Self::Position] variant is represented as 1.
 /// The variant [Self::Velocity] is the default.

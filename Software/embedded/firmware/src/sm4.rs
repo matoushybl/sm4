@@ -4,10 +4,12 @@ use crate::prelude::config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R};
 use crate::prelude::definitions::{Axis1, Axis2};
 use crate::prelude::*;
 use crate::state::DriverState;
+use core::cell::RefCell;
 use embedded_time::duration::Microseconds;
 use hal::dma::StreamsTuple;
 use hal::prelude::*;
 use sm4_shared::prelude::*;
+use spin::Mutex;
 use stm32f4xx_hal as hal;
 
 const SECOND: u32 = 168_000_000;
@@ -34,7 +36,10 @@ pub struct SM4 {
     usb: USBProtocol,
     can: CANOpen,
     monitoring: Monitoring,
-    state: DriverState<{ ENCODER_RESOLUTION }>,
+    state: DriverState<
+        PersistentStoreObjectDictionary<Storage, { ENCODER_RESOLUTION }>,
+        { ENCODER_RESOLUTION },
+    >,
     axis1: Axis1,
     axis2: Axis2,
     i2c: I2CSlave<
@@ -113,11 +118,18 @@ impl SM4 {
             sampling_period,
         );
 
-        defmt::error!("init done");
+        static STORAGE: Mutex<RefCell<Storage>> = Mutex::new(RefCell::new(Storage::new()));
+        STORAGE
+            .lock()
+            .borrow_mut()
+            .init()
+            .on_error(|_| defmt::error!("Initialization of storage failed."));
 
-        let mut state = DriverState::new();
+        let od = PersistentStoreObjectDictionary::<_, { ENCODER_RESOLUTION }>::new(&STORAGE);
+        let mut state = DriverState::new(od);
         state.go_to_preoperational_if_needed();
 
+        defmt::debug!("Init done.");
         Self {
             can,
             leds,
@@ -133,22 +145,22 @@ impl SM4 {
     pub fn control(&mut self) {
         self.axis1.control(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary().axis1_mut(),
+            self.state.object_dictionary().axis_mut(Axis::Axis1),
         );
         self.axis2.control(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary().axis2_mut(),
+            self.state.object_dictionary().axis_mut(Axis::Axis2),
         );
     }
 
     pub fn ramp(&mut self) {
         self.axis1.ramp(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary().axis1_mut(),
+            self.state.object_dictionary().axis_mut(Axis::Axis1),
         );
         self.axis2.ramp(
             self.state.is_movement_blocked(),
-            self.state.object_dictionary().axis2_mut(),
+            self.state.object_dictionary().axis_mut(Axis::Axis2),
         );
     }
 
