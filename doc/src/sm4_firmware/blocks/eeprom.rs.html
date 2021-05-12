@@ -241,13 +241,11 @@
 <span id="238">238</span>
 <span id="239">239</span>
 <span id="240">240</span>
-<span id="241">241</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">blocks</span>::<span class="ident">flash</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">blocks</span>::<span class="ident">flash</span>::{<span class="ident">FlashExt</span>, <span class="ident">MemIter</span>, <span class="ident">UnlockedFlash</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">sm4</span>::<span class="ident">OnError</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::{<span class="ident">ObjectDictionaryKey</span>, <span class="ident">ObjectDictionaryStorage</span>};
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">flash</span>::<span class="ident">FLASH</span>;
 

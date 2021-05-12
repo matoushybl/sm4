@@ -199,21 +199,13 @@
 <span id="196">196</span>
 <span id="197">197</span>
 <span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">LEDs</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">sm4</span>::<span class="ident">OnError</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">state</span>::<span class="ident">DriverState</span>;
 <span class="kw">use</span> <span class="ident">bxcan</span>::<span class="ident">Frame</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
-<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::{
-    <span class="ident">Axis</span>, <span class="ident">NMTRequestedState</span>, <span class="ident">ObjectDictionary</span>, <span class="ident">Position</span>, <span class="ident">RxPDO1</span>, <span class="ident">RxPDO2</span>, <span class="ident">RxPDO3</span>, <span class="ident">RxPDO4</span>,
-    <span class="ident">SerializePDO</span>, <span class="ident">TxPDO1</span>, <span class="ident">TxPDO2</span>, <span class="ident">TxPDO3</span>, <span class="ident">TxPDO4</span>, <span class="ident">Velocity</span>,
-};
+<span class="kw">use</span> <span class="ident">sm4_shared</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sync</span><span class="op">&lt;</span><span class="ident">OD</span>, <span class="kw">const</span> <span class="ident">R</span>: <span class="ident">u32</span><span class="op">&gt;</span>(<span class="ident">bus</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CANOpen</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">DriverState</span><span class="op">&lt;</span><span class="ident">OD</span>, <span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">leds</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">LEDs</span>)
 <span class="kw">where</span>
