@@ -220,7 +220,7 @@ The CAN bus on STM32 is implemented in hardware in the bxCAN peripheral.
 This peripheral is the same for all of the STM32F \acs{mcu}s, only with slight differences in filter banks and message mailbox sizes.
 Given this fact it was possible to develop a crate that supports all of the STM32 \acs{mcu}s, the crate is called \textbf{bxcan} and is developed the stm32-rs organization.
 
-In the past projects described in Chapter~\ref{ch:related_work}, we utilized our own implementation of a driver for the bxCAN peripheral, but since the \textbf{bxcan} crate is well maintained, documented and tested, we decided to discontinue development of the driver and migrate to \acs{bxcan}.
+In the past projects described in Chapter~\ref{ch:related_work}, we utilized our own implementation of a driver for the bxCAN peripheral, but since the \textbf{bxcan} crate is well maintained, documented and tested, we decided to discontinue development of the driver and migrate to \textbf{bxcan}.
 
 In order to implement the CANOpen protocols described in the Section~\ref{subsec:canopen}, we developed a simple wrapper over the \textbf{bxcan} crate.
 The wrapper is basically a simple proxy that transforms CANOpen protocol data to CAN frames and sends them and parses received CAN frames into CANOpen protocol data.
@@ -242,7 +242,7 @@ bus.set_automatic_wakeup(true);
 nb::block!(bus.enable()).unwrap();
 \end{lstlisting}
 
-When an interrupt handler is invoked, the function \textbf{process_incoming_frame} is called and it returns the type of the CANOpen protocol message, alongside with the received frame.
+When an interrupt handler is invoked, the function \textbf{process\_incoming\_frame} is called, and it returns the type of the CANOpen protocol message, alongside with the received frame.
 If the frame contains valid CANOpen message, the CAN frame is further parsed, for example to decode the contents of the PDO as can be seen in the Listing~\ref{lst:can_parse}
 
 \begin{lstlisting}[caption={Initializing the bxCAN peripheral in the CANOpen wrapper.},label=lst:can_parse]
