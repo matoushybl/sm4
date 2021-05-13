@@ -1,12 +1,19 @@
 \section{Development of the Bare-Metal Firmware}
 \label{sec:firmware}
 This Section describes the development of the bare-metal firmware.
-First, we go ove the firmware architecture, where we describe the technology stack and the architecture itself.
-Second, we go over some of the components of the firmware that are either crucial to the firmware or their implementation stands out in any way.
+First, we go over the firmware architecture, where we describe the technology stack and the architecture itself.
+Second, we go over some components of the firmware that are either crucial to the firmware, or their implementation stands out in any way.
 
 \subsection{Firmware Architecture}
 \label{subsec:firmware-arch}
-% object dictionary, etc, dependency on RTIC, other things
+Firmware architecture can be described in many ways, we decided to show three ways in which we describe this firmware.
+First, we describe the technology stack, describing what crates and libraries we built the hardware upon.
+These libraries have mostly been described in the Section~\ref{sec:embedded_rust}.
+The technology stack can be seen in the Figure~\ref{fig:firmware_tech_stack}.
+When we go from the bottom, to the top, we can see that we access the hardware \acs{mcu} via two crates - the \textbf{stm32-rs} used to access peripheral circuits of the \acs{mcu} and the \textbf{cortex-m} crate used to access the \acs{arm} core of the \acs{mcu}.
+The \textbf{stm32f4xx-hal} builds upon the \textbf{stm32-rs} crate and provides Hardware Abstraction Layer over the STM32F4 family and implements the \textbf{embedded-hal} traits.
+The \textbf{cortex-m} crate is then used by the RTIC scheduler (described in the Section~\ref{subsec:mut_shared_state}).
+As can be seen in the Figure, the firmware itself then builds upon all of these technologies - it accesses the HAL as some peripherals have their abstractions developed, for some special configurations the direct peripheral register access via \textbf{stm32-rs} is used, the RTIC scheduler is used for orchestrating the firmware and for some low-level assembly instructions the \textbf{cortex-m} crate for low level \acs{arm} core access is used.
 
 \begin{figure}[H]
     \centering
@@ -15,15 +22,136 @@ Second, we go over some of the components of the firmware that are either crucia
     \label{fig:firmware_tech_stack}
 \end{figure}
 
+While the technology stack gives us vital information about the architecture, the architecture itself is much more complex and in theory could and should be independent on the used technologies\cite{thomas_pragmatic_2019}.
+The architecture overview diagram can be seen in the Figure~\ref{fig:firmware_arch}.
+The central part of the architecture is the Object Dictionary (described in Section~\ref{subsec:object_dictionary} and~\ref{subsec:object_dict_impl} (implementation-wise)).
+The object dictionary contains the state of the stepper motor controller alongside with configuration.
+Part of the object dictionary is also a persistent storage where its values are retained between reboots.
+In the center of the firmware, there is also general state that stores variables outside the scope of the Object Dictionary and software failsafe mechanisms, that can manipulate bot the state and object dictionary.
+When we look lower in the diagram, we can see that there are the communication interfaces that receive data from and send them to the outer world, usually to some high-level system.
+On the other hand, when we look higher in the diagram, that's where the motion control systems operate, they get their data from the object dictionary (control values) and encoders and use these data for controlling the stepper motor driver \acs{ic}s.
+The encoders and motor drivers are again connected to the outer world - meaning that they interact with it via the connected motors.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{obrazky/firmware_arch}
-    \caption{Bare-Metal firmware technology stack.}
+    \caption{Bare-Metal firmware architecture.}
     \label{fig:firmware_arch}
+\end{figure}
+
+There is one more final point of view on the architecture, which is connected with the project structure.
+Given there are two projects - the bare-metal firmware, and the further-described control application, there is a need to share code between those two projects, e.g. share communication models.
+An important distinction being, that the bare-metal firmware is also cross-compiled and cross-compiled in a \textbf{no\_std} environment.
+Code sharing was solved by creating another project, that is \textbf{no\_std} and is simply called \textbf{shared}, both of the application projects statically link against it.
+This can be seen in a diagram presented in the Figure~\ref{fig:component_arch}.
+The project structure was adopted from\cite{aparicio_testing_nodate}, which proposes a project structure, that promotes code sharing and testability of all components.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{obrazky/components}
+    \caption{Component sharing between the bare-metal firmware and the Control Application.}
+    \label{fig:component_arch}
 \end{figure}
 
 \subsection{Object Dictionary}
 \label{subsec:object_dict_impl}
+The importance and role of the Object Dictionary was described in the Sections~\ref{subsec:object_dictionary} and~\ref{subsec:firmware-arch}.
+When designing the Object Dictionary, we wanted to design it so that it could be universally used and implemented in multiple ways (e.g. with persistent storage or without one).
+The abstraction was done using traits.
+
+\begin{lstlisting}[caption={Trait for abstracting away the Object Dictionary.},label=lst:od_trait]
+/// Trait for Object Dictionary abstraction
+pub trait ObjectDictionary<const RESOLUTION: u32> {
+    /// Returns battery voltage stored in the Object Dictionary.
+    fn battery_voltage(&self) -> f32;
+    /// Returns temperature stored in the Object Dictionary.
+    fn temperature(&self) -> f32;
+    /// Sets the battery voltage value in the Object Dictionary.
+    fn set_battery_voltage(&mut self, battery_voltage: f32);
+    /// Sets the temperature value in the Object Dictionary.
+    fn set_temperature(&mut self, temperature: f32);
+    /// Returns the configuration of a specific axis.
+    fn axis(&self, axis: Axis) -> &dyn AxisDictionary<RESOLUTION>;
+    /// Returns a mutable reference the configuration of a specific axis.
+    /// This is the only way an axis configuration can be changed
+    fn axis_mut(&mut self, axis: Axis) -> &mut dyn AxisDictionary<RESOLUTION>;
+}
+\end{lstlisting}
+
+\subsection{Persistent storage using EEPROM emulation}
+\label{subsec:eeprom}
+The SM4 stepper motor controller needs persistent storage to save configuration and data.
+Persistent storage on MCUs is generally solved by using non-volatile memory that can be either part of the MCU or an external component.
+Different memory technologies may be used for both types of the storage.
+In general, \acs{fram} (\acl{fram}), \acs{eeprom} (\acl{eeprom}), or flash memories are used.
+
+In order to save space on the \acs{pcb}, save cost, and better utilize the MCU resources we decided to use the internal flash memory to store the user data apart from the driver firmware.
+Even though the flash memory may seem straightforward to use since they are ubiquitous, their low level use is not that simple.
+A flash memory is generally divided into sectors, that can be several kilobytes or megabytes large.
+These sectors can be electrically erased - which means that every bit in the sector is set to 1.
+Depending on the memory a word of a specific size can be programmed, but it is only possible to flip the bits in the word to zero~\cite{mansanet_ecorax_nodate, mansanet_ecorax_nodate-1}.
+That means that to write a higher number to the word of the memory, the flash needs to be first erased and then programmed.
+This is problematic for two reasons:
+\begin{enumerate}
+    \item sectors generally have the size of several kilobytes, meaning that when you'd want to update the value in the desired word, the whole sector would have to be read to some other memory, erased and then programmed again with the new, updated value,
+    \item there is a limited number of whole sector erases, caused by the limitation of hardware.
+\end{enumerate}
+
+Fortunately, this problem can be solved by emulating the EEPROM memory as described in ST Application Note AN3969~\cite{stmicro_an3969_2011}.
+The application note leverages two FLASH sectors of the same size, where one of them is marked as the active one and the second one is used when the first sector is full.
+The working principle is described in the following paragraphs and can be seen in the Figure~\ref{fig:eeprom_emul}.
+
+In the beginning, both of the sectors are erased and one of them is marked as active.
+Data are then written to the first sector into simulated cells.
+The cells contain a header (which can be understood as a key or a virtual address) and the data.
+When a new write is requested, the data are appended behind the already stored data.
+When a data with is read using the virtual address, or a key, the sector is traversed from its end, searching for the first occurrence of the key or address.
+The first occurrence is the most recent value of the cell marked by the key.
+This way we are able to store the value with a specific identifier (key, virtual address) in the flash multiple times.
+
+When no more cells can be written to the active sector, the second sector is marked active, and the data are transmitted to the second sector, taking only the latest value of an identifier into account.
+After the transfer, the first sector is erased.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky/eeprom_emul_principle}
+    \caption{EEPROM emulation working principle~\cite{stmicro_an3969_2011}.}
+    \label{fig:eeprom_emul}
+\end{figure}
+
+Even though the working principle of the EEPROM emulation is simple, there are some technical obstacles in the implementation.
+The first obstacle is that the flash memory on the STM32 MCU is split into differently sized sectors, and it is required that the sectors have the same size.
+Referring to the Reference Manual~\cite{stmicro_stm32f405rg_nodate} there are a some 16~kilobyte sectors that could be used for the emulation, as can be seen in the Figure~\ref{fig:flash_layout}.
+Using the 128~kilobyte sectors would also be possible, but given their size copying values from one sector to another would take too much time and also read access times would be higher.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{obrazky/flash_stm}
+    \caption{EEPROM emulation working principle~\cite{stmicro_stm32f405rg_nodate}.}
+    \label{fig:flash_layout}
+\end{figure}
+
+There is however a problem with using the sectors in the beginning of the flash memory as that is where the firmware is usually stored.
+The solution to this problem is by leaving the first sector (Sector 0) for the vector table and instructing the linker to place the \textbf{.text} section of the program further in the memory.
+According to the documentation of the \textbf{cortex-m} Rust crate~\cite{rust_embedded_devices_wg_rust-embeddedcortex-m_2021}, this can be achieved by adding the line \textbf{\_stext = ORIGIN(FLASH) + OFFSET} to the linker script, where the \textbf{OFFSET} shall be replaced with the offset of the target sector where we want our program to be stored, in our case \textbf{0x0000C000}, which indicates the start of the Sector 3.
+
+As for the actual implementation of the emulation for the STM32F405, we decided to develop our own, as no suitable Rust crate was available for it.
+The development was inspired by a crate that implemented the emulation for STM32F103~\cite{dubrov_idubroveeprom_2020} and by following the implementation in the Application Note.
+The functions from flash memory access were adopted from an as of the time of writing unmerged Pull Request into the STM32F4 HAL~\cite{astro_implement_2020}.
+An example of accessing the emulated persistent storage can be seen in the following Listing~\ref{lst:eeprom}.
+
+\begin{lstlisting}[caption={An example use of the emulated persistent storage.},label=lst:eeprom]
+let mut store = Storage::new(device.FLASH);
+store
+    .init()
+    .expect("Failed to initialize emulated storage.");
+store.write_f32(0xbeef, 3.14);
+let read = store.read_f32(0xbeef).unwrap();
+assert_eq!(read, 3.14);
+\end{lstlisting}
+
+As can be seen in the Listing~\ref{lst:eeprom}, first we create the object with a parameter of the flash peripheral, then we initialize the emulated storage - this prepares the sectors that are supposed to be used and then we perform a simple write and read operations on the storage.
+
 
 \subsection{CANOpen Implementation}
 \label{subsec:canopen_impl}

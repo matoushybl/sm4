@@ -2,13 +2,20 @@ use crate::models::{Axis, AxisMode, Position, Velocity};
 use crate::psd::ControllerSettings;
 use core::convert::TryFrom;
 
+/// Trait for Object Dictionary abstraction
 pub trait ObjectDictionary<const RESOLUTION: u32> {
+    /// Returns battery voltage stored in the Object Dictionary.
     fn battery_voltage(&self) -> f32;
+    /// Returns temperature stored in the Object Dictionary.
     fn temperature(&self) -> f32;
+    /// Sets the battery voltage value in the Object Dictionary.
     fn set_battery_voltage(&mut self, battery_voltage: f32);
+    /// Sets the temperature value in the Object Dictionary.
     fn set_temperature(&mut self, temperature: f32);
-
+    /// Returns the configuration of a specific axis.
     fn axis(&self, axis: Axis) -> &dyn AxisDictionary<RESOLUTION>;
+    /// Returns a mutable reference the configuration of a specific axis.
+    /// This is the only way an axis configuration can be changed
     fn axis_mut(&mut self, axis: Axis) -> &mut dyn AxisDictionary<RESOLUTION>;
 }
 

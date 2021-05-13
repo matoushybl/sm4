@@ -102,6 +102,7 @@ impl SM4 {
         );
 
         static STORAGE: Mutex<RefCell<Storage>> = Mutex::new(RefCell::new(Storage::new()));
+
         STORAGE
             .lock()
             .borrow_mut()
