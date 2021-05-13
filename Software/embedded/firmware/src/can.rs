@@ -4,10 +4,8 @@ use core::convert::TryFrom;
 use embedded_can::{Id, StandardId};
 use stm32f4xx_hal as hal;
 
-type BUS = Can<hal::can::Can<hal::pac::CAN1>>;
-
 pub struct CANOpen {
-    bus: BUS,
+    bus: Can<hal::can::Can<hal::pac::CAN1>>,
     id: u8,
 }
 

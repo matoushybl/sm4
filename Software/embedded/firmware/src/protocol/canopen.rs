@@ -162,6 +162,7 @@ where
         defmt::warn!("Malformed RxPDO2 received.");
     }
 }
+
 pub fn rx_pdo3<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
 where
     OD: ObjectDictionary<R>,

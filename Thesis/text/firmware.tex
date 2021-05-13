@@ -100,6 +100,7 @@ pub trait ObjectDictionaryStorage {
 
 Using all the aforementioned traits we then developed Object Dictionary implementation called the PersistentStoreObjectDictionary, which is generic over the ObjectDictionaryStorage, meaning, that an arbitrary storage type can be used with it.
 Similar to the Object Dictionary traits, we also needed to develop a Persistent Store Object Dictionary for axis data, which is also generic over the Object Dictionary Storage and can be seen in the Listing~\ref{lst:persistent_store_dict}.
+
 \begin{lstlisting}[caption={Object Dictionary for persistently storing axis data.},label=lst:persistent_store_dict]
 #[derive(Copy, Clone)]
 pub struct PersistentStoreAxisDictionary<
@@ -133,6 +134,8 @@ impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
 ...
 }
 \end{lstlisting}
+
+An important note is that now when any part of the code needs to access the Object Dictionary, it is done by hiding the real implementation behind dynamic dispatch based on the ObjectDictionary trait.
 
 Since we are expecting that the only way a value can be written into the Object Dictionary is using the accessor methods, we employ buffering to make storage reads more scarce, therefore more making the ObjectDictionary more effective.
 This basically means that at the firmware startup, all the values are loaded to \acs{ram} and the storage is not accessed when reading.
@@ -213,8 +216,61 @@ As can be seen in the Listing~\ref{lst:eeprom}, first we create the object with 
 
 \subsection{CANOpen Implementation}
 \label{subsec:canopen_impl}
+The CAN bus on STM32 is implemented in hardware in the bxCAN peripheral.
+This peripheral is the same for all of the STM32F \acs{mcu}s, only with slight differences in filter banks and message mailbox sizes.
+Given this fact it was possible to develop a crate that supports all of the STM32 \acs{mcu}s, the crate is called \textbf{bxcan} and is developed the stm32-rs organization.
 
+In the past projects described in Chapter~\ref{ch:related_work}, we utilized our own implementation of a driver for the bxCAN peripheral, but since the \textbf{bxcan} crate is well maintained, documented and tested, we decided to discontinue development of the driver and migrate to \acs{bxcan}.
 
+In order to implement the CANOpen protocols described in the Section~\ref{subsec:canopen}, we developed a simple wrapper over the \textbf{bxcan} crate.
+The wrapper is basically a simple proxy that transforms CANOpen protocol data to CAN frames and sends them and parses received CAN frames into CANOpen protocol data.
+Upon initialization, the wrapper first configures the bxCAN peripheral, enables interrupts and enables the peripheral itself.
+
+The bxCAN initialization in the wrapper can be seen in the Listing~\ref{lst:canopen_wrapper}.
+\begin{lstlisting}[caption={Initializing the bxCAN peripheral in the CANOpen wrapper.},label=lst:canopen_wrapper]
+let mut bus = Can::new(bus);
+bus.configure(|config| {
+    config.set_bit_timing(0x001a000b);
+});
+bus.enable_interrupts(
+    Interrupts::FIFO0_MESSAGE_PENDING | Interrupts::FIFO1_MESSAGE_PENDING,
+);
+bus.modify_filters()
+    .clear()
+    .enable_bank(0, Mask32::accept_all());
+bus.set_automatic_wakeup(true);
+nb::block!(bus.enable()).unwrap();
+\end{lstlisting}
+
+When an interrupt handler is invoked, the function \textbf{process_incoming_frame} is called and it returns the type of the CANOpen protocol message, alongside with the received frame.
+If the frame contains valid CANOpen message, the CAN frame is further parsed, for example to decode the contents of the PDO as can be seen in the Listing~\ref{lst:can_parse}
+
+\begin{lstlisting}[caption={Initializing the bxCAN peripheral in the CANOpen wrapper.},label=lst:can_parse]
+pub fn rx_pdo2<OD, const R: u32>(frame: &Frame, state: &mut DriverState<OD, R>)
+where
+    OD: ObjectDictionary<R>,
+{
+    if frame.data().is_none() {
+        defmt::warn!("Invalid RxPDO2 received.");
+        return;
+    }
+    if let Ok(pdo) = RxPDO2::try_from(frame.data().unwrap().as_ref()) {
+        state
+            .object_dictionary()
+            .axis_mut(Axis::Axis1)
+            .set_target_velocity(Velocity::new(pdo.axis1_velocity));
+        state
+            .object_dictionary()
+            .axis_mut(Axis::Axis2)
+            .set_target_velocity(Velocity::new(pdo.axis2_velocity));
+
+        state.invalidate_last_received_speed_command_counter();
+    } else {
+        defmt::warn!("Malformed RxPDO2 received.");
+    }
+}
+\end{lstlisting}
+In the Listing, we can also see accessing the generic ObjectDictionary via the structure \textbf{DriverState}.
 
 \subsection{I2C Implementation}
 \label{subsec:i2c_impl}
