@@ -63,12 +63,23 @@
 \usepackage{color,soul}
 \usepackage{float}
 \usepackage[formats]{listings}	% Balíček pro sazbu zdrojových textů
+\lstdefinelanguage{Rust}{%
+	sensitive%
+	, morecomment=[l]{//}%
+	, morecomment=[s]{/*}{*/}%
+	, moredelim=[s][{\itshape\color[rgb]{0,0,0.75}}]{\#[}{]}%
+	, morestring=[b]{"}%
+	, alsodigit={}%
+	, alsoother={}%
+	, alsoletter={!}%
+}
 \lstset{              % nastavení
 %	Definice jazyka použitého ve výpisech
 %    language=[LaTeX]{TeX},	% LaTeX
 %	language={Matlab},		% Matlab
-	language={C},           % jazyk C
-	morekeywords={let,mut,struct,pub,impl,use,assert\_eq,enum,match,if,fn,\&,self,f32,println!,str,i64,u8,u16,u32,u64,usize,trait,where},
+%	language={C},           % jazyk C
+	language={Rust},           % jazyk C
+	morekeywords={let,mut,struct,pub,impl,use,assert\_eq,enum,match,if,fn,\&,self,f32,println!,str,i64,u8,u16,u32,u64,usize,trait,where,dyn,const,static},
 	frame=single,
 	captionpos=b,
 	numbers=left,
@@ -79,6 +90,8 @@
 		columns=fixed,  %fixed nebo flexible,
 		fontadjust=true %licovani sloupcu
     extendedchars=true,
+	showspaces=false,
+	showstringspaces=false,
 	commentstyle=\color{olive},
 	keywordstyle=\color{blue},
 	stringstyle=\color{red},

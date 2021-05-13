@@ -58,6 +58,9 @@ The project structure was adopted from\cite{aparicio_testing_nodate}, which prop
 The importance and role of the Object Dictionary was described in the Sections~\ref{subsec:object_dictionary} and~\ref{subsec:firmware-arch}.
 When designing the Object Dictionary, we wanted to design it so that it could be universally used and implemented in multiple ways (e.g. with persistent storage or without one).
 The abstraction was done using traits.
+The most important trait is the ObjectDictionary trait displayed in the Listing~\ref{lst:od_trait}.
+This trait describes the Object Dictionary as a type, that contains information about battery voltage, temperature and an arbitrary number of axes.
+The axis is also represented as a trait with accessor methods for specific axis settings (controller settings, current settings, etc.).
 
 \begin{lstlisting}[caption={Trait for abstracting away the Object Dictionary.},label=lst:od_trait]
 /// Trait for Object Dictionary abstraction
@@ -78,9 +81,65 @@ pub trait ObjectDictionary<const RESOLUTION: u32> {
 }
 \end{lstlisting}
 
+To implement a simple Object Dictionary, implementing these traits would be enough, but since we wanted to create an Object Dictionary whose values can be saved in an arbitrary storage, we needed to create another abstraction for storage.
+Such an abstraction can be found in the Listing~\ref{lst:storage_trait}.
+As can be seen in the Listing, the trait defines loading and saving values of 32-bit floats and boolean values for an arbitrary type of key, that implements the ObjectDictionaryKey.
+
+\begin{lstlisting}[caption={Trait for abstracting away the Object Dictionary storage.},label=lst:storage_trait]
+pub trait ObjectDictionaryStorage {
+    fn save_f32<KEY: ObjectDictionaryKey>(&mut self,
+        key: KEY, value: f32);
+    fn save_bool<KEY: ObjectDictionaryKey>(&mut self,
+        key: KEY, value: bool);
+    fn load_f32<KEY: ObjectDictionaryKey>(&self,
+        key: KEY) -> Option<f32>;
+    fn load_bool<KEY: ObjectDictionaryKey>(&self,
+        key: KEY) -> Option<bool>;
+}
+\end{lstlisting}
+
+Using all the aforementioned traits we then developed Object Dictionary implementation called the PersistentStoreObjectDictionary, which is generic over the ObjectDictionaryStorage, meaning, that an arbitrary storage type can be used with it.
+Similar to the Object Dictionary traits, we also needed to develop a Persistent Store Object Dictionary for axis data, which is also generic over the Object Dictionary Storage and can be seen in the Listing~\ref{lst:persistent_store_dict}.
+\begin{lstlisting}[caption={Object Dictionary for persistently storing axis data.},label=lst:persistent_store_dict]
+#[derive(Copy, Clone)]
+pub struct PersistentStoreAxisDictionary<
+    STORAGE: 'static + ObjectDictionaryStorage,
+    const RESOLUTION: u32,
+> {
+    axis: Axis,
+    mode: AxisMode,
+    enabled: bool,
+    target_velocity: Velocity,
+    actual_velocity: Velocity,
+    target_position: Position<RESOLUTION>,
+    actual_position: Position<RESOLUTION>,
+    current: CurrentSettings,
+    velocity_controller_settings: ControllerSettings,
+    position_controller_settings: ControllerSettings,
+    velocity_feedback_control_enabled: bool,
+    acceleration: f32,
+    storage: &'static Mutex<RefCell<STORAGE>>,
+}
+impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
+    AxisDictionary<{ RESOLUTION }> for PersistentStoreAxisDictionary<STORAGE, RESOLUTION>
+{
+    fn set_accelerating_current(&mut self, current: f32) {
+        self.current.set_accelerating_current(current);
+        self.storage.lock().borrow_mut().save_f32(
+            Key::key_for_axis(AxisKey::AcceleratingCurrent, self.axis),
+            current,
+        );
+    }
+...
+}
+\end{lstlisting}
+
+Since we are expecting that the only way a value can be written into the Object Dictionary is using the accessor methods, we employ buffering to make storage reads more scarce, therefore more making the ObjectDictionary more effective.
+This basically means that at the firmware startup, all the values are loaded to \acs{ram} and the storage is not accessed when reading.
+
 \subsection{Persistent storage using EEPROM emulation}
 \label{subsec:eeprom}
-The SM4 stepper motor controller needs persistent storage to save configuration and data.
+In the previous Section, we discussed development of storage agnostic persistent Object Dictionary and in this section, the way we actually implemented the persistent storage is described.
 Persistent storage on MCUs is generally solved by using non-volatile memory that can be either part of the MCU or an external component.
 Different memory technologies may be used for both types of the storage.
 In general, \acs{fram} (\acl{fram}), \acs{eeprom} (\acl{eeprom}), or flash memories are used.
@@ -152,9 +211,10 @@ assert_eq!(read, 3.14);
 
 As can be seen in the Listing~\ref{lst:eeprom}, first we create the object with a parameter of the flash peripheral, then we initialize the emulated storage - this prepares the sectors that are supposed to be used and then we perform a simple write and read operations on the storage.
 
-
 \subsection{CANOpen Implementation}
 \label{subsec:canopen_impl}
+
+
 
 \subsection{I2C Implementation}
 \label{subsec:i2c_impl}
