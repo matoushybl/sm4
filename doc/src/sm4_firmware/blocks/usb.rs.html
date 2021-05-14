@@ -120,7 +120,7 @@
         <span class="kw">let</span> <span class="ident">serial</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">usbd_serial</span>::<span class="ident">SerialPort</span>::<span class="ident">new</span>(<span class="ident">USB_BUS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>()) };
 
         <span class="kw">let</span> <span class="ident">usb_dev</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-            <span class="ident">UsbDeviceBuilder</span>::<span class="ident">new</span>(<span class="ident">USB_BUS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(), <span class="ident">UsbVidPid</span>(<span class="number">0x445a</span>, <span class="number">0x05e1</span>))
+            <span class="ident">UsbDeviceBuilder</span>::<span class="ident">new</span>(<span class="ident">USB_BUS</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(), <span class="ident">UsbVidPid</span>(<span class="number">0x16c0</span>, <span class="number">0x05e1</span>))
                 .<span class="ident">manufacturer</span>(<span class="string">&quot;MH Robotics&quot;</span>)
                 .<span class="ident">product</span>(<span class="string">&quot;SM4&quot;</span>)
                 .<span class="ident">serial_number</span>(<span class="string">&quot;sm4202101&quot;</span>)
