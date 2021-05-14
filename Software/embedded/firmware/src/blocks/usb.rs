@@ -40,7 +40,7 @@ impl USBProtocol {
         let serial = unsafe { usbd_serial::SerialPort::new(USB_BUS.as_ref().unwrap()) };
 
         let usb_dev = unsafe {
-            UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x445a, 0x05e1))
+            UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x16c0, 0x05e1))
                 .manufacturer("MH Robotics")
                 .product("SM4")
                 .serial_number("sm4202101")

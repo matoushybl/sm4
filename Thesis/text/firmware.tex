@@ -272,11 +272,44 @@ where
 \end{lstlisting}
 In the Listing, we can also see accessing the generic ObjectDictionary via the structure \textbf{DriverState}.
 
-\subsection{I2C Implementation}
+\subsection{I\textsuperscript{2}C Slave Implementation}
 \label{subsec:i2c_impl}
+Implementing I\textsuperscript{2}C slave on a \acs{mcu} is a cumbersome problem, as there is not enough documentation or example code.
+Timing of the bus, requiring the slave to react within quite short time makes development and debugging harder, on the other hand with the help of \textbf{defmt} and \acs{rtt} this is not a problem anymore.
+We had already developed one implementation of the I\textsuperscript{2}C Slave handling for STM32F0 \acs{mcu} as a part of the KM3 firmware described in the Section~\ref{sec:km3}.
+Unfortunately, the STM32F4 family has a different version of the I\textsuperscript{2}C peripheral than the STM32F0, resulting with significant changes to the peripheral handling code, even though the external \acs{api} remained the same.
+The I\textsuperscript{2}C2 peripheral is utilized, and it is configured to use the 7 bit addressing mode, with enabled clock stretching to give the \acs{mcu} more time to prepare the data for transfer.
+Finally, all the interrupt sources are enabled.
+The peripheral has two interrupt vectors - one for data related interrupts \textbf{I2C2\_EV} and one for error related interrupts \textbf{I2C2\_ER}.
+When the error related interrupt handler is invoked, the error flags are cleared, and the transfer is reset.
+In the data related interrupt handler, the state machine implementing the I\textsuperscript{2}C slave register based protocol (described in the Section~\ref{subsec:i2c}) is implemented.
+The result of calling the data interrupt handling function is a state which denotes, what is expected of the higher level system - the data can be either requested or received.
+The upper level system then handles transfering the data between the I\textsuperscript{2}C slave implementation's buffers and the Object Dictionary.
+
+% TODO add code describing transfer between I2C and OD
 
 \subsection{USB}
 \label{subsec:usb_impl}
+The integrated \acs{usb} on the SM4 stepper motor controller has two functions - it enables the possibility to upgrade the firmware via \acs{dfu} (handled by the internal \acs{mcu} bootloader) and provides an interface for configuration (developed by us in the firmware).
+For the configuration, the \acs{usb} utilizes the CDC-ACM device class, which means that to the host device, the SM4 controller turns up as a serial port.
+Thankfully, given the ubiquity of \acs{usb} devices, crates for implementing \acs{usb} devices on the STM32 are already developed.
+There is the crate \textbf{usb-device} providing the \acs{usb} stack and abstractions for hardware\cite{virkkunen_mvirkkunenusb-device_2021}, the \textbf{stm32-usbd}\cite{noauthor_stm32-rsstm32-usbd_2021} implementing the hardware abstraction and \textbf{usbd-serial}\cite{virkkunen_mvirkkunenusbd-serial_2021} implementing the CDC-ACM device class for the \textbf{usb-device} stack.
+
+The implementation of this functionality in the firmware is done via the \textbf{USBProtocol} struct, which is basically a wrapper over the raw USB Serial port functionality.
+This wrapper is interrupt driven, quite similarly to the I\textsuperscript{2}C Slave driver, meaning that the received data is parsed when an interrupt handler is invoked, and the data is then exchanged between the wrapper and the Object Dictionary.
+
+An example of configuring the \acs{USB} device can be found in the Listing~\ref{lst:usb}.
+\begin{lstlisting}[caption={Initializing the USB device with the CDC-ACM class.},label=lst:usb]
+let usb_dev = unsafe {
+    UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x16c0, 0x05e1))
+        .manufacturer("MH Robotics")
+        .product("SM4")
+        .serial_number("sm4202101")
+        .device_class(usbd_serial::USB_CLASS_CDC)
+        .build()
+};
+\end{lstlisting}
+The used device \textbf{VID} and \textbf{PID} were adopted from the VUSB project\cite{noauthor_obdevv-usb_nodate}, that provides them for free with some rules about their use.
 
 \subsection{Stepper control}
 \label{subsec:stepper_control}
