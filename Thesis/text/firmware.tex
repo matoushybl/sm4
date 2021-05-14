@@ -534,7 +534,31 @@ self.battery_voltage = (raw_volt as f32) / ((2_i32.pow(12) - 1) as f32) * 3.3 / 
 
 \subsection{Motion Control}
 \label{subsec:motion_control}
-% psd, ramping
+Motion control is a crucial component of the firmware.
+Based on the values stored in the Object Dictionary, it calculates the output control signal values for the stepper motor driver \acs{ic}s.
+In our case, the core of the motion control component are two nested PSD controllers.
+The controllers are implemented with anti-windup realized by summator and output value clamping
+The algorithm used for the PSD controller can be seen in the Listing~\ref{lst:psd}.
+For ease of use, all the constants are stored in a structure \textbf{ControllerSettings}.
+\begin{lstlisting}[caption={Implementation of the PSD controller with integrator.},label=lst:psd]
+let error = desired - actual;
+self.sum += error * self.sampling_period;
+self.sum = self.sum.clamp(
+    -settings.max_output_amplitude,
+    settings.max_output_amplitude,
+);
+let action = error * settings.proportional
+    + settings.derivative * (error - self.previous) / self.sampling_period
+    + settings.integral * self.sum;
+self.previous = error;
+action.clamp(
+    -settings.max_output_amplitude,
+    settings.max_output_amplitude,
+)
+\end{lstlisting}
+
+One of these controllers (the inner one) is used for controlling output speed based on the target speed, and the second one (the outer one) is used to control the position.
+The structure of the motion controller can be seen in the Figure~\ref{fig:motion_control}.
 
 \begin{figure}[H]
     \centering
@@ -542,3 +566,57 @@ self.battery_voltage = (raw_volt as f32) / ((2_i32.pow(12) - 1) as f32) * 3.3 / 
     \caption{Motion control schematic.}
     \label{fig:motion_control}
 \end{figure}
+
+In the first half of the Figure, there is the velocity controller, which is used both when the SM4 stepper motor controller's axis is running in the velocity or position mode.
+Given, that the stepper motor controllers are often driven in the open loop, there is an option to bypass the velocity PSD controller, meaning, that the target speed is directly passed to the ramp generator.
+The ramp generator is capable of generating trapezoidal ramps with defined acceleration.
+An important note being, that the ramp generator is sampled at higher frequency than the rest of the motion controller.
+The algorithm for calculating trapezoidal ramps can be seen in the Listing~\ref{lst:ramp}.
+\begin{lstlisting}[caption={Calculating trapezoidal ramps.},label=lst:ramp]
+pub fn generate(&mut self, target_speed: f32, target_acceleration: f32) -> f32 {
+    let step = target_acceleration / self.generation_frequency;
+    let diff = target_speed - self.current_speed;
+    if diff.abs() < step {
+        self.current_speed = target_speed;
+    } else {
+        self.current_speed += diff.signum() * step;
+    }
+    self.current_speed
+}
+\end{lstlisting}
+
+Velocity calculated by the ramp generator is then passed to the stepper motor driver \acs{ic} via an abstraction.
+In the case of the closed loop control, the bypass is not active, and the velocity controller regulates the velocity based on the value speed measured by the encoder.
+It is important to note, that to successfully control in closed loop mode, the difference between encoder samples must be higher than 0, ideally several orders of magnitude higher.
+
+When the SM4 stepper motor controller's axis is running in the position control mode, the second controller shown in the second half of the Figure is utilized.
+In this case, the feedback from the encoder is utilized and this controller is a proper closed loop controller.
+
+The actual motion controller implementation utilizes the \textbf{StepperDriver} and \textbf{Encoder} traits described in the Sections~\ref{subsec:stepper_control} and~\ref{subsec:simulated_encoders}.
+It is declared as follows in the Listing~\ref{lst:mc_decl}.
+\begin{lstlisting}[caption={Implementation of the PSD controller with integrator.},label=lst:mc_decl]
+/// Motion controller of an arbitrary axis.
+/// This motion controller expects that the target driver is controlled either in velocity or position mode.
+/// Trapezoidal ramp generator is utilized.
+pub struct AxisMotionController<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32> {
+    /// The target stepper motor driver, that will be controlled by this motion controller.
+    driver: D,
+    /// The encoder, that will be used to provide feedback for closed loop control
+    encoder: E,
+    velocity_controller: PSDController,
+    position_controller: PSDController,
+    ramp_generator: TrapRampGen,
+    /// Variable used to store the calculated velocity action for ramp generator.
+    axis_velocity_action: f32,
+}
+\end{lstlisting}
+
+Given there are two sampling frequencies - one for control and one for ramping (the higher one), there are two methods used to actually control the axis.
+The \textbf{control} method calculated the output velocity based on the requirements imposed by the object dictionary and stores it into a member variable.
+The ramping method then utilizes this value to change the output velocity.
+Headers of these functions can be seen in the Listing~\ref{lst:ramp_head}.
+\begin{lstlisting}[caption={Headers of the ramp and control functions.},label=lst:ramp_head]
+pub fn ramp(&mut self, global_disable: bool, dictionary: &mut dyn AxisDictionary<RESOLUTION>) { ... }
+pub fn control(&mut self, global_disable: bool, dictionary: &mut dyn AxisDictionary<RESOLUTION>) { ... }
+\end{lstlisting}
+As can be seen in the Listing, the motion controller operates over the generic AxisDictionary trait and also features a \textbf{global\_disable} option to disable motion in the case a failsafe mechanism triggers.
