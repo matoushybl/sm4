@@ -248,3 +248,138 @@
 .2 README.md\DTcomment{Readme for this master's project}.
 }
 }
+
+\chapter{Schematic of the Second Electronics Revision}
+\label{ch:rev2_schematic}
+\includepdf[pages=1, landscape=true]{pdf/schematic}
+
+\chapter{PCB of the Second Electronics Revision}
+\label{ch:rev2_pcb}
+\includepdf[pages=-, landscape=true]{pdf/pcb}
+
+\chapter{CANOpen PDOs and Object Dictionary}
+\label{ch:canopen_appendices}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{1.5cm}|p{1.8cm}|p{1.8cm}|p{2cm}|p{5.5cm}| }
+        \hline
+        Index & Subindex & Type & Length [B] & Description \\
+        \hline
+        \hline
+        2000 & 1 & f32 & 4 & Battery Voltage in Volts \\
+        \hline
+        2000 & 2 & f32 & 4 & MCU Temperature in \textdegree C \\
+        \hline
+        2[1,2]00 & 1 & AxisMode & 1 & mode of the axis - 0 for velocity, 1 for position \\
+        \hline
+        2[1,2]00 & 2 & bool & 1 & axis enabled \\
+        \hline
+        2[1,2]00 & 3 & f32 & 4 & target axis velocity in RPS \\
+        \hline
+        2[1,2]00 & 4 & f32 & 4 & actual axis velocity in RPS \\
+        \hline
+        2[1,2]00 & 5 & i32 & 4 & target axis position - revolutions \\
+        \hline
+        2[1,2]00 & 6 & u32 & 4 & target axis position - angle \\
+        \hline
+        2[1,2]00 & 7 & i32 & 4 & actual axis position - revolutions \\
+        \hline
+        2[1,2]00 & 8 & u32 & 4 & actual axis position - angle \\
+        \hline
+        2[1,2]00 & 9 & f32 & 4 & target ramp acceleration in RPS per second \\
+        \hline
+        2[1,2]00 & 10 & bool & 1 & velocity controller bypass enabled \\
+        \hline
+        2[1,2]00 & 11 & f32 & 4 & current applied to motor winding during acceleration in Amperes \\
+        \hline
+        2[1,2]00 & 12 & f32 & 4 & current applied to motor winding when idle in Amperes \\
+        \hline
+        2[1,2]00 & 13 & f32 & 4 & current applied to motor winding when moving with constant speed in Amperes \\
+        \hline
+        2[1,2]00 & 14 & f32 & 4 & velocity controller proportional gain \\
+        \hline
+        2[1,2]00 & 15 & f32 & 4 & velocity controller summation gain \\
+        \hline
+        2[1,2]00 & 16 & f32 & 4 & velocity controller differential gain \\
+        \hline
+        2[1,2]00 & 17 & f32 & 4 & velocity controller maximal action value \\
+        \hline
+        2[1,2]00 & 18 & f32 & 4 & position controller proportional gain \\
+        \hline
+        2[1,2]00 & 19 & f32 & 4 & position controller summation gain \\
+        \hline
+        2[1,2]00 & 20 & f32 & 4 & position controller differential gain \\
+        \hline
+        2[1,2]00 & 21 & f32 & 4 & position controller maximal action value \\
+        \hline
+    \end{tabular}
+    \caption{RxPDO1 mapping}
+    \label{tab:object_dictionary}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{3cm}|p{2cm}|p{8cm}| }
+        \hline
+        Value & Length [B] & Description \\
+        \hline
+        \hline
+        axis mode & 1 & LSB contains axis 1 mode - 0 means velocity mode, 1 means position mode, first bit of the second nimble contains axis 2 mode \\
+        \hline
+        axis enabled & 1 & LSB sets axis 1 enabled - 0 means disabled, 1 means enabled, second lowest bit sets axis 2 enabled \\
+        \hline
+    \end{tabular}
+    \caption{RxPDO1 mapping}
+    \label{tab:rxpdo1}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{3cm}|p{2cm}|p{8cm}| }
+        \hline
+        Value & Length [B] & Description \\
+        \hline
+        \hline
+        battery voltage & 2 & battery voltage in millivolts \\
+        \hline
+        temperature & 2 & temperature in tenths of \textdegree C \\
+        \hline
+    \end{tabular}
+    \caption{TxPDO1 mapping}
+    \label{tab:txpdo1}
+\end{table}
+
+
+RxPDO2, TxPDO2
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{3cm}|p{2cm}|p{8cm}| }
+        \hline
+        Value & Length [B] & Description \\
+        \hline
+        \hline
+        axis 1 velocity & 4 & 32-bit float indicating axis 1 velocity in revolutions per second \\
+        \hline
+        axis 2 velocity & 4 & 32-bit float indicating axis 2 velocity in revolutions per second \\
+        \hline
+    \end{tabular}
+    \caption{Mapping of PDOs containing velocity information - RxPDO2 and TxPDO2}
+    \label{tab:velocity_pdo}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{3cm}|p{2cm}|p{8cm}| }
+        \hline
+        Value & Length [B] & Description \\
+        \hline
+        \hline
+        axis revolutions & 4 & signed 32-bit integer denoting the number of axis shaft revolutions \\
+        \hline
+        axis angle & 4 & unsigned 32-bit indicating axis shaft angle \\
+        \hline
+    \end{tabular}
+    \caption{Mapping of PDOs containing position information - RxPDO3, RxPDO4, TxPDO3 and TxPDO4}
+    \label{tab:position_pdo}
+\end{table}
+

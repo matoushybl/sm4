@@ -18,7 +18,7 @@ As can be seen in the Figure, the firmware itself then builds upon all of these 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{obrazky/tech_stack}
-    \caption{Bare-Metal firmware technology stack.}
+    \caption{Bare\textendash metal firmware technology stack.}
     \label{fig:firmware_tech_stack}
 \end{figure}
 
@@ -35,7 +35,7 @@ The encoders and motor drivers are again connected to the outer world - meaning 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{obrazky/firmware_arch}
-    \caption{Bare-Metal firmware architecture.}
+    \caption{Bare\textendash metal firmware architecture.}
     \label{fig:firmware_arch}
 \end{figure}
 
@@ -49,7 +49,7 @@ The project structure was adopted from\cite{aparicio_testing_nodate}, which prop
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{obrazky/components}
-    \caption{Component sharing between the bare-metal firmware and the Control Application.}
+    \caption{Component sharing between the bare\textendash metal firmware and the Control Application.}
     \label{fig:component_arch}
 \end{figure}
 
@@ -469,8 +469,13 @@ pub trait Encoder<const RESOLUTION: u32> {
 \end{lstlisting}
 
 Based on this trait and the Counter trait a simulated encoder was developed.
-The big advantage being that the the simulated encoder can be easily replaced by another, hardware or software realized encoders.
+The big advantage being that the simulated encoder can be easily replaced by another, hardware or software realized encoders.
 This Encoder trait is further used in the motion controller.
+
+For representing the position we utilized the model used in servo controllers by TGDrives - a signed integer denoting the number of revolutions, and an unsigned integer denoting the angle.
+For example, assume that we have a two bit encoder, and a position of 1 revolution and the angle with the value of 2, meaning that the position is equal to 1.5 revolutions.
+Now, assume that the number of revolutions is -1, and the angle is again 2, which means that the resulting position represented by these two numbers is -0.5.
+More on this implementation, alongside with its tests, can be found in the shared library in the module defining the structure Position.
 
 \subsection{Device Monitoring}
 \label{subsec:device_monitoring}

@@ -150,13 +150,13 @@ impl Key {
     fn parse(index: u16, subindex: u8) -> Option<Key> {
         let index = index & 0xff00;
         match index {
-            0x0000 => match subindex {
+            0x2000 => match subindex {
                 0x01 => Some(Key::BatteryVoltage),
                 0x02 => Some(Key::Temperature),
                 _ => None,
             },
-            0x6100 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis1(k))),
-            0x6200 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis2(k))),
+            0x2100 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis1(k))),
+            0x2200 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis2(k))),
             _ => None,
         }
     }
@@ -167,10 +167,10 @@ impl Key {
 
     fn offset(&self) -> u16 {
         match self {
-            Key::BatteryVoltage => 0x0000,
-            Key::Temperature => 0x0000,
-            Key::Axis1(_) => 0x6100,
-            Key::Axis2(_) => 0x6200,
+            Key::BatteryVoltage => 0x2000,
+            Key::Temperature => 0x2000,
+            Key::Axis1(_) => 0x2100,
+            Key::Axis2(_) => 0x2200,
         }
     }
 

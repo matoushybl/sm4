@@ -69,11 +69,11 @@ modify_reg!(gpio, gpioa, MODER, MODER1: Input, MODER2: Output, MODER3: Input);
 The \textbf{embedded-hal} project\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021} is one of the projects developed by the Embedded Devices Working Group.
 Its aim is to provide a \acs{hal} (\acl{hal}) abstract enough that device drivers using it may be shared not only between different \acs{mcu}s but also different platforms (\acs{mcu} and Embedded Linux).
 This is achieved by utilizing traits, described earlier in the Section~\ref{subsec:traits}.
-An example of such device driver developed using the traits available in the \textbf{embedded-hal} can be seen in the Listing~\ref{lst:hal_usage}.
+An example of such device driver developed using the traits available in the \textbf{embedded-hal} can be seen in the Listing~\ref{lst:hal_usage}\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021}.
 As can be seen in the Listing, the driver will work with any type that implements the \textbf{WriteRead} trait.
 Currently, the \textbf{embedded-hal} defines traits for common embedded functionality (such as \acs{gpio}, \acs{adc}) and buses (I\textsuperscript{2}C, \acs{spi}), but only their blocking variants.
 
-\begin{lstlisting}[caption={Example of an device driver utilizing embedded-hal traits\cite{rust_embedded_devices_wg_rust-embeddedembedded-hal_2021}.},label=lst:hal_usage]
+\begin{lstlisting}[caption={Example of an device driver utilizing embedded\textendash hal traits.},label=lst:hal_usage]
 use embedded_hal::blocking::i2c::{TenBitAddress, WriteRead};
 const ADDR: u16  = 0x158;
 const TEMP_REGISTER: u8 = 0x1;
@@ -207,9 +207,9 @@ As of now, the runner doesn't support debugging via GDB, but there has been some
 \label{subsubsec:defmttest}
 \textbf{defmt-test} is a component of the \textbf{defmt} tool, that can be used for running integration and unit tests directly on the target \acs{mcu}.
 We believe that this brings new possibilities for reliability in embedded systems and software/hardware in the loop testing.
-An example of such test can be seen in the Listing~\ref{lst:defmttest}.
+An example of such test can be seen in the Listing~\ref{lst:defmttest}\cite{knurling_project_knurling-rsdefmt_2021}.
 
-\begin{lstlisting}[caption={Integration test written using defmt-test\cite{knurling_project_knurling-rsdefmt_2021}.},label=lst:defmttest]
+\begin{lstlisting}[caption={Integration test written using defmt\textendash test.},label=lst:defmttest]
 struct State {
     scd30: Scd30<Twim<TWIM0>>,
 }
