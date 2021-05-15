@@ -87,25 +87,6 @@ pub fn parse_both_axes_velocities(raw: &[u8]) -> (Velocity, Velocity) {
     (parse_velocity(&raw[..4]), parse_velocity(&raw[4..]))
 }
 
-pub fn both_axes_velocity<const R: u32>(dictionary: &dyn ObjectDictionary<R>) -> [u8; 8] {
-    let mut buffer: [u8; 8] = [0; 8];
-    buffer[..4].copy_from_slice(
-        &dictionary
-            .axis(Axis::Axis1)
-            .actual_velocity()
-            .get_rps()
-            .to_le_bytes(),
-    );
-    buffer[4..].copy_from_slice(
-        &dictionary
-            .axis(Axis::Axis2)
-            .actual_velocity()
-            .get_rps()
-            .to_le_bytes(),
-    );
-    buffer
-}
-
 pub fn position<const R: u32>(position: &Position<R>) -> [u8; 8] {
     let mut buffer: [u8; 8] = [0; 8];
     buffer[..4].copy_from_slice(&position.get_revolutions().to_le_bytes());

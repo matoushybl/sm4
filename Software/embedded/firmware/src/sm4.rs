@@ -1,24 +1,6 @@
-use crate::prelude::{
-    canopen::{read_object_dictionary, update_axis_dictionary, update_object_dictionary},
-    definitions::{Axis1, Axis2},
-    i2c::{parse_both_axes_velocities, parse_position},
-};
-
+use crate::prelude::config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R};
 use crate::prelude::*;
-use crate::prelude::{
-    config::{CAN_ID, ENCODER_RESOLUTION, SENSE_R},
-    i2c::set_axis_settings,
-};
-use crate::protocol::i2c::I2CRegister;
 use crate::state::DriverState;
-use crate::{
-    can::{CANOpen, CANOpenMessage},
-    i2c::{I2CSlave, State},
-    prelude::i2c::axis_settings,
-    prelude::i2c::both_axes_position,
-    prelude::i2c::{parse_velocity, position},
-};
-use bxcan::{Data, Frame};
 use core::convert::TryFrom;
 use core::{cell::RefCell, convert::TryInto};
 use embedded_time::duration::Microseconds;
@@ -218,27 +200,19 @@ impl SM4 {
         if let Some((message, frame)) = self.can.process_incoming_frame() {
             match message {
                 CANOpenMessage::NMTNodeControl => {
-                    crate::protocol::canopen::nmt_received(CAN_ID, &frame, &mut self.state);
+                    nmt_received(CAN_ID, &frame, &mut self.state);
                 }
                 CANOpenMessage::GlobalFailsafeCommand => {}
                 CANOpenMessage::Sync => {
                     self.leds.signalize_sync();
-                    crate::protocol::canopen::sync(&mut self.can, &mut self.state, &mut self.leds);
+                    sync(&mut self.can, &mut self.state, &mut self.leds);
                 }
                 CANOpenMessage::Emergency => {}
                 CANOpenMessage::TimeStamp => {}
-                CANOpenMessage::RxPDO1 => {
-                    crate::protocol::canopen::rx_pdo1(&frame, &mut self.state)
-                }
-                CANOpenMessage::RxPDO2 => {
-                    crate::protocol::canopen::rx_pdo2(&frame, &mut self.state)
-                }
-                CANOpenMessage::RxPDO3 => {
-                    crate::protocol::canopen::rx_pdo3(&frame, &mut self.state)
-                }
-                CANOpenMessage::RxPDO4 => {
-                    crate::protocol::canopen::rx_pdo4(&frame, &mut self.state)
-                }
+                CANOpenMessage::RxPDO1 => rx_pdo1(&frame, &mut self.state),
+                CANOpenMessage::RxPDO2 => rx_pdo2(&frame, &mut self.state),
+                CANOpenMessage::RxPDO3 => rx_pdo3(&frame, &mut self.state),
+                CANOpenMessage::RxPDO4 => rx_pdo4(&frame, &mut self.state),
                 CANOpenMessage::RxSDO => {
                     if frame.dlc() != 8 {
                         return;

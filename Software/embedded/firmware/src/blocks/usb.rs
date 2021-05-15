@@ -1,17 +1,11 @@
-use core::convert::TryInto;
-use crc_all::Crc;
+use crate::prelude::*;
 use sm4_shared::{
     prelude::{USBMessage, USBProtocolConsumer},
     OnError,
 };
 use stm32f4xx_hal::otg_fs::*;
-use stm32f4xx_hal::stm32;
-
-use crate::{
-    board::definitions::{USBDMinus, USBDPlus},
-    can::CANOpenMessage,
-};
 use stm32f4xx_hal::rcc::Clocks;
+use stm32f4xx_hal::stm32;
 use usb_device::class_prelude::UsbBusAllocator;
 use usb_device::prelude::*;
 use usbd_serial::SerialPort;

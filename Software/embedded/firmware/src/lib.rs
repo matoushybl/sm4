@@ -18,7 +18,10 @@ mod state;
 
 pub mod prelude {
     pub use crate::blocks::*;
+    pub use crate::board::definitions::*;
     pub use crate::board::*;
+    pub use crate::can::*;
+    pub use crate::i2c::*;
     pub use crate::protocol::*;
     pub use crate::state::DriverState;
 }

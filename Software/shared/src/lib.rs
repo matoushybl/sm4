@@ -35,7 +35,7 @@ pub trait OnError {
 }
 
 impl<T, E> OnError for Result<T, E> {
-    fn on_error<F: FnOnce(&Self) -> ()>(&self, closure: F)
+    fn on_error<F: FnOnce(&Self)>(&self, closure: F)
     where
         Self: Sized,
     {

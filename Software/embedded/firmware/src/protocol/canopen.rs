@@ -223,7 +223,7 @@ pub fn update_object_dictionary<const R: u32>(
     }
 }
 
-pub fn update_axis_dictionary<const R: u32>(
+fn update_axis_dictionary<const R: u32>(
     key: AxisKey,
     data: &[u8],
     dictionary: &mut dyn AxisDictionary<R>,
