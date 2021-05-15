@@ -13,6 +13,7 @@ mod motion_controller;
 mod psd;
 mod ramp;
 mod tmc2100;
+mod usb_protocol;
 
 pub mod prelude {
     pub use crate::canopen::*;
@@ -23,6 +24,7 @@ pub mod prelude {
     pub use crate::psd::PSDController;
     pub use crate::ramp::TrapRampGen;
     pub use crate::tmc2100::TMC2100;
+    pub use crate::usb_protocol::*;
     pub use crate::OnError;
 }
 

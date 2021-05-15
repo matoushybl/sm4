@@ -13,7 +13,7 @@ pub use pdos::{RxPDO1, RxPDO2, RxPDO3, RxPDO4, TxPDO1, TxPDO2, TxPDO3, TxPDO4};
 
 use core::convert::TryFrom;
 pub use object_dictionary::{
-    AxisDictionary, ObjectDictionary, ObjectDictionaryKey, ObjectDictionaryStorage,
+    AxisDictionary, AxisKey, Key, ObjectDictionary, ObjectDictionaryKey, ObjectDictionaryStorage,
 };
 pub use persistent_dictionary::{PersistentStoreAxisDictionary, PersistentStoreObjectDictionary};
 

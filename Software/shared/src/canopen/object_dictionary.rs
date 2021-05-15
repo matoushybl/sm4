@@ -66,8 +66,10 @@ pub enum AxisKey {
     Enabled,
     TargetVelocity,
     ActualVelocity,
-    TargetPosition,
-    ActualPosition,
+    TargetPositionRevolutions,
+    TargetPositionAngle,
+    ActualPositionRevolutions,
+    ActualPositionAngle,
     Acceleration,
     VelocityFeedbackControlEnabled,
     AcceleratingCurrent,
@@ -90,21 +92,23 @@ impl ObjectDictionaryKey for AxisKey {
             AxisKey::Enabled => 0x02,
             AxisKey::TargetVelocity => 0x03,
             AxisKey::ActualVelocity => 0x04,
-            AxisKey::TargetPosition => 0x05,
-            AxisKey::ActualPosition => 0x06,
-            AxisKey::Acceleration => 0x07,
-            AxisKey::VelocityFeedbackControlEnabled => 0x08,
-            AxisKey::AcceleratingCurrent => 0x09,
-            AxisKey::StandStillCurrent => 0x0a,
-            AxisKey::ConstantVelocityCurrent => 0x0b,
-            AxisKey::VelocityP => 0x0c,
-            AxisKey::VelocityS => 0x0d,
-            AxisKey::VelocityD => 0x0e,
-            AxisKey::VelocityMaxAction => 0x0f,
-            AxisKey::PositionP => 0x10,
-            AxisKey::PositionS => 0x11,
-            AxisKey::PositionD => 0x12,
-            AxisKey::PositionMaxAction => 0x13,
+            AxisKey::TargetPositionRevolutions => 0x05,
+            AxisKey::TargetPositionAngle => 0x06,
+            AxisKey::ActualPositionRevolutions => 0x07,
+            AxisKey::ActualPositionAngle => 0x08,
+            AxisKey::Acceleration => 0x09,
+            AxisKey::VelocityFeedbackControlEnabled => 0x0a,
+            AxisKey::AcceleratingCurrent => 0x0b,
+            AxisKey::StandStillCurrent => 0x0c,
+            AxisKey::ConstantVelocityCurrent => 0x0d,
+            AxisKey::VelocityP => 0x0e,
+            AxisKey::VelocityS => 0x0f,
+            AxisKey::VelocityD => 0x10,
+            AxisKey::VelocityMaxAction => 0x11,
+            AxisKey::PositionP => 0x12,
+            AxisKey::PositionS => 0x13,
+            AxisKey::PositionD => 0x14,
+            AxisKey::PositionMaxAction => 0x15,
         }
     }
 }
@@ -118,21 +122,23 @@ impl TryFrom<u8> for AxisKey {
             0x02 => Ok(AxisKey::Enabled),
             0x03 => Ok(AxisKey::TargetVelocity),
             0x04 => Ok(AxisKey::ActualVelocity),
-            0x05 => Ok(AxisKey::TargetPosition),
-            0x06 => Ok(AxisKey::ActualPosition),
-            0x07 => Ok(AxisKey::Acceleration),
-            0x08 => Ok(AxisKey::VelocityFeedbackControlEnabled),
-            0x09 => Ok(AxisKey::AcceleratingCurrent),
-            0x0a => Ok(AxisKey::StandStillCurrent),
-            0x0b => Ok(AxisKey::ConstantVelocityCurrent),
-            0x0c => Ok(AxisKey::VelocityP),
-            0x0d => Ok(AxisKey::VelocityS),
-            0x0e => Ok(AxisKey::VelocityD),
-            0x0f => Ok(AxisKey::VelocityMaxAction),
-            0x10 => Ok(AxisKey::PositionP),
-            0x11 => Ok(AxisKey::PositionS),
-            0x12 => Ok(AxisKey::PositionD),
-            0x13 => Ok(AxisKey::PositionMaxAction),
+            0x05 => Ok(AxisKey::TargetPositionRevolutions),
+            0x06 => Ok(AxisKey::TargetPositionAngle),
+            0x07 => Ok(AxisKey::ActualPositionRevolutions),
+            0x08 => Ok(AxisKey::ActualPositionAngle),
+            0x09 => Ok(AxisKey::Acceleration),
+            0x0a => Ok(AxisKey::VelocityFeedbackControlEnabled),
+            0x0b => Ok(AxisKey::AcceleratingCurrent),
+            0x0c => Ok(AxisKey::StandStillCurrent),
+            0x0d => Ok(AxisKey::ConstantVelocityCurrent),
+            0x0e => Ok(AxisKey::VelocityP),
+            0x0f => Ok(AxisKey::VelocityS),
+            0x10 => Ok(AxisKey::VelocityD),
+            0x11 => Ok(AxisKey::VelocityMaxAction),
+            0x12 => Ok(AxisKey::PositionP),
+            0x13 => Ok(AxisKey::PositionS),
+            0x14 => Ok(AxisKey::PositionD),
+            0x15 => Ok(AxisKey::PositionMaxAction),
             _ => Err(()),
         }
     }
@@ -147,7 +153,7 @@ pub enum Key {
 }
 
 impl Key {
-    fn parse(index: u16, subindex: u8) -> Option<Key> {
+    pub fn parse(index: u16, subindex: u8) -> Option<Key> {
         let index = index & 0xff00;
         match index {
             0x2000 => match subindex {
@@ -159,10 +165,6 @@ impl Key {
             0x2200 => AxisKey::try_from(subindex).map_or(None, |k| Some(Key::Axis2(k))),
             _ => None,
         }
-    }
-
-    fn parse_i2c(value: u8) -> Option<Key> {
-        None
     }
 
     fn offset(&self) -> u16 {

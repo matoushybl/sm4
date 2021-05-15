@@ -114,6 +114,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc_all"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8870eaf25cadb929c663b7f85e76bf9e82ceca6ac51c72c2bd8f029271187d4"
+
+[[package]]
 name = "crossbeam"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1044,6 +1050,7 @@ dependencies = [
 name = "sm4-shared"
 version = "0.1.0"
 dependencies = [
+ "crc_all",
  "embedded-hal",
  "embedded-time",
  "num-traits",

@@ -46,6 +46,12 @@ impl<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32>
             self.encoder.notify_direction_changed(axis_new_direction);
         }
 
+        dictionary.set_actual_velocity(if dictionary.velocity_feedback_control_enabled() {
+            self.encoder.get_velocity()
+        } else {
+            Velocity::new(output_frequency)
+        });
+
         self.driver.set_output_frequency(output_frequency);
         let current = if output_frequency.abs() < 0.1 {
             dictionary.current().standstill_current()
@@ -64,11 +70,6 @@ impl<D: StepperDriver, E: Encoder<RESOLUTION>, const RESOLUTION: u32>
     ) {
         self.encoder.sample();
         dictionary.set_actual_position(self.encoder.get_position());
-        dictionary.set_actual_velocity(if dictionary.velocity_feedback_control_enabled() {
-            self.encoder.get_velocity()
-        } else {
-            Velocity::new(output_frequency)
-        });
 
         let target_velocity = if dictionary.enabled() && !global_disable {
             match dictionary.mode() {

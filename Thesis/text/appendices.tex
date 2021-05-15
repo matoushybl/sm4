@@ -219,7 +219,7 @@
 %
 %\bigskip
 %
-\chapter{Contents of the Enclosed Electronic Appendix}
+\chapter{Contents of the Enclosed Electronic Medium}
 \label{ch:flash_contents}
 {\small
 %
@@ -304,17 +304,28 @@
         \hline
         2[1,2]00 & 17 & f32 & 4 & velocity controller maximal action value \\
         \hline
-        2[1,2]00 & 18 & f32 & 4 & position controller proportional gain \\
-        \hline
-        2[1,2]00 & 19 & f32 & 4 & position controller summation gain \\
-        \hline
-        2[1,2]00 & 20 & f32 & 4 & position controller differential gain \\
-        \hline
-        2[1,2]00 & 21 & f32 & 4 & position controller maximal action value \\
-        \hline
     \end{tabular}
-    \caption{RxPDO1 mapping}
+    \caption{The Object Dictionary}
     \label{tab:object_dictionary}
+\end{table}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ |p{1.5cm}|p{1.8cm}|p{1.8cm}|p{2cm}|p{5.5cm}| }
+        \hline
+        Index & Subindex & Type & Length [B] & Description \\
+        \hline
+        \hline
+2[1,2]00 & 18 & f32 & 4 & position controller proportional gain \\
+\hline
+2[1,2]00 & 19 & f32 & 4 & position controller summation gain \\
+\hline
+2[1,2]00 & 20 & f32 & 4 & position controller differential gain \\
+\hline
+2[1,2]00 & 21 & f32 & 4 & position controller maximal action value \\
+\hline
+\end{tabular}
+\caption{The Object Dictionary (Continued)}
+\label{tab:object_dictionary2}
 \end{table}
 
 \begin{table}[H]

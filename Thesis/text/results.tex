@@ -120,7 +120,9 @@ The API can be found in the Table~\ref{tab:i2c_api} and is based on the I\textsu
         \hline
         0x3X & R/W & 8 & set or read axis position, where X denotes the axis (1, 2) \\
         \hline
-        0x40 & R & 16 & read position from both axes \\
+        0x40 & W & 8 & set velocity for both axes \\
+        \hline
+        0x50 & R & 16 & read position from both axes \\
         \hline
     \end{tabular}
     \caption{I\textsuperscript{2}C API}

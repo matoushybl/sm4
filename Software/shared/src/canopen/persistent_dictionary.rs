@@ -101,67 +101,72 @@ impl<STORAGE: 'static + ObjectDictionaryStorage, const RESOLUTION: u32>
                 axis,
             ))
             .unwrap_or(false);
-        let current = CurrentSettings::new(
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::StandStillCurrent, axis))
-                .unwrap_or(0.4),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::AcceleratingCurrent, axis))
-                .unwrap_or(0.7),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::ConstantVelocityCurrent, axis))
-                .unwrap_or(0.6),
-        );
-        let velocity_controller_settings = ControllerSettings::new(
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::VelocityP, axis))
-                .unwrap_or(1.0),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::VelocityS, axis))
-                .unwrap_or(0.1),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::VelocityD, axis))
-                .unwrap_or(0.0),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::VelocityMaxAction, axis))
-                .unwrap_or(3.0),
-        );
-        let position_controller_settings = ControllerSettings::new(
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::PositionP, axis))
-                .unwrap_or(3.0),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::PositionS, axis))
-                .unwrap_or(0.001),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::PositionD, axis))
-                .unwrap_or(0.0001),
-            storage
-                .lock()
-                .borrow()
-                .load_f32(Key::key_for_axis(AxisKey::PositionMaxAction, axis))
-                .unwrap_or(3.0),
-        );
+        let stand = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::StandStillCurrent, axis))
+            .unwrap_or(0.4);
+        let accel = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::AcceleratingCurrent, axis))
+            .unwrap_or(0.7);
+        let constant = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::ConstantVelocityCurrent, axis))
+            .unwrap_or(0.6);
+        let current = CurrentSettings::new(stand, accel, constant);
+
+        let p = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::VelocityP, axis))
+            .unwrap_or(1.0);
+        let s = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::VelocityS, axis))
+            .unwrap_or(0.1);
+
+        let d = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::VelocityD, axis))
+            .unwrap_or(0.0);
+
+        let max = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::VelocityMaxAction, axis))
+            .unwrap_or(3.0);
+
+        let velocity_controller_settings = ControllerSettings::new(p, s, d, max);
+
+        let p = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::PositionP, axis))
+            .unwrap_or(3.0);
+        let s = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::PositionS, axis))
+            .unwrap_or(0.001);
+
+        let d = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::PositionD, axis))
+            .unwrap_or(0.0001);
+
+        let max = storage
+            .lock()
+            .borrow()
+            .load_f32(Key::key_for_axis(AxisKey::PositionMaxAction, axis))
+            .unwrap_or(3.0);
+
+        let position_controller_settings = ControllerSettings::new(p, s, d, max);
         Self {
             axis,
             mode: Default::default(),

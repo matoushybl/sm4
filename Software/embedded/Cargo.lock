@@ -602,6 +602,7 @@ dependencies = [
 name = "sm4-shared"
 version = "0.1.0"
 dependencies = [
+ "crc_all",
  "embedded-hal",
  "embedded-time",
  "num-traits",
