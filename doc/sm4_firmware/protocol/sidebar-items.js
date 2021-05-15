@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["canopen",""]]});
+initSidebarItems({"mod":[["canopen",""],["i2c",""]]});

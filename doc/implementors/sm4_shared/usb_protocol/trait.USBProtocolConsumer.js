@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sm4_firmware"] = [{"text":"impl USBProtocolConsumer for <a class=\"struct\" href=\"sm4_firmware/blocks/usb/struct.USBProtocol.html\" title=\"struct sm4_firmware::blocks::usb::USBProtocol\">USBProtocol</a>","synthetic":false,"types":["sm4_firmware::blocks::usb::USBProtocol"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["nmt_received",""],["rx_pdo1",""],["rx_pdo2",""],["rx_pdo3",""],["rx_pdo4",""],["sync",""]]});
+initSidebarItems({"fn":[["nmt_received",""],["read_axis_dictionary",""],["read_object_dictionary",""],["rx_pdo1",""],["rx_pdo2",""],["rx_pdo3",""],["rx_pdo4",""],["sync",""],["update_axis_dictionary",""],["update_object_dictionary",""]]});

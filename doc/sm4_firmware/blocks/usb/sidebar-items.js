@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["USBProtocol",""]]});
+initSidebarItems({"constant":[["BUFFER_SIZE",""]],"struct":[["USBProtocol",""]]});

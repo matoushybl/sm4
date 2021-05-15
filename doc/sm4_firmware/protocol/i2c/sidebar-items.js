@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["I2CRegister",""]],"fn":[["axis_settings",""],["both_axes_position",""],["both_axes_velocity",""],["parse_both_axes_velocities",""],["parse_position",""],["parse_velocity",""],["position",""],["set_axis_settings",""]]});
