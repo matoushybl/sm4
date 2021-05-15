@@ -429,54 +429,10 @@
 <span id="426">426</span>
 <span id="427">427</span>
 <span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
-<span id="438">438</span>
-<span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::{
-    <span class="ident">canopen</span>::{<span class="ident">read_object_dictionary</span>, <span class="ident">update_axis_dictionary</span>, <span class="ident">update_object_dictionary</span>},
-    <span class="ident">definitions</span>::{<span class="ident">Axis1</span>, <span class="ident">Axis2</span>},
-    <span class="ident">i2c</span>::{<span class="ident">parse_both_axes_velocities</span>, <span class="ident">parse_position</span>},
-};
-
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">config</span>::{<span class="ident">CAN_ID</span>, <span class="ident">ENCODER_RESOLUTION</span>, <span class="ident">SENSE_R</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::{
-    <span class="ident">config</span>::{<span class="ident">CAN_ID</span>, <span class="ident">ENCODER_RESOLUTION</span>, <span class="ident">SENSE_R</span>},
-    <span class="ident">i2c</span>::<span class="ident">set_axis_settings</span>,
-};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">i2c</span>::<span class="ident">I2CRegister</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">state</span>::<span class="ident">DriverState</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>},
-    <span class="ident">i2c</span>::{<span class="ident">I2CSlave</span>, <span class="ident">State</span>},
-    <span class="ident">prelude</span>::<span class="ident">i2c</span>::<span class="ident">axis_settings</span>,
-    <span class="ident">prelude</span>::<span class="ident">i2c</span>::<span class="ident">both_axes_position</span>,
-    <span class="ident">prelude</span>::<span class="ident">i2c</span>::{<span class="ident">parse_velocity</span>, <span class="ident">position</span>},
-};
-<span class="kw">use</span> <span class="ident">bxcan</span>::{<span class="ident">Data</span>, <span class="ident">Frame</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">cell</span>::<span class="ident">RefCell</span>, <span class="ident">convert</span>::<span class="ident">TryInto</span>};
 <span class="kw">use</span> <span class="ident">embedded_time</span>::<span class="ident">duration</span>::<span class="ident">Microseconds</span>;
@@ -676,27 +632,19 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">message</span>, <span class="ident">frame</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">can</span>.<span class="ident">process_incoming_frame</span>() {
             <span class="kw">match</span> <span class="ident">message</span> {
                 <span class="ident">CANOpenMessage</span>::<span class="ident">NMTNodeControl</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">nmt_received</span>(<span class="ident">CAN_ID</span>, <span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>);
+                    <span class="ident">nmt_received</span>(<span class="ident">CAN_ID</span>, <span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>);
                 }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">GlobalFailsafeCommand</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">Sync</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="self">self</span>.<span class="ident">leds</span>.<span class="ident">signalize_sync</span>();
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">can</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">leds</span>);
+                    <span class="ident">sync</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">can</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">leds</span>);
                 }
                 <span class="ident">CANOpenMessage</span>::<span class="ident">Emergency</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="ident">CANOpenMessage</span>::<span class="ident">TimeStamp</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">rx_pdo1</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>)
-                }
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">rx_pdo2</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>)
-                }
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO3</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">rx_pdo3</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>)
-                }
-                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO4</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">crate</span>::<span class="ident">protocol</span>::<span class="ident">canopen</span>::<span class="ident">rx_pdo4</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>)
-                }
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rx_pdo1</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>),
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rx_pdo2</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>),
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rx_pdo3</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>),
+                <span class="ident">CANOpenMessage</span>::<span class="ident">RxPDO4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rx_pdo4</span>(<span class="kw-2">&amp;</span><span class="ident">frame</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>),
                 <span class="ident">CANOpenMessage</span>::<span class="ident">RxSDO</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">dlc</span>() <span class="op">!</span><span class="op">=</span> <span class="number">8</span> {
                         <span class="kw">return</span>;

@@ -148,27 +148,15 @@
 <span id="145">145</span>
 <span id="146">146</span>
 <span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
-<span class="kw">use</span> <span class="ident">crc_all</span>::<span class="ident">Crc</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">sm4_shared</span>::{
     <span class="ident">prelude</span>::{<span class="ident">USBMessage</span>, <span class="ident">USBProtocolConsumer</span>},
     <span class="ident">OnError</span>,
 };
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">otg_fs</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>;
-
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">board</span>::<span class="ident">definitions</span>::{<span class="ident">USBDMinus</span>, <span class="ident">USBDPlus</span>},
-    <span class="ident">can</span>::<span class="ident">CANOpenMessage</span>,
-};
 <span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">rcc</span>::<span class="ident">Clocks</span>;
+<span class="kw">use</span> <span class="ident">stm32f4xx_hal</span>::<span class="ident">stm32</span>;
 <span class="kw">use</span> <span class="ident">usb_device</span>::<span class="ident">class_prelude</span>::<span class="ident">UsbBusAllocator</span>;
 <span class="kw">use</span> <span class="ident">usb_device</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">usbd_serial</span>::<span class="ident">SerialPort</span>;
