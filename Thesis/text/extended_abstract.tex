@@ -2,28 +2,28 @@
 \noindent
 {\large\sffamily\bfseries\MakeUppercase{Extended Abstract}}
 \section*{Úvod}
-Tato práce poojednává o vývoji dvoukanálového kontroléru krokových motorů.
+Tato práce pojednává o vývoji dvoukanálového kontroléru krokových motorů.
 V rámci práce je popsán jak vývoj elektroniky, tak vývoj software.
-Jsme si vědomi, že kontroléry krokových motorů je již mnohokráte vyřešený problém, který má mnoho komerčně dostupných řešení.
+Uvědomujeme si, že kontroléry krokových motorů jsou již mnohokráte vyřešený problém, který má mnoho komerčně dostupných řešení.
 Navzdory tomuto faktu jsme se rozhodli takový kontrolér vyvinout, a to ze dvou důvodů - výsledný kontrolér bude používán v rámcí předmětu BPC-PRP, což má jisté nároky na jeho hardware i software, a proto, že jsme se rozhodli naprogramovat firmware a řídicí software v programovacím jazyce Rust.
-V současnosti, je většina embedded projektů programována v klasických jazycích C a C++, s jistými výjimkami v podobě jazyků Python a Ada.
-I když jazyky C a C++ jsou vhodné pro embedded vývoj z důvodu snadného přístupu k periferiím, tyto jazyky si s sebou nesou problémy v podobě nedostatečné ochrany před nevalidním přístupem do paměti a spoustou nedefinovaných chování, které jsou mnohdy často závislé na implementaci kompilátoru.
-Podle studijí, které uvádíme v originálním úvodu je špatný přístup do paměti zodpovědný za až 70 \% vysoce závažných problémů v prohlížeči Chrome.
+V současnosti, je většina embedded projektů programována v klasických jazycích - C a C++, s jistými výjimkami v podobě jazyků Python a Ada.
+I když jazyky C a C++ jsou vhodné pro embedded vývoj z důvodu snadného přístupu k periferiím, tyto jazyky si s sebou nesou problémy v podobě nedostatečné ochrany před nevalidním přístupem do paměti a velkým množstvím nedefinovaných chování, které jsou mnohdy často závislé na implementaci kompilátoru.
+Podle studijí, které uvádíme v originálním úvodu je špatný přístup do paměti zodpovědný až za 70 \% vysoce závažných problémů v prohlížeči Chrome.
 Problém s nedefinovaným chováním je sice méně důležitý než špatná práce s pamětí, ale přesto způsobuje problémy zejména v rámci vývoje, kdy prodlužuje jeho čas a tedy i finanční náročnost.
 
-Tyto problémy nejsou ale jen doménou vysokoúrovňových systémů, ale ve velké míře jsou doménou i samotných embedded sustémů, kde mohou mít mnohem katastrofálnější následky než v případě oněch vysokoúrovňových systémů.
-Věříme, že tyto problémy lze odstranit, nebo alespoň minimalizovat jejich dopady právě použitím programovacího jazyka Rust, který byl navržen tak, aby předcházel právě problémům s pamětí a to i v případě vícevláknových systémů, minimalizoval nedefinovaná chování a to vše aniž by to nějak ovlivnilo výkon programu nebo jeho paměťovou náročnost.
+Tyto problémy nejsou ale jen doménou vysokoúrovňových systémů, ale ve velké míře jsou doménou i samotných embedded systémů, kde mohou mít mnohem katastrofálnější následky než v případě oněch vysokoúrovňových systémů.
+Věříme, že tyto problémy lze odstranit, nebo alespoň minimalizovat jejich dopady, právě použitím programovacího jazyka Rust, který byl navržen tak, aby předcházel právě chybám při práci pamětí a to i v případě vícevláknových systémů, minimalizoval nedefinovaná chování a to vše aniž by to nějak ovlivnilo výkon programu nebo jeho paměťovou náročnost.
 
 Myslíme si, že pokrokové myšlenky a nástroje, které jazyk nabízí mohou do embedded systémů přinést mnohem více bezpečnosti a spolehlivosti než je nyní možné dosáhnout s konvenčními nástroji.
-To platí zejména v momentě, kdy složitost embedded systémů neustále roste a zvyšují se požadavky na rychlost vývoje.
+To platí zejména v současnosti, kdy složitost embedded systémů neustále roste a zvyšují se požadavky na rychlost vývoje.
 
 \section*{Příbuzné projekty}
 V rámci příbuzných projektů popisujeme projekty, které souvisí ať už s vývojem embedded systémů v jazyce Rust, tak se zabývají vývojem kontrolérů pr krokové motory, nebo nám byly přímou inspirací.
 
-Vzhledem k tomu, že výsledný kontrolér má být použit v předmětu BPC-PRP, popisujeme kontroléry, které jsou v rámci tohoto kurzu již používány - tedy kontrolér KM2, který je založený na mikrokontroléru ATMega8 a s nadřazeným systémem komunikuje pomocí sběrnice I\textsuperscript{2}C.
+Vzhledem k tomu, že výsledný kontrolér má být použit v předmětu BPC-PRP, popisujeme kontrolér, který je v rámci tohoto kurzu již používán - tedy kontrolér KM2, který je založený na mikrokontroléru ATMega8 a s nadřazeným systémem komunikuje pomocí sběrnice I\textsuperscript{2}C.
 Vzhledem k použití tohoto mikrokontroléru nelze ale použít vyšší frekvenci I\textsuperscript{2}C než 30 kHz, kvůli chybě ve funkcionalitě clock-stretching.
 
-Dále popisujeme kontrolér KM3, který využívá modernější mikrokontrolér STM32F0, ale zatím nebyl do výuky nasazen z důvodu nedostatku prostředků.
+Dále popisujeme kontrolér KM3, který využívá modernější mikrokontrolér STM32F0, ale zatím nebyl do výuky nasazen.
 Pro tento kontrolér jsme již dříve vyvinuly firmware v programovacím jazyce Rust, čímž jsme otestovali schopnost jazyka a jeho nástrojů fungovat na low-endovém procesoru s nedostatkem paměti FLASH.
 Použitý procesor byl ale největší slabinou kontroléru, protože neumožňoval implementaci pokročilých funkcí.
 
@@ -35,18 +35,16 @@ V rámci projektů, které nám byly inspirací zmiňujeme projekt Mechaduino, k
 
 Dále zmiňujeme projekt Flott, který implementuje řízení pohybu krokových motorů v programovacím jazyce Rust.
 
-Na základě příbuzných projektů jsme stanovili některé cíle pro vývoj kontroléru SM4.
-
 \section*{Metody}
 V rámci použitých metod popisujeme krokové motory a jejich řízení.
-Vzhledem k tomu, že jsme se rozhodli použít integrované obvody pro řízení krokových motorů od firmy Trinamic, popisujeme rovněý jejich proprietální technologie, které jsou důležité pro správné nastavení integrovaných obvodů i jejich výběr.
+Vzhledem k tomu, že jsme se rozhodli použít integrované obvody pro řízení krokových motorů od firmy Trinamic, popisujeme rovněž jejich proprietální technologie, které jsou důležité pro správné nastavení integrovaných obvodů i jejich výběr.
 Kromě popisu krokových motorů popisujeme také použité sběrnice, a to CAN bus s protokolem CANOpen, I\textsuperscript{2}C a USB.
 Následně popisujeme programovací jazyk Rust a jeho důležité koncepty - proměnné a konstanty, princip vlastnictví a tzv. borrow checker, výčtové typy a pattern matching, datové struktury, traits a generika, makra, standarní knihovnu, testování a build systém Cargo.
 Na základě informací o programovacím jazyce se přesouváme k popisu toho, jak lze v tomto jazyce vyvíjet pro embedded systémy.
 Diskutujeme podporu pro různé rodiny a jádra mikrokontrolérů, organizace vyvíjející nástroje a knihovny pro embedded Rust, přístup k periferiím, abstrakce pomocí HAL, přístup ke globálnímu stavu (který v rámci bezpečnosti považuje Rust za nebezpečný).
 Dále popisujeme asynchronní programování v Rustu, které by mohlo zcela změnit způsob jakým je k embedded software přistupováno.
 Důležitou součástí embedded Rustu jsou nástroje, které byli vyvinuty pro snazší práci s mikrokontroléry - jsou jimi například generátor kódu pro přístup k periferiím, extrémně rychlé logování, nebo ochrana paměti před přetečením zásobníku.
-Jako nedílnou součást vývoje moderního software popisujeme i automatizované testy a Continuous Integration pro embedded systémy.
+Jako nedílnou součást moderního vývoje software popisujeme i automatizované testy a Continuous Integration pro embedded systémy.
 
 Po nezbytném teoretickém úvodu se dostáváme k samotnému vývoji kontroléru.
 Nejprve zadefinujeme požadavky na zařízení, které plynou se zadání, ale i z předchozích zkušeností a příbuzných projektů.
@@ -75,13 +73,13 @@ Jako další součást výsledků popisujeme dvě demonstace funkčnosti kontrol
 \section*{Závěr}
 V rámci této práce jsme navrhli, vyrobili a naprogramovali dvoukanálový kontrolér krokových motorů.
 Byly vytvořeny dvě verze hardware, lišící se jak zapojením, tak použitými integrovanými obvody pro řízení krokových motorů, tak designem desky plošných spojů.
-Druhá verze hardware je sice mnohem pokročilejší než ta první, ale v rámci práce jsme vymysleli další způsoby jak tuto verzi hardware dále vylepšit.
+Druhá verze hardware je sice mnohem pokročilejší než ta první, i přesto jsme v rámci práce vymysleli další způsoby jak tuto verzi hardware dále vylepšit.
 
 Pro kontrolér jsme vyvinuli firmware v programovacím jazyce Rust.
 Momentální verze firmware bohužel momentálně podporuje pouze první verzi hardware, ale doprogramování podpory pro druhou verzi by nemělo být příliš náročné.
-V rámci programování jsme vyžili všech možných nástrojů, které nám jazyk poskytuje - zejména v rámci vývoje abstrakcí, kde jsme hojně využívali traits a generiku.
-Musíme podotknout, že embedded Rust je již dostatečně vyspělý na to, aby v něm šli bezproblémově a efektivně programovat větší či menší embedded projekty.
-Věříme, že firmware byl naprogramován dostatečně abstraktně na to aby šel jednoduše rozšiřovat a vylepšovat.
+V rámci programování jsme využili všech možných nástrojů, které nám jazyk poskytuje - zejména v rámci vývoje abstrakcí, kde jsme hojně využívali traits a generiku.
+Věříme, že firmware byl naprogramován dostatečně abstraktně na to, aby jej bylo možné jednoduše rozšiřovat a vylepšovat.
+Musíme podotknout, že embedded Rust je již dostatečně vyspělý na to, aby v něm šly bezproblémově a efektivně programovat větší či menší embedded projekty.
 
 Pro jednoduchost testování jsme rovněž vytvořili jednoduchý řídicí software schopný řídit kontrolér jak v rychlostním, tak v pozičním režimu.
 

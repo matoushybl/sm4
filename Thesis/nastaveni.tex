@@ -81,25 +81,25 @@
 %%% Abstrakt
 \abstract[%
 Cílem této práce je vývoj dvoukanálového kontroléru krokových motorů.
-V rámci práce je popsán vývoj jak elektroniky, tak příslušného software.
+V rámci práce je popsán jak vývoj elektroniky, tak vývoj příslušného software.
 Elektronika kontrolŕu je založena na mikrokontroléru STM32F405 a driverů krokových motorů vyráběných firmou Trinamic.
-Pro komunikaci s nadřazenými systémy je implementován CANOpen a sběrnice I\textsuperscript{2}C a USB.
+Pro komunikaci s nadřazenými systémy je implementován protokol CANOpen a sběrnice I\textsuperscript{2}C a USB.
 Elektronika byla navržena v software KiCAD and využívá čtyřvrstvého plošného spoje a moderních výrobních technologií.
 Co se týká software, byl vyvinut jak firmware pro mikrokontrolér, tak software pro ovládání kontroléru.
 Obě části software využívají programovacího jazyka Rust, který se zaměřuje na bezpečnost práce s pamětí, rychlost a zero-cost abstrakce.
-Sekundárním cílem této práce je ukázat, jak lze tento programovací jazyk s výhodou použít pro programování nízkoúrovňového vestavného software.
+Sekundárním cílem této práce je ukázat, jak lze tento programovací jazyk s výhodou použít pro programování nízkoúrovňového embedded software.
 Firmware kontroléru implementuje nezávislé řízení pohybu obou os kontroléru a to jak v rychlostním, tak v pozičním režimu a zároveň implementuje bezpečnostní funkce pro případy selhání komunikace.
 Výsledný kontrolér by měl být použit v rámcí výzkumné skupiny Robotiky a Umělé Inteligence a studenty na Ústavu Automatizace FEKT VUT.
 ]{%
-The goal of this thesis is the development of a dual channel stepper motor controller.
+The goal of this thesis is the development of a dual-channel stepper motor controller.
 Both the development of electronics and software is described.
-The electronics of the controller is based on the STM32F405 microcontroller and Trinamic manufactured stepper motor controller ICs.
-For communication with higher level systems, the controller utilizes CANOpen, I\textsuperscript{2}C and USB buses.
+The electronics of the controller is based on the STM32F405 microcontroller, and Trinamic manufactured stepper motor controller ICs.
+For communication with higher-level systems, the controller utilizes the CANOpen protocol, I\textsuperscript{2}C, and USB buses.
 The whole electronics was designed in the KiCAD EDA and utilizes a 4-layer PCB and contemporary manufacturing technologies.
-As for the software, both firmware and control software was developed.
+As for the software, both firmware and control software were developed.
 Both of these pieces of software utilize the Rust programming language, which focuses on memory safety, performance and provides useful zero-cost abstraction.
-Secondary goal of this thesis is to show how the language can be utilized for low-level embedded software development.
-The firmware of the controller implements motion controller independently for each of the axis with both velocity and position control and provides some failsafe mechanisms for cases of communication failures.
+The Secondary goal of this thesis is to show how the language can be utilized for low-level embedded software development.
+The firmware of the controller implements independent motion control for each of the axes with both velocity and position control and provides failsafe mechanisms for cases of communication failures.
 The controller is meant to be used by the Robotics and AI research group and by students of the DCI, FEEC BUT.
 }
 
@@ -112,9 +112,9 @@ stepper motor, electronics design, KiCAD, PCB, MCU, embedded software, Rust, mem
 
 %%% Poděkování
 \acknowledgement{%
-I would like to express my gratitude to my supervisor prof. Ing. Luděk Žalud Ph.D. for his help and leadership.
+I want to express my gratitude to my supervisor, prof. Ing. Luděk Žalud Ph.D. for his help and leadership.
 I would also like to express my gratitude to my colleagues at the Robotics and AI research group of FEEC and CEITEC BUT who supported me and helped me.
-Special thanks goes to Ing. Lukáš Kopečný Ph.D. who supplied me with tasty beer and Ing. Adam Ligocky for providing emotional support.
+Special thanks belongs to Ing. Lukáš Kopečný Ph.D. who supplied me with tasty beer, and Ing. Adam Ligocky for providing emotional support.
 I would also like to thank Ing. Ondřej Baštán for helping me with the direction of the project when I developed the second hardware revision.
 Also, I would like to thank the embedded Rust community, especially James Munns and Hanno Braun, who provided me with essential feedback at the beginning of software development.
 Last but not least, I would like to thank my girlfriend for her never-ending support and also to my family and friends who helped me and supported me along the way.

@@ -1,33 +1,34 @@
 \section{Requirements}
 \label{sec:requirements}
 In the book Better Embedded System Software\cite{koopman_better_2010}, the author specifies written requirements as one of the most important parts of documentation for any embedded system.
-The author describes requirements as rules specifying everything the system must do, everything the system must not do and constraints the system must meet.
-According to the book, there are three types of requirements - functional requirements, non-functional requirements and constraints.
-An important property of requirements is that they must be easily verifiable and if possible directly measurable.
+The author describes requirements as rules specifying everything the system must do, everything the system must not do, and constraints the system must meet.
+According to the book, there are three types of requirements - functional requirements, non-functional requirements, and constraints.
+An essential property of requirements is that they must be easily verifiable and, if possible, directly measurable.
 Also, for future reference, every requirement must have a unique number.
 
 \subsection{Functional Requirements}
 \label{subsec:func_req}
-Functional requirements describe properties that must be provided by the target system, these are implemented either by the firmware or the hardware.
+Functional requirements describe properties that must be provided by the target system.
+These are implemented either by the firmware or the hardware.
 
-The requirement for the stepper-motor controller are specified as follows:
+The requirements for the stepper-motor controller are specified as follows:
 
 \begin{itemize}
-    \item \textbf{FR-01} When no command specifying motor speed is received for a period of time (configurable, e.g. 1~s), the controller shall stop both motors.
+    \item \textbf{FR-01} When no command specifying motor speed is received for a period of time (configurable, e.g., 1~s), the controller shall stop both motors.
     \item \textbf{FR-02} When multiple communication interfaces are connected, the system shall prioritize CAN bus, then I2C. USB has the lowest priority.
     \item \textbf{FR-03} The controller shall set motor current based on the ramping state.
-    When the motor is still, low current shall be set, when the motor is accelerating, high current shall be set, when motor is moving with constant speed, the current shall be set to some medium values.
+    When the motor is still, low current shall be set; when the motor is accelerating, high current shall be set; when the motor is moving with constant speed, the current shall be set to some medium values.
     These values shall be configurable.
     \item \textbf{FR-04} All relevant values (currents, timings, limits, etc.) shall be configurable via USB or CANOpen SDO protocol.
     \item \textbf{FR-05} The controller shall be able to ramp the speeds using at least trapezoidal ramps, and their parameters shall be configurable.
     \item \textbf{FR-06} The controller shall support control in speed mode as well as position mode.
     \item \textbf{FR-07} The controller shall provide basic electrical safety features - such as fuses and reverse voltage protection.
-    \item \textbf{FR-08} The controller shall have interface allowing to connect external encoders (absolute or incremental) during future development.
+    \item \textbf{FR-08} The controller shall have an interface allowing to connect external encoders (absolute or incremental) during future development.
 \end{itemize}
 
 \subsection{Non-functional Requirements}
 \label{subsec:nonfunc_req}
-Non-functional requirements are properties that the system must have, but are not directly features or functions, but rather properties of the system as a whole.
+Non-functional requirements are properties that the system must have but are not directly features or functions but rather properties of the system as a whole.
 
 \begin{itemize}
     \item \textbf{NFR-01} The controller shall provide developer-friendly protocol and data formats.
@@ -42,7 +43,8 @@ Non-functional requirements are properties that the system must have, but are no
 
 \subsection{Constraints}
 \label{subsec:constraints}
-Constraints specify limitations on how the system must be built, they specify for example hardware limitations, technologies, protocols, conformance to standards, etc.
+Constraints specify limitations on how the system must be built.
+They specify, for example, hardware limitations, technologies, protocols, conformance to standards, etc.
 
 \begin{itemize}
     \item \textbf{C-01} The controller shall utilize stepper drivers with silent operation, such as Trinamic StealthChop\texttrademark.

@@ -111,7 +111,7 @@ impl CANOpenBackend {
                                     }
                                     .to_raw()
                                     .unwrap(),
-                                    TxPDO1::len(),
+                                    RxPDO1::len(),
                                 )))
                                 .unwrap();
 

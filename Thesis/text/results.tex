@@ -1,14 +1,14 @@
 \chapter{Results}
 \label{ch:results}
 This chapter discusses the implemented functionality, features and the final state of the project in general.
-Apart from the final project state, two demonstrations are showcased - one of them being a small mobile robot for indoor mapping, and the second one being a stepper motor driven linear rail useful for example for camera movement.
+Apart from the final project state, two demonstrations are showcased - one of them being a small mobile robot for indoor mapping, and the second one being a stepper motor driven linear rail useful, for example, for camera movement.
 
 \section{Final Project State}
 \label{sec:final_project_state}
 This section describes the final state of the SM4 stepper motor controller project.
-In the Figures below, we can se both of the manufactured \acs{pcb} revisions.
+In the Figures below, we can see both of the manufactured \acs{pcb} revisions.
 There were two pieces of each of the \acs{pcb} revisions manufactured.
-Furthermore, the \acs{API}s for all of the buses ae described.
+Furthermore, the \acs{API}s for all of the buses are described.
 
 \begin{figure}[H]
     \begin{minipage}[t]{0.45\textwidth}
@@ -25,17 +25,17 @@ Furthermore, the \acs{API}s for all of the buses ae described.
     \end{minipage}
 \end{figure}
 
-In general, two revisions of the hardware have been developed, but only the first one has been used for firmware development, due to time constraints.
-Majority of the requirements have been fulfilled.
-The stepper motor controller is capble of independently driving two stepper motors in either velocity or position mode.
-Thanks to the Trinamic driver \acs{ic}s the motor operation is silent.
+In general, two revisions of the hardware have been developed, but only the first one has been used for firmware development due to time constraints.
+The majority of the requirements have been fulfilled.
+The stepper motor controller is capable of independently driving two stepper motors in either velocity or position mode.
+Thanks to the Trinamic driver \acs{ic}s, the motor operation is silent.
 The driver now utilizes simulated encoders to measure output shaft position.
 Given the controller's design, it can be controlled using the CANOpen protocol or via I\textsuperscript{2}C and can be configured using the USB interface.
 
 \subsection{Requirements Fulfilment}
 \label{subsec:req_fulfilment}
-In the beginning of the development, we specified requirements in the Section~\ref{sec:requirements}.
-Majority of the requirements have been fulfilled, but we will describe the unfulfilled requirements alongside their current fulfilment status in the Table~\ref{tab:unfulfilled_req}.
+At the beginning of the development, we specified requirements in the Section~\ref{sec:requirements}.
+The majority of the requirements have been fulfilled, but we will describe the unfulfilled requirements alongside their current fulfilment status in the Table~\ref{tab:unfulfilled_req}.
 
 \begin{table}[H]
     \centering
@@ -46,11 +46,11 @@ Majority of the requirements have been fulfilled, but we will describe the unful
         \hline
         FR-02 & When multiple communication interfaces are connected, the system shall prioritize CAN bus, then I2C. USB has the lowest priority. & We haven't been able to find a mechanism for prioritizing, we believe that this requirement might be changed as it should be the integrator's responsibility to choose only one of the communication interfaces. \\
         \hline
-        FR-04 & All relevant values (currents, timings, limits, etc.) shall be configurable via USB or CANOpen SDO protocol. & Now, only a subset of the values is configurable, more values (such as configuration of communication) will be implemented in the future revisions. \\
+        FR-04 & All relevant values (currents, timings, limits, etc.) shall be configurable via USB or CANOpen SDO protocol. & Now, only a subset of the values is configurable. More values (such as the configuration of communication) will be implemented in future revisions. \\
         \hline
         NFR-03 & The controller shall be configurable using a program for personal computers. & The software for personal computers was developed, but the configuration part is missing as of now. \\
         \hline
-        NFR-6 & The firmware should utilize software in the loop integration testing for \acs{qa} (\acl{Quality Assurance}) & Some software in the loop testing has been drafted with the Encoder abstraction, but more of the software in the loop testing will be done in the future.\\
+        NFR-6 & The firmware should utilize software in the loop integration testing for \acs{qa} & Some software in the loop testing has been drafted with the Encoder abstraction, but more of the software in the loop testing will be done in the future.\\
         \hline
         NFR-7 & The firmware shall be properly documented. & Some parts of the firmware are already documented via the inline documentation, but the majority of the other code is not, but it will be done in the future revision. \\
         \hline
@@ -61,9 +61,9 @@ Majority of the requirements have been fulfilled, but we will describe the unful
 
 \subsection{CANOpen API}
 As we described in the Sections on firmware development (\ref{sec:firmware}) and the one on CANOpen (~\ref{subsec:canopen}), the firmware utilizes the Object Dictionary as the central configuration storage.
-From the higher level systems, this Object Dictionary can be accessed via the SDO protocol using indexes and subindexes, that are specified in the Table~\ref{tab:object_dictionary} in the Appendix~\ref{ch:canopen_appendices}.
+From the higher level systems, this Object Dictionary can be accessed via the SDO protocol using indexes and subindexes which are specified in the Table~\ref{tab:object_dictionary} in the Appendix~\ref{ch:canopen_appendices}.
 
-Apart from accessing the Object Dictionary using SDOs, some of the important control and configuration values have been made accessible via the PDO protocol.
+Apart from accessing the Object Dictionary using SDOs, some important control and configuration values have been made accessible via the PDO protocol.
 The structure of the PDOs can be seen in the Tables~\ref{tab:rxpdo1}, \ref{tab:txpdo1}, \ref{tab:velocity_pdo}, \ref{tab:position_pdo} in the Appendix~\ref{ch:canopen_appendices}.
 For completeness, the description of the PDOs can be found in the Table~\ref{tab:pdo_meaning}.
 
@@ -99,7 +99,7 @@ Alongside the SDO and PDO protocols, also the SYNC and NMT protocols have been i
 Note that the device must reach the NMT State Operational in order to enable motion control.
 
 \subsection{I\textsuperscript{2}C API}
-In order for the controller to be usable with the BPC-PRP course, we developed a simplified API for the I\textsuperscript{2}C bus.
+For the controller to be usable with the BPC-PRP course, we developed a simplified API for the I\textsuperscript{2}C bus.
 Using this API, it is only possible to set the axes mode, enable or disable them and then to set control variables and read them.
 In the course, the students utilize control in the velocity mode and then acquire the positions of both axes for odometry calculation.
 In the previous Sections, we described that in order for motion control to work, the driver needs to reach NMT State Operational.
@@ -131,10 +131,11 @@ The API can be found in the Table~\ref{tab:i2c_api} and is based on the I\textsu
 
 \subsection{USB API}
 The implemented USB API was designed to only allow for configuring the device as per the requirements.
-The protocol is fairly simple, there are two types of messages - a request and a transfer message, that can be seen in the Figures~\ref{fig:usb_request} and \ref{fig:usb_tansfer}.
+The protocol is fairly simple.
+There are two types of messages - a request and a transfer message, that can be seen in the Figures~\ref{fig:usb_request} and \ref{fig:usb_tansfer}.
 
-When the higher level device wants to write a value to the Object Dictionary, it simply sends the data transfer message, where the OD KEY contains the index and the subindex.
-On the other hand, when the higher level device wants to read a value from the Object Dictionary, it sends the data request message and the controller responds with the data transfer message containing the requested value.
+When the higher-level device wants to write a value to the Object Dictionary, it simply sends the data transfer message, where the OD KEY contains the index and the subindex.
+On the other hand, when the higher-level device wants to read a value from the Object Dictionary, it sends the data request message, and the controller responds with the data transfer message containing the requested value.
 
 \begin{figure}[H]
     \centering
@@ -160,17 +161,17 @@ This is true for both the CANOpen and I\textsuperscript{2}C APIs.
 \subsection{Control Application}
 A simple control application utilizing the \acs{tui} and CANOpen protocol was developed.
 Controlling the stepper motor controller both in velocity and position mode is implemented, but it is not possible to change controller parameters, such as controller constants.
-In the future a fully featured control application with proper \acs{gui}, support for all the buses and configuration will be developed in order to allow for seamless configuration.
+In the future, a fully-featured control application with proper \acs{gui}, support for all the buses and configuration will be developed in order to allow for seamless configuration.
 Adding support for flashing via \acs{usb} \acs{dfu} is planned too.
 
 \subsection{Takeaways for Future Revisions}
 \label{subsec:final_takeaways}
-In this section, we describe what changes we'd made in a possible future revisions.
+In this section, we describe what changes we'd made in a possible future revision.
 The changes are:
 \begin{itemize}
     \item Use the angular XT-30 connector for motor power.
     \item Use different connectors for motors.
-    \item Use standardized 10 pin JTAG connector for SWD (Serial Wire Debug).
+    \item Use standardized 10-pin JTAG connector for SWD (Serial Wire Debug).
     \item Use eFuse for electronics protection.
     \item Add more status LEDs.
     \item Improve encoder connector placement, select appropriate connectors.
@@ -184,12 +185,12 @@ The changes are:
 
 \section{Demonstration \#1 - Linear Rail Actuator for Camera Movement}
 \label{sec:dem2}
-The first demonstration for the SM4 motor controller is controlling a single axis linear rail actuator.
+The first demonstration for the SM4 motor controller is controlling a single-axis linear rail actuator.
 This actuator was provided by the thesis supervisor and is equipped with a NEMA17 style stepper motor that drives a belt with an attached table.
 Originally, this rail was meant to be used for camera movement when recording a musician.
 
 This demonstration is controlled using a Raspberry Pi 4B, and the SM4 motor controller is controlled using the I\textsuperscript{2}C bus and the corresponding API.
-This showcase aims to demonstrate the controller's ability to control in position mode and therefore to position the table on the rail according to the commands of the higher-level system, and also the usability of I\textsuperscript{2}C bus and API.
+This showcase aims to demonstrate the controller's ability to control in position mode and, therefore, to position the table on the rail according to the commands of the higher-level system, and also the usability of I\textsuperscript{2}C bus and API.
 In the future, this demonstration will be equipped with a second axis allowing for tilting the mounted camera.
 The finished demonstrator can be seen in the Figure~\ref{fig:rail_demonstrator}.
 
@@ -210,18 +211,18 @@ The finished demonstrator can be seen in the Figure~\ref{fig:rail_demonstrator}.
 3)  Whatever you do, don't develop any new launch vehicles.}{Akin's Laws of Spacecraft Design\cite{akin_akins_nodate}}
 
 The second demonstration, where we showcase the SM4 stepper motor controller, is a small differentially driven robot aimed for indoor mapping and self-localization.
-The chassis is differential with a motor on two sides of the robot, which showcases the driver's ability to control both of the motor and calculate odometry.
-Apart from the driver itself, the robot features a Raspberry Pi 4B SBC, 4 cell Li-Ion battery, step-down converter and a simple planar LIDAR for the mapping task.
+The chassis is differential with a motor on two sides of the robot, which showcases the driver's ability to control both of the motors and calculate odometry.
+Apart from the driver itself, the robot features a Raspberry Pi 4B SBC, 4-cell Li-Ion battery, step-down converter, and a simple planar LIDAR for the mapping task.
 A block diagram of this demonstration can be seen in the Figure~\ref{fig:mapbot_block}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{obrazky/mapbot_block_diag}
+    \includegraphics[width=0.7\textwidth]{obrazky/mapbot_block_diag}
     \caption{The block diagram of the robot used for the second demonstration.}
     \label{fig:mapbot_block}
 \end{figure}
 
-It is projected, that the robot will be utilized for algorithm demonstration as part of the MPC-MAP - Advanced Mapping and Self-Localization for Robotics course.
+It is projected that the robot will be utilized for algorithm demonstration as part of the MPC-MAP - Advanced Mapping and Self-Localization for Robotics course.
 The finalized robot can be seen in the Figure~\ref{fig:map_bot}.
 
 \begin{figure}[H]

@@ -1,28 +1,36 @@
 \chapter*{Conclusion, Discussion and Future work}
 \phantomsection
 \addcontentsline{toc}{chapter}{Conclusion, Discussion and Future work}
-
-In this thesis, we described the development of a dual channel stepper motor controller we named SM4.
+In this thesis, we described the development of a dual-channel stepper motor controller we named SM4.
 We developed both the hardware and software.
-As for the hardware development we utilized the STM32F405 MCU, Trinamic stepper motor driver ICs as the basis of the design.
-As for PCB design, we utilized a 4-layer PCB to decrease the development time and we utilized the JLCPCB's manufacturing service alongside with the PCB assembly service.
+As for the hardware development, we utilized the STM32F405 MCU and Trinamic stepper motor driver ICs as the basis of the design.
+As for PCB design, we utilized a 4-layer PCB to decrease the development time, and we utilized the JLCPCB's manufacturing service alongside the PCB assembly service.
 Two revisions of the PCB were designed and manufactured, two of each revision PCBs were assembled.
-The schematic and PCBs were designed in the KiCAD EDA suite, which proved useful, given the KiCAD has large footprint and symbol library.
+Even though the second revision of the PCB is more advanced than the first one, there is still plenty of room for improvements, which we came across during the development.
+The schematic and PCBs were designed in the KiCAD EDA suite, which proved useful, given the fact that KiCAD has a large footprint and symbol library.
 
-As for development of the software, we utilized the Rust programming language for both the bare-metal firmware and the control application.
-Developing the firmware in Rust proved useful, as there is a great support for developing on bare-metal, given there is a large community for developing device drivers, HALs and tooling.
+As for the development of the software, we utilized the Rust programming language for both the bare-metal firmware and the control application.
+Unfortunately, the firmware, as of now, supports only the first revision of the hardware.
+Developing the firmware in Rust proved useful, as there is great support for developing on bare-metal, given there is a large community for developing device drivers, HALs, and tooling.
+During the development, we utilized many of the language's features, especially when developing abstractions over the hardware where we utilized traits and generics.
+We believe that given the developed abstractions the firmware can be easily extended and improved.
+
 We believe that the tooling that currently exists surpasses the tooling available for other languages and ecosystems.
 The language's features provide memory and data race safety for embedded systems while not impeding the code size or performance.
-Given our experience with developing embedded firmware for this project and several other ones described earlier, we firmly believe that the Rust programming languages is the right way forward as it brings features never deemed possible for embedded systems development.
+Given our experience with developing embedded firmware for this project and several other ones described earlier, we firmly believe that the Rust programming language is the right way forward as it brings features never deemed possible for embedded systems development.
 
-Apart from the firmware, we also developed a simple control application for personal computers, that is now capable of only controlling the stepper motor controller but not of configuring it.
+Apart from the firmware, we also developed a simple control application for personal computers that is now capable of only controlling the stepper motor controller but not of configuring it.
+The control application is now able to control the controller's axis in both velocity and position modes.
 
-As for the future work, there is a lot to do.
-First, some of the requirements were not completely fulfilled, unfortunately some of them are crucial.
-Also, the documentation and tests are definitely not completed which creates an obstacle for future development.
-An important thing is that the firmware as of now doesn't have support for the stepper motor controller ICs used in the second revision of the hardware.
-This is a problem, given mostly by the fact that these controller ICs are much more advanced than the ones used in the first revision.
-In the future, we would also like to fully utilize the capabilities of the second hardware revision and use the encoder interface to precisely measure the shaft position.
-When the stepper motor controller will be used by the target developers, we expect to get vital feedback about the usability of the provided APIs.
-We will also aim for full conformance with the CANOpen standard, to allow for seamless integration with other systems.
+Even though there is still a lot of work to be done, we believe that the controller is currently usable and be deployed, for example, to be part of the BPC-PRP course.
+
+\section{Future work}
+\label{sec:fut_job}
+We are hoping to continue working on the stepper motor controller in the future.
+We would like to greatly extend and improve both the hardware and software (and both the firmware and the control application).
+Some of the requirements were not completely fulfilled, and we are aiming to revisit them.
+A big part of the future development will be finishing the documentation and automated testing.
+Extending the firmware with support for the second hardware revision will be a priority since the new stepper motor controller IC is much more powerful than the one in the first revision.
+We are also planning to try integrating real hardware encoders to try out the suitability of the abstractions and the ability to control the motors with proper feedback.
+We will also aim for full conformance with the CANOpen standard to allow for seamless integration with other systems.
 We are also looking into continuing the development using Rust programming language for embedded systems, either by developing more projects using it or contributing to the existing ecosystem by developing the tooling and libraries.

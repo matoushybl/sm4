@@ -48,7 +48,7 @@ impl CANOpen {
             message.message_id_with_device(self.id),
             Data::new(data).unwrap(),
         );
-        self.bus.transmit(&frame).map(|_| ()).map_err(|_| ())
+        nb::block!(self.bus.transmit(&frame).map(|_| ())).map_err(|_| ())
     }
 }
 

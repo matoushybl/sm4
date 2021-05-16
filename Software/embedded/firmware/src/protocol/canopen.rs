@@ -58,7 +58,7 @@ where
     let pdo = TxPDO4 {
         revolutions: state
             .object_dictionary()
-            .axis(Axis::Axis1)
+            .axis(Axis::Axis2)
             .actual_position()
             .get_revolutions(),
         angle: state
@@ -71,7 +71,10 @@ where
         CANOpenMessage::TxPDO4,
         &pdo.to_raw().unwrap()[..TxPDO4::len()],
     )
-    .on_error(|_| leds.signalize_can_error());
+    .on_error(|_| {
+        defmt::error!("Failed to send.");
+        leds.signalize_can_error();
+    });
 }
 
 pub fn nmt_received<OD, const R: u32>(id: u8, frame: &Frame, state: &mut DriverState<OD, R>)

@@ -2,36 +2,39 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{Introduction \& Motivation}
 This thesis describes the design and development of a simple dual-channel stepper-motor controller.
-We acknowledge, that driving stepper motors is nowadays a solved problem with many solutions that are commercially available.
+We acknowledge that driving of stepper motors is nowadays a solved problem with many solutions that are commercially available.
 Given this fact, we needed to differentiate the project from others.
-The first difference is that the target of this project is driving stepper motors in the DCI FEEC BUT's (Department of Control and Instrumentation, Faculty of Electrical Engineering and Communications, Brno University of Technology) Robotics and AI group for students' projects and development of our robots, which imposes some requirements on the \acs{pcb} (\acl{pcb}) size and used technologies.
-The second, albeit more important difference is that in contrast with classical embedded systems, this stepper motor controller's firmware and service software will be developed in the Rust programming language.
+The first difference is that the target of this project is driving stepper motors in the DCI FEEC BUT's (Department of Control and Instrumentation, Faculty of Electrical Engineering and Communications, Brno University of Technology) Robotics and AI group.
+The controllers will be used for students' projects and development of our robots, which imposes some requirements on the \acs{pcb} (\acl{pcb}) size and used technologies.
+The second, albeit more important difference, is that in contrast with classical embedded systems, this stepper motor controller's firmware and service software will be developed in the Rust programming language.
 We believe that this difference is the core of the thesis and further distinguishes itself from other theses and projects on embedded development.
 
 In general, the majority of embedded systems nowadays are developed in the C/C++ programming languages~\cite{cohen_tech_nodate, dubois_programming_nodate, noauthor_embedded_2021}.
-There are some examples - there are systems developed in Ada and currently the embedded development in Python is starting to take off in hobby projects~\cite{circuitpython_circuitpython_2021}.
-While C and C++ are suitable for development of embedded systems, because they allow for direct hardware access, and the programs written in them can be extremely performant, they carry the problem of memory unsafety and undefined behavior.
+There are some exceptions - there are systems developed in Ada, and currently, the embedded development in Python is starting to take off in hobby projects~\cite{circuitpython_circuitpython_2021}.
+While C and C++ are suitable for the development of embedded systems because they allow for direct hardware access, and the programs written in them can be extremely performant, they carry the problem of memory unsafety and undefined behavior.
 
-Memory unsafe code is nowadays cause of many critical software problems, be it security vulnerabilities or safety hazards.
-Recent Chrome browser analysis and report shows that around 70 \% of high severity problems are memory safety problems - meaning problems with pointers and staggering half of these are use-after-free problems~\cite{chromium_projects_memory_nodate}.
+Memory unsafe code is the leading cause of many critical software problems, be it security vulnerabilities or safety hazards.
+Recent Chrome browser analysis and report show that around 70 \% of high severity problems are memory safety problems - meaning problems with pointers.
+A staggering half of these are use-after-free problems~\cite{chromium_projects_memory_nodate}.
 Similar results show other statistics, namely from the cURL project\cite{stenberg_half_nodate}.
 The notorious Heartbleed bug in the OpenSSL was also a problem of the ability of the program to access memory used by other parts of the program, allowing the attacker to steal confidential data from the memory~\cite{synopsys_heartbleed_2020}.
 
-The problem of undefined behaviors and the inability of the commonly used tools to spot them, can be as harmful as memory safety problems, but in general causes problems mostly during development, making the development take longer and therefore more expensive.
-An example of this is when programs behave as was not intended, but with seemingly error-less code.
+The problem of undefined behaviors and the inability of the commonly used tools to spot them can be as harmful as memory safety problems, but in general causes problems mostly during development, making the development take longer and therefore become more expensive.
+The symptom of undefined behaviors is when the program behaves as was not intended, but with seemingly error-less code.
 
-While the problem of memory safety and \acs{ub}s (\acl{ub}) seem to generally be problems of higher level systems and not embedded systems, we believe that these problems apply to embedded systems as well, as these problems can have as devastating effects as the above mentioned security vulnerabilities.
-Imagine a robot uncontrollably spinning and destroying its surroundings because some part of a program overwritten its controls by mistake.
+While the problem of memory safety and \acs{ub}s (\acl{ub}) seem to generally be problems of higher-level systems and not embedded systems, we believe that these problems apply to embedded systems as well, as these problems can have as devastating (or even more devastating) effects as the above mentioned security vulnerabilities.
+Imagine a robot uncontrollably spinning and destroying its surroundings because some part of a program has overwritten its controls by mistake.
 
-We believe that both of these problems can be solved by using the Rust programming language.
-While being a relatively novel language for systems development (development started in 2006), the language is designed to be memory safe, even delivering memory safety for state shared between threads.
-Its focus on type safety and strong guarantees about performance of systems programming allows the developers to create powerful and performance, yet in many cases zero-cost (memory or performance) abstractions.
-This is especially useful as the complexity of all systems is rising, and we believe that to deliver great systems, the human programmers need to be aided by all available tools.
-Even though the language primarily targets high level systems, its design allows for it to be used with bare-metal embedded systems, bringing its advantages to these low level systems.
+We believe that the Rust programming language can solve both of these problems.
+While being a relatively novel language for systems development (development started in 2006), the language is designed to be memory-safe, even delivering memory safety for state shared between threads.
+Its focus on type safety and strong guarantees about the performance of systems programming allows the developers to create powerful, yet in many cases zero-cost (memory or performance) abstractions.
+These features is especially useful as the complexity of all systems is rising.
+We believe that to deliver great systems, human programmers need to be aided by all available tools.
+Even though the language primarily targets higher-level systems, its design allows for it to be used with bare-metal embedded systems, bringing its advantages to these low-level systems.
 
-We also believe that the novel approaches brought by the language and its ecosystem could bring improvements to the existing embedded development approaches and also the strictness of the language could bring more safety and reliability to embedded systems.
-Some of these approaches can be unit-testing and integration testing, dependency management and embedded-systems-dedicated open-source tooling.
+We also believe that the novel approaches brought by the language and its ecosystem could bring improvements to the existing embedded development approaches, and also, the strictness of the language could bring more safety and reliability to embedded systems.
+Some of these approaches can be unit-testing and integration testing, dependency management, and embedded-systems-dedicated open-source tooling.
 
 With this information in mind, we decided to develop the controller's firmware and control application in Rust, showcasing the language's advantages and disadvantages.
-This project follows the development of firmware for other motor controllers, described in the Chapter~\ref{ch:related_work}, which were presented on the PAIR conference~\cite{faigl_program_nodate}.
-Another aim of this project was also to push forward the development of electronics devices at the Robotics and AI research group - using high-performance MCUs (Microcontroller Unit), state-of-the-art stepper drivers and effective 4-layer PCB design and contemporary manufacturing capabilities.
+This project follows the development of firmware for other motor controllers, described in the Chapter~\ref{ch:related_work}, which were presented at the PAIR conference~\cite{faigl_program_nodate}.
+Another aim of this project was to push forward the development of electronic devices at the Robotics and AI research group - using high-performance MCUs (Microcontroller Unit), state-of-the-art stepper drivers, effective 4-layer PCB design, and contemporary manufacturing capabilities.
