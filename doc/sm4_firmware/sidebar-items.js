@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["panic",""]],"mod":[["blocks",""],["board",""],["can",""],["i2c",""],["prelude",""],["protocol",""],["sm4",""],["state",""]],"static":[["COUNT",""]],"struct":[["SM4",""]]});
+initSidebarItems({"fn":[["panic",""]],"mod":[["blocks",""],["board",""],["can",""],["i2c",""],["prelude",""],["protocol",""],["sm4",""],["staging","Asynchronous serial communication using UART/USART peripherals"],["state",""]],"static":[["COUNT",""]],"struct":[["SM4",""]]});

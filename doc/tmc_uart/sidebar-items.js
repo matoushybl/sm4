@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["APP","Implementation details"],["BLINK",""],["SECOND",""]],"fn":[["blink",""],["init",""],["main",""]],"mod":[["blink","Software task"],["init","Initialization function"],["main","Idle loop"]],"struct":[["blinkResources","Resources `blink` has access to"],["initLateResources","Resources initialized at runtime"]],"type":[["HDSerial",""]]});

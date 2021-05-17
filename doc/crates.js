@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["main","sm4_firmware"];
+window.ALL_CRATES = ["main","sm4_firmware","tmc_uart"];
