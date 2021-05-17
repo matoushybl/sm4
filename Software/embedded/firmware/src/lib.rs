@@ -14,6 +14,7 @@ mod can;
 mod i2c;
 mod protocol;
 mod sm4;
+pub mod staging;
 mod state;
 
 pub mod prelude {
