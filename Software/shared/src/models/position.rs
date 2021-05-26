@@ -59,7 +59,7 @@ impl<const RESOLUTION: u32> Position<RESOLUTION> {
     /// assert_eq!(invalid_position.get_revolutions(), -1);
     /// assert_eq!(invalid_position.get_angle(), 2);
     /// ```
-    pub fn new(revolutions: i32, angle: u32) -> Self {
+    pub const fn new(revolutions: i32, angle: u32) -> Self {
         Self {
             revolutions: revolutions + (angle / RESOLUTION) as i32,
             angle: angle % RESOLUTION,
