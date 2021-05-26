@@ -3,15 +3,22 @@ use crossterm::execute;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
+use i2cdev::core::I2CDevice;
+use i2cdev::core::I2CMessage;
+use i2cdev::core::I2CTransfer;
+use i2cdev::linux::LinuxI2CDevice;
+use i2cdev::linux::LinuxI2CError;
 use parking_lot::Mutex;
 use sm4_controller::canopen_backend::AxisState;
 use sm4_controller::canopen_backend::ENCODER_RESOLUTION;
 use sm4_controller::tui::SystemEvent;
 use sm4_controller::tui::SystemEvents;
 use sm4_shared::prelude::Position;
+use sm4_shared::OnError;
 use std::io::Write;
 use std::sync::Arc;
 use std::time::Duration;
+use std::vec;
 use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Direction, Layout, Rect},
@@ -20,6 +27,76 @@ use tui::{
     widgets::{Block, Borders, Gauge, Paragraph, Wrap},
     Frame, Terminal,
 };
+
+trait I2CRegisterTransfers<Error> {
+    fn write_register<R: Into<u8>>(&mut self, register: R, data: &[u8]) -> Result<u32, Error>;
+    fn read_register<R: Into<u8>>(&mut self, register: R, buffer: &mut [u8]) -> Result<u32, Error>;
+}
+
+impl I2CRegisterTransfers<LinuxI2CError> for LinuxI2CDevice {
+    fn write_register<R: Into<u8>>(
+        &mut self,
+        register: R,
+        data: &[u8],
+    ) -> Result<u32, LinuxI2CError> {
+        let mut buffer = vec![register.into()];
+        buffer.extend_from_slice(data);
+        self.transfer(&mut [I2CMessage::write(&buffer)])
+    }
+
+    fn read_register<R: Into<u8>>(
+        &mut self,
+        register: R,
+        buffer: &mut [u8],
+    ) -> Result<u32, LinuxI2CError> {
+        self.transfer(&mut [
+            I2CMessage::write(&[register.into()]),
+            I2CMessage::read(buffer),
+        ])
+    }
+}
+
+#[derive(Clone)]
+struct I2CBackend {
+    state: Arc<Mutex<AxisState>>,
+}
+
+impl I2CBackend {
+    fn new(device: LinuxI2CDevice) -> Self {
+        let s = Self {
+            state: Arc::new(Mutex::new(AxisState::default())),
+        };
+
+        std::thread::spawn({
+            let s = s.clone();
+            let mut device = device;
+            device
+                .write_register(0x10, &[0x10])
+                .on_error(|_| println!("Failed to set driver mode"));
+            move || loop {
+                device
+                    .write_register(0x31, &[])
+                    .on_error(|_| println!("Failed to write target position."));
+
+                let mut buffer = [0u8; 16];
+                device
+                    .read_register(0x50, &mut buffer)
+                    .on_error(|_| println!("Failed to read positions."));
+                std::thread::sleep(Duration::from_millis(20));
+            }
+        });
+
+        s
+    }
+
+    fn set_target_position(&self, position: Position<ENCODER_RESOLUTION>) {
+        self.state.lock().target_position = position;
+    }
+
+    fn get_target_position(&self) -> Position<ENCODER_RESOLUTION> {
+        self.state.lock().target_position
+    }
+}
 
 const MAX_POSITION: Position<ENCODER_RESOLUTION> = Position::<ENCODER_RESOLUTION>::new(10, 0);
 
