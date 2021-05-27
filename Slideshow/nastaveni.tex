@@ -1,0 +1,121 @@
+% V tomto souboru se nastavují téměř veškeré informace, proměnné mezi studenty:
+% jméno, název práce, pohlaví atd.
+% Tento soubor je SDÍLENÝ mezi textem práce a prezentací k obhajobě -- netřeba něco nastavovat na dvou místech.
+
+\usepackage[
+%%% Z následujících voleb jazyka lze použít pouze jednu
+ czech-english,		% originální jazyk je čeština, překlad je anglicky (výchozí)
+%    english-czech,	% originální jazyk je angličtina, překlad je česky
+%slovak-english,	% originální jazyk je slovenština, překlad je anglicky
+%english-slovak,	% originální jazyk je angličtina, překlad je slovensky
+%
+%%% Z následujících voleb typu práce lze použít pouze jednu
+%semestral,		  % semestrální práce (nesází se abstrakty, prohlášení, poděkování) (výchozí)
+%bachelor,			%	bakalářská práce
+    master,			  % diplomová práce
+%treatise,			% pojednání o dizertační práci
+%doctoral,			% dizertační práce
+%
+%%% Z následujících voleb zarovnání objektů lze použít pouze jednu
+%  left,				  % rovnice a popisky plovoucích objektů budou zarovnány vlevo
+    center,			    % rovnice a popisky plovoucích objektů budou zarovnány na střed (vychozi)
+%
+]{thesis}   % Balíček pro sazbu studentských prací
+
+
+%%% Jméno a příjmení autora ve tvaru
+%  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
+% Pokud osoba nemá titul před/za jménem, smažte celý řetězec '[...]'
+\author[Bc.]{Matouš}{Hýbl}
+\butid{191600}
+
+%%% Pohlaví autora/autorky
+% (nepoužije se ve variantě english-czech ani english-slovak)
+% Číselná hodnota: 1...žena, 0...muž
+\gender{0}
+
+%%% Jméno a příjmení vedoucího/školitele včetně titulů
+%  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
+% Pokud osoba nemá titul před/za jménem, smažte celý řetězec '[...]'
+\advisor[prof. Ing.]{Luděk}{Žalud}[Ph.D.]
+
+%%% Jméno a příjmení oponenta včetně titulů
+%  [tituly před jménem]{Křestní}{Příjmení}[tituly za jménem]
+% Pokud osoba nemá titul před/za jménem, smažte celý řetězec '[...]'
+% Nastavení oponenta se uplatní pouze v prezentaci k obhajobě;
+% v případě, že nechcete, aby se na titulním snímku prezentace zobrazoval oponent, pouze příkaz zakomentujte;
+% u obhajoby semestrální práce se oponent nezobrazuje (jelikož neexistuje)
+\opponent[Ing.]{Jakub}{Arm}[Ph.D.]
+
+%%% Název práce
+%  Parametr ve složených závorkách {} je název v originálním jazyce,
+%  parametr v hranatých závorkách [] je překlad (podle toho jaký je originální jazyk)
+\title[Two channel stepper motor controller]{Dvoukanálový kontrolér krokových motorů}
+
+\specialization[Kybernetika, Automatizace a Měření]{Cybernetics, Control and Measurements}
+
+\department[Ústav automatizace a měřicí techniky]{Department of Control and Instrumentation}
+
+\faculty[Fakulta elektrotechniky a~komunikačních technologií]{Faculty of Electrical Engineering and~Communication}
+%\faculty[Faculty of Chemistry]{Fakulta chemická}
+%\faculty[Faculty of Information Technology]{Fakulta informačních technologií}
+%\faculty[Faculty of Business and Management]{Fakulta podnikatelská}
+%\faculty[Faculty of Civil Engineering]{Fakulta stavební}
+%\faculty[Faculty of Mechanical Engineering]{Fakulta strojního inženýrství}
+%\faculty[Faculty of Fine Arts]{Fakulta výtvarných umění}
+%
+%Nastavení logotypu (v hranatych zavorkach zkracene logo, ve slozenych plne):
+\facultylogo[logo/FEKT_zkratka_barevne_PANTONE_CZ]{logo/UAMT_color_PANTONE_CZ}
+
+%%% Rok sepsání práce
+\graduateyear{2021}
+\academicyear{2020/21}
+
+%%% Datum obhajoby (uplatní se pouze v prezentaci k obhajobě)
+\date{8.\,6.\,2021}
+
+%%% Místo obhajoby
+% Na titulních stránkách bude automaticky vysázeno VELKÝMI písmeny (pokud tyto stránky sází šablona)
+\city{Brno}
+
+%%% Abstrakt
+\abstract[%
+    Cílem této práce je vývoj dvoukanálového kontroléru krokových motorů.
+    V rámci práce je popsán jak vývoj elektroniky, tak vývoj příslušného software.
+    Elektronika kontrolŕu je založena na mikrokontroléru STM32F405 a driverů krokových motorů vyráběných firmou Trinamic.
+    Pro komunikaci s nadřazenými systémy je implementován protokol CANOpen a sběrnice I\textsuperscript{2}C a USB.
+    Elektronika byla navržena v software KiCAD and využívá čtyřvrstvého plošného spoje a moderních výrobních technologií.
+    Co se týká software, byl vyvinut jak firmware pro mikrokontrolér, tak software pro ovládání kontroléru.
+    Obě části software využívají programovacího jazyka Rust, který se zaměřuje na bezpečnost práce s pamětí, rychlost a zero-cost abstrakce.
+    Sekundárním cílem této práce je ukázat, jak lze tento programovací jazyk s výhodou použít pro programování nízkoúrovňového embedded software.
+    Firmware kontroléru implementuje nezávislé řízení pohybu obou os kontroléru a to jak v rychlostním, tak v pozičním režimu a zároveň implementuje bezpečnostní funkce pro případy selhání komunikace.
+    Výsledný kontrolér by měl být použit v rámcí výzkumné skupiny Robotiky a Umělé Inteligence a studenty na Ústavu Automatizace FEKT VUT.
+]{%
+    The goal of this thesis is the development of a dual-channel stepper motor controller.
+    Both the development of electronics and software is described.
+    The electronics of the controller is based on the STM32F405 microcontroller, and Trinamic manufactured stepper motor controller ICs.
+    For communication with higher-level systems, the controller utilizes the CANOpen protocol, I\textsuperscript{2}C, and USB buses.
+    The whole electronics was designed in the KiCAD EDA and utilizes a 4-layer PCB and contemporary manufacturing technologies.
+    As for the software, both firmware and control software were developed.
+    Both of these pieces of software utilize the Rust programming language, which focuses on memory safety, performance and provides useful zero-cost abstraction.
+    The Secondary goal of this thesis is to show how the language can be utilized for low-level embedded software development.
+    The firmware of the controller implements independent motion control for each of the axes with both velocity and position control and provides failsafe mechanisms for cases of communication failures.
+    The controller is meant to be used by the Robotics and AI research group and by students of the DCI, FEEC BUT.
+}
+
+%%% Klíčová slova
+\keywrds[%
+    krokový motor, návrh elektroniky, KiCAD, DPS, MCU, vestavný software, Rust, bezpečnost práce s pamětí, zero-cost abstrakce, řízení pohybu, bezpečnostní mechanismy, CANOpen, I2C, USB, robotika
+]{%
+    stepper motor, electronics design, KiCAD, PCB, MCU, embedded software, Rust, memory safety, zero-cost abstractions, motion control, failsafe mechanism, CANOpen, I2C, USB, robotics,
+}
+
+%%% Poděkování
+\acknowledgement{%
+    I want to express my gratitude to my supervisor, prof. Ing. Luděk Žalud Ph.D. for his help and leadership.
+    I would also like to express my gratitude to my colleagues at the Robotics and AI research group of FEEC and CEITEC BUT who supported me and helped me.
+    Special thanks belongs to Ing. Lukáš Kopečný Ph.D. who supplied me with tasty beer, and Ing. Adam Ligocky for providing emotional support.
+    I would also like to thank Ing. Ondřej Baštán for helping me with the direction of the project when I developed the second hardware revision.
+    Also, I would like to thank the embedded Rust community, especially James Munns and Hanno Braun, who provided me with essential feedback at the beginning of software development.
+    Last but not least, I would like to thank my girlfriend for her never-ending support and also to my family and friends who helped me and supported me along the way.
+}%
