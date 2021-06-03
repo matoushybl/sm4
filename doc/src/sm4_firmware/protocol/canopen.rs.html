@@ -420,6 +420,8 @@
 <span id="417">417</span>
 <span id="418">418</span>
 <span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">can</span>::{<span class="ident">CANOpen</span>, <span class="ident">CANOpenMessage</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">LEDs</span>;
@@ -602,6 +604,7 @@
             .<span class="ident">object_dictionary</span>()
             .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>)
             .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">revolutions</span>, <span class="ident">pdo</span>.<span class="ident">angle</span>));
+        <span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
     } <span class="kw">else</span> {
         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO3 received.&quot;</span>);
     }
@@ -620,6 +623,7 @@
             .<span class="ident">object_dictionary</span>()
             .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>)
             .<span class="ident">set_target_position</span>(<span class="ident">Position</span>::<span class="ident">new</span>(<span class="ident">pdo</span>.<span class="ident">revolutions</span>, <span class="ident">pdo</span>.<span class="ident">angle</span>));
+        <span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
     } <span class="kw">else</span> {
         <span class="ident">defmt</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;Malformed RxPDO4 received.&quot;</span>);
     }

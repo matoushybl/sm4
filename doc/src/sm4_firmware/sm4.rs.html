@@ -429,6 +429,18 @@
 <span id="426">426</span>
 <span id="427">427</span>
 <span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="ident">config</span>::{<span class="ident">CAN_ID</span>, <span class="ident">ENCODER_RESOLUTION</span>, <span class="ident">SENSE_R</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
@@ -715,11 +727,13 @@
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_i2c_event</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">event_interrupt</span>();
+        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;event&quot;</span>);
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_state</span>() {
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
             <span class="prelude-val">Some</span>(<span class="ident">State</span>::<span class="ident">DataRequested</span>(<span class="ident">register</span>)) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">register</span>) <span class="op">=</span> <span class="ident">I2CRegister</span>::<span class="ident">try_from</span>(<span class="ident">register</span>) {
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">register</span>.<span class="ident">readable</span>() {
+                        <span class="ident">defmt</span>::<span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;Register not readable&quot;</span>);
                         <span class="comment">// TOOD nack</span>
                     }
                     <span class="kw">match</span> <span class="ident">register</span> {
@@ -788,16 +802,20 @@
                             );
                             <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">go_to_operational</span>();
                         }
-                        <span class="ident">I2CRegister</span>::<span class="ident">Axis1Velocity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
-                            .<span class="ident">state</span>
-                            .<span class="ident">object_dictionary</span>()
-                            .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>)
-                            .<span class="ident">set_target_velocity</span>(<span class="ident">parse_velocity</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>())),
-                        <span class="ident">I2CRegister</span>::<span class="ident">Axis2Velocity</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
-                            .<span class="ident">state</span>
-                            .<span class="ident">object_dictionary</span>()
-                            .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>)
-                            .<span class="ident">set_target_velocity</span>(<span class="ident">parse_velocity</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>())),
+                        <span class="ident">I2CRegister</span>::<span class="ident">Axis1Velocity</span> <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="self">self</span>.<span class="ident">state</span>
+                                .<span class="ident">object_dictionary</span>()
+                                .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>)
+                                .<span class="ident">set_target_velocity</span>(<span class="ident">parse_velocity</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>()));
+                            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
+                        }
+                        <span class="ident">I2CRegister</span>::<span class="ident">Axis2Velocity</span> <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="self">self</span>.<span class="ident">state</span>
+                                .<span class="ident">object_dictionary</span>()
+                                .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>)
+                                .<span class="ident">set_target_velocity</span>(<span class="ident">parse_velocity</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>()));
+                            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
+                        }
                         <span class="ident">I2CRegister</span>::<span class="ident">BothAxesVelocity</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw">let</span> (<span class="ident">axis1_velocity</span>, <span class="ident">axis2_velocity</span>) <span class="op">=</span>
                                 <span class="ident">parse_both_axes_velocities</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>());
@@ -810,18 +828,24 @@
                                 .<span class="ident">object_dictionary</span>()
                                 .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>)
                                 .<span class="ident">set_target_velocity</span>(<span class="ident">axis2_velocity</span>);
+
+                            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
                         }
                         <span class="ident">I2CRegister</span>::<span class="ident">Axis1Position</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="self">self</span>.<span class="ident">state</span>
                                 .<span class="ident">object_dictionary</span>()
                                 .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis1</span>)
                                 .<span class="ident">set_target_position</span>(<span class="ident">parse_position</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>()));
+
+                            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
                         }
                         <span class="ident">I2CRegister</span>::<span class="ident">Axis2Position</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="self">self</span>.<span class="ident">state</span>
                                 .<span class="ident">object_dictionary</span>()
                                 .<span class="ident">axis_mut</span>(<span class="ident">Axis</span>::<span class="ident">Axis2</span>)
                                 .<span class="ident">set_target_position</span>(<span class="ident">parse_position</span>(<span class="self">self</span>.<span class="ident">i2c</span>.<span class="ident">get_received_data</span>()));
+
+                            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">invalidate_last_received_speed_command_counter</span>();
                         }
                         <span class="ident">I2CRegister</span>::<span class="ident">BothAxesPosition</span> <span class="op">=</span><span class="op">&gt;</span> {}
                     }
