@@ -166,7 +166,7 @@
 
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Requirements}
+	\frametitle{Požadavky}
 	\begin{itemize}
 		\item \textbf{FR-04} All relevant values (currents, timings, limits, etc.) shall be configurable via USB or CANOpen SDO protocol.
 		\item \textbf{FR-06} The controller shall support control in speed mode as well as position mode.
@@ -183,15 +183,14 @@
 	% nadpis snímku
 	\frametitle{Technické řešení - vývoj elektroniky}
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
-		\begin{column}{0.4\textwidth}		% první sloupec
-			Elektronika je zalozna na:\\[2ex]
-			%
+		\begin{column}{0.4\textwidth}
 			\begin{itemize}
+				\item Dvě revize
 				\item STM32F405
 				\item TMC2100/TMC2226
-				\item Podpora pro enkodery
+				\item Podpora pro enkodéry
 				\item 4-vrstva DPS
-				\item Navrh v KiCAD
+				\item Návrh v KiCAD
 			\end{itemize}
 		\end{column}
 		%
@@ -208,7 +207,7 @@
 \end{frame}
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Technické řešení - vysledna elektronika}
+	\frametitle{Technické řešení - výsledná elektronika}
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
 		\begin{column}{0.5\textwidth}		% první sloupec
 			\begin{figure}%
@@ -237,11 +236,11 @@
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
 		\begin{column}{0.5\textwidth}		% první sloupec
 			\begin{itemize}
-				\item Rust
-				\item Zalozen na RTIC
-				\item Vyuziva jak HAL, tak primy pristup k HW
-				\item Hojne vyuziva traits a generiku pro dependency injection
-				\item Testovatelny (unit i integration testy)
+				\item Embedded Rust
+				\item Založen na RTIC
+				\item Využívá jak HAL, tak přímý přístup k HW
+				\item Hojně využívá traits a generiku pro dependency injection
+				\item Testovatelný (unit i integration testy)
 			\end{itemize}
 		\end{column}
 		%
@@ -269,14 +268,14 @@
 \end{frame}
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Technické řešení - obsluzny SW}
+	\frametitle{Technické řešení - obslužný SW}
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
 		\begin{column}{0.4\textwidth}
 			\begin{itemize}
 				\item TUI (Terminal User Interface)
-				\item Komunikace pres CAN
-				\item Moznost rizeni obou os, v pozicnim i rychlostnim rezimu
-				\item V budoucnu GUI, moznost konfigurace parametru
+				\item Komunikace přes CAN
+				\item Možnost řízení obou os, v pozičním i rychlostním režimu
+				\item V budoucnu GUI, možnost konfigurace parametrů
 			\end{itemize}
 		\end{column}
 		%
@@ -294,14 +293,14 @@
 
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Demonstrace 1 - linearni posuv}
+	\frametitle{Demonstrace 1 - lineárni posuv}
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
 		\begin{column}{0.4\textwidth}
 			\begin{itemize}
 				\item Jedna osa,
-				\item pozicni rizeni,
-				\item I\textsuperscript{2}C
-				\item pomoci druhe revize hardware bude mozny sensorless homing.
+				\item poziční řízení,
+				\item I\textsuperscript{2}C,
+				\item pomocí druhé revize hardware bude možný sensorless homing.
 			\end{itemize}
 		\end{column}
 		%
@@ -310,7 +309,7 @@
 				\centering
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/rail}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Linearni posuv}%
+				\caption{Lineární posuv}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -319,20 +318,20 @@
 
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Demonstrace 1 - linearni posuv}
+	\frametitle{Demonstrace 1 - lineární posuv}
 	\movie[width=14cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{sample-mp4-file.mp4}
 \end{frame}
 
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Demonstrace 2 - mapovaci robot}
+	\frametitle{Demonstrace 2 - mapovací robot}
 	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
 		\begin{column}{0.4\textwidth}
 			\begin{itemize}
-				\item Obe osy,
-				\item rychlostni rizeni,
+				\item Obě osy,
+				\item rychlostní řízení,
 				\item CAN bus,
-				\item do budoucna pomucka do predmetu MPC-MAP.
+				\item do budoucna pomůcka do předmětu MPC-MAP.
 			\end{itemize}
 		\end{column}
 		%
@@ -341,7 +340,7 @@
 				\centering
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/map_bot}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Linearni posuv}%
+				\caption{Mapovací robot}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -350,7 +349,7 @@
 
 \begin{frame}
 	% nadpis snímku
-	\frametitle{Demonstrace 2 - mapovaci robot}
+	\frametitle{Demonstrace 2 - mapovací robot}
 	\movie[width=14cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{sample_640x360.avi}
 \end{frame}
 
@@ -358,9 +357,9 @@
 	% nadpis snímku
 	\frametitle{Zhodnocení}
 	\begin{itemize}
-		\item Requirements splneny az na vyjimky, zadani splneno.
-		\item Lze ridit obe osy, v obou rezimech, pomoci obou komunikacnich rozhrani.
-		\item Embedded Rust se osvedcil i v tomto projektu.
+		\item Požadavky splněny až na výjimky, zadání splněno.
+		\item Lze řídit obě osy, v obou režimech, pomocí obou komunikačních rozhraní.
+		\item Embedded Rust se osvědčil i v tomto projektu.
 	\end{itemize}
 \end{frame}
 
@@ -368,9 +367,10 @@
 	% nadpis snímku
 	\frametitle{Budoucnost}
 	\begin{itemize}
-		\item GUI ridici aplikace.
-		\item Vetsi test coverage, integracni testy bezici v ramci CI.
-		\item Doprogramovani plne podpory druhe revize DPS.
+		\item GUI řídicí aplikace.
+		\item Lepší podpora konfigurace měniče.
+		\item Větší test coverage, integrační testy běžící v rámci CI.
+		\item Doprogramování plné podpory druhé revize DPS.
 	\end{itemize}
 \end{frame}
 
