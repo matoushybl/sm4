@@ -108,7 +108,7 @@ pub fn parse_position<const R: u32>(raw: &[u8]) -> Position<R> {
 
 pub fn both_axes_position<const R: u32>(dictionary: &dyn ObjectDictionary<R>) -> [u8; 16] {
     let mut buffer: [u8; 16] = [0; 16];
-    buffer[..4].copy_from_slice(&position(&dictionary.axis(Axis::Axis1).actual_position()));
-    buffer[4..].copy_from_slice(&position(&dictionary.axis(Axis::Axis2).actual_position()));
+    buffer[..8].copy_from_slice(&position(&dictionary.axis(Axis::Axis1).actual_position()));
+    buffer[8..].copy_from_slice(&position(&dictionary.axis(Axis::Axis2).actual_position()));
     buffer
 }

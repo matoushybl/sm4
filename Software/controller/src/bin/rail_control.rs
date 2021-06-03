@@ -13,6 +13,7 @@ use sm4_controller::canopen_backend::AxisState;
 use sm4_controller::canopen_backend::ENCODER_RESOLUTION;
 use sm4_controller::tui::SystemEvent;
 use sm4_controller::tui::SystemEvents;
+use sm4_shared::prelude::Axis;
 use sm4_shared::prelude::Position;
 use sm4_shared::OnError;
 use std::io::Write;
@@ -29,7 +30,7 @@ use tui::{
 };
 
 trait I2CRegisterTransfers<Error> {
-    fn write_register<R: Into<u8>>(&mut self, register: R, data: &[u8]) -> Result<u32, Error>;
+    fn write_register<R: Into<u8>>(&mut self, register: R, data: &[u8]) -> Result<(), Error>;
     fn read_register<R: Into<u8>>(&mut self, register: R, buffer: &mut [u8]) -> Result<u32, Error>;
 }
 
@@ -38,10 +39,10 @@ impl I2CRegisterTransfers<LinuxI2CError> for LinuxI2CDevice {
         &mut self,
         register: R,
         data: &[u8],
-    ) -> Result<u32, LinuxI2CError> {
+    ) -> Result<(), LinuxI2CError> {
         let mut buffer = vec![register.into()];
         buffer.extend_from_slice(data);
-        self.transfer(&mut [I2CMessage::write(&buffer)])
+        self.write(&buffer)
     }
 
     fn read_register<R: Into<u8>>(
@@ -71,18 +72,24 @@ impl I2CBackend {
             let s = s.clone();
             let mut device = device;
             device
-                .write_register(0x10, &[0x10])
+                .write_register(0x10, &[0x11, 0x0f])
                 .on_error(|_| println!("Failed to set driver mode"));
             move || loop {
+                let mut data = [0u8; 8];
+                {
+                    let position = s.state.lock().target_position;
+                    data[..4].clone_from_slice(&position.get_revolutions().to_le_bytes());
+                    data[4..].clone_from_slice(&position.get_angle().to_le_bytes());
+                }
                 device
-                    .write_register(0x31, &[])
+                    .write_register(0x31, &data)
                     .on_error(|_| println!("Failed to write target position."));
 
-                let mut buffer = [0u8; 16];
-                device
-                    .read_register(0x50, &mut buffer)
-                    .on_error(|_| println!("Failed to read positions."));
-                std::thread::sleep(Duration::from_millis(20));
+                // let mut buffer = [0u8; 16];
+                // device
+                //     .read_register(0x50, &mut buffer)
+                //     .on_error(|_| println!("Failed to read positions."));
+                std::thread::sleep(Duration::from_millis(50));
             }
         });
 
@@ -95,6 +102,10 @@ impl I2CBackend {
 
     fn get_target_position(&self) -> Position<ENCODER_RESOLUTION> {
         self.state.lock().target_position
+    }
+
+    fn get_state(&self) -> AxisState {
+        *self.state.lock()
     }
 }
 
@@ -177,26 +188,29 @@ fn main() -> anyhow::Result<()> {
     let mut terminal = Terminal::new(backend)?;
     terminal.clear()?;
 
-    let system_events = SystemEvents::new(Duration::from_millis(10));
+    let system_events = SystemEvents::new(Duration::from_millis(50));
 
-    let axis_state = Arc::new(Mutex::new(AxisState::default()));
+    // let axis_state = Arc::new(Mutex::new(AxisState::default()));
+
+    let i2c = LinuxI2CDevice::new("/dev/i2c-11", 0x55).unwrap();
+    let backend = I2CBackend::new(i2c);
 
     let mut running = true;
     while running {
         terminal.draw(|frame| {
-            draw(&axis_state.lock(), frame);
+            draw(&backend.get_state(), frame);
         })?;
-        let position_increment = Position::<ENCODER_RESOLUTION>::new(0, 100);
+        let position_increment = Position::<ENCODER_RESOLUTION>::new(0, 500);
         match system_events.recv() {
             SystemEvent::Input(key) => match key.code {
                 KeyCode::Char('q') => running = false,
                 KeyCode::Left => {
-                    let mut state = axis_state.lock();
-                    state.target_position = state.target_position - &position_increment;
+                    backend
+                        .set_target_position(backend.get_target_position() - &position_increment);
                 }
                 KeyCode::Right => {
-                    let mut state = axis_state.lock();
-                    state.target_position = state.target_position + &position_increment;
+                    backend
+                        .set_target_position(backend.get_target_position() + &position_increment);
                 }
                 _ => {}
             },

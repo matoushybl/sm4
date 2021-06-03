@@ -283,11 +283,13 @@ impl SM4 {
 
     pub fn process_i2c_event(&mut self) {
         self.i2c.event_interrupt();
+        defmt::error!("event");
         match self.i2c.get_state() {
             None => {}
             Some(State::DataRequested(register)) => {
                 if let Ok(register) = I2CRegister::try_from(register) {
                     if !register.readable() {
+                        defmt::error!("Register not readable");
                         // TOOD nack
                     }
                     match register {
@@ -356,16 +358,20 @@ impl SM4 {
                             );
                             self.state.go_to_operational();
                         }
-                        I2CRegister::Axis1Velocity => self
-                            .state
-                            .object_dictionary()
-                            .axis_mut(Axis::Axis1)
-                            .set_target_velocity(parse_velocity(self.i2c.get_received_data())),
-                        I2CRegister::Axis2Velocity => self
-                            .state
-                            .object_dictionary()
-                            .axis_mut(Axis::Axis2)
-                            .set_target_velocity(parse_velocity(self.i2c.get_received_data())),
+                        I2CRegister::Axis1Velocity => {
+                            self.state
+                                .object_dictionary()
+                                .axis_mut(Axis::Axis1)
+                                .set_target_velocity(parse_velocity(self.i2c.get_received_data()));
+                            self.state.invalidate_last_received_speed_command_counter();
+                        }
+                        I2CRegister::Axis2Velocity => {
+                            self.state
+                                .object_dictionary()
+                                .axis_mut(Axis::Axis2)
+                                .set_target_velocity(parse_velocity(self.i2c.get_received_data()));
+                            self.state.invalidate_last_received_speed_command_counter();
+                        }
                         I2CRegister::BothAxesVelocity => {
                             let (axis1_velocity, axis2_velocity) =
                                 parse_both_axes_velocities(self.i2c.get_received_data());
@@ -378,18 +384,24 @@ impl SM4 {
                                 .object_dictionary()
                                 .axis_mut(Axis::Axis2)
                                 .set_target_velocity(axis2_velocity);
+
+                            self.state.invalidate_last_received_speed_command_counter();
                         }
                         I2CRegister::Axis1Position => {
                             self.state
                                 .object_dictionary()
                                 .axis_mut(Axis::Axis1)
                                 .set_target_position(parse_position(self.i2c.get_received_data()));
+
+                            self.state.invalidate_last_received_speed_command_counter();
                         }
                         I2CRegister::Axis2Position => {
                             self.state
                                 .object_dictionary()
                                 .axis_mut(Axis::Axis2)
                                 .set_target_position(parse_position(self.i2c.get_received_data()));
+
+                            self.state.invalidate_last_received_speed_command_counter();
                         }
                         I2CRegister::BothAxesPosition => {}
                     }

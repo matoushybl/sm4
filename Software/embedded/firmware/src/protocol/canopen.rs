@@ -179,6 +179,7 @@ where
             .object_dictionary()
             .axis_mut(Axis::Axis1)
             .set_target_position(Position::new(pdo.revolutions, pdo.angle));
+        state.invalidate_last_received_speed_command_counter();
     } else {
         defmt::warn!("Malformed RxPDO3 received.");
     }
@@ -197,6 +198,7 @@ where
             .object_dictionary()
             .axis_mut(Axis::Axis2)
             .set_target_position(Position::new(pdo.revolutions, pdo.angle));
+        state.invalidate_last_received_speed_command_counter();
     } else {
         defmt::warn!("Malformed RxPDO4 received.");
     }
