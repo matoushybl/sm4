@@ -95,15 +95,16 @@
 				\item Popsat jejich výhody a nevýhody.
 			\end{itemize}
 			\item Provést rešerši dostupných integrovaných obvodů vhodných pro nový kontrolér.
-			\item Navrhněte a vyrobte nový kontrolér krokových motorů se sběrnicemi I\textsuperscript{2}C a CAN.
-			\item Vyviňte software, který demonstruje možnosti vyvinutého kontroléru.
-			\item Demonstrujte kontrolér ve specifické aplikaci.
+			\item Navrhnout a vyrobit nový kontrolér krokových motorů se sběrnicemi I\textsuperscript{2}C a CAN.
+			\item Vyvinout software, který demonstruje možnosti vyvinutého kontroléru.
+			\item Demonstrovat kontrolér ve specifické aplikaci.
 	\end{itemize}
 \end{frame}
 \begin{frame}
 	% nadpis snímku
 	\frametitle{Motivace}
 	\begin{itemize}
+		\item Nové kontroléry pro předmět PRP a pro řízení krokových motorů v rámci výzkumné skupiny.
 		\item Současné řešení je technologicky zastaralé.
 		\item Problémy s vyššími rychlostmi (>30 kHz) I\textsuperscript{2}C, kvůli chybné implementaci clock-stretching na Raspberry Pi.
 		\item Vývoj elektroniky s použitím moderních a výkonných komponent a soudobých výrobních technologií.
@@ -133,14 +134,14 @@
 			\begin{itemize}
 				\item ATMega8
 				\item I\textsuperscript{2}C
-				\item Napevno nastaveny proud
-				\item Moduly s drivery do 3D tiskaren
+				\item Napevno nastavený proud
+				\item Moduly s drivery do 3D tiskáren
 			\end{itemize}
 			\begin{figure}%
 				\centering
 				\vspace{0.2cm}	              % horizontální mezera
 				\includegraphics[width=0.5\columnwidth]{../Thesis/obrazky/km2render}
-				\caption{Render kontroleru KM2}
+				\caption{Render kontroléru KM2}
 				\label{fig:km2}
 			\end{figure}
 		\end{column}
@@ -149,15 +150,15 @@
 			KM3
 				\begin{itemize}
 					\item STM32F031 - 48 MHz, 32 kB FLASH, 4 kB RAM
-					\item Integrovane drivery DRV8825
-					\item Dynamicke nastavovani proudu
+					\item Integrované drivery DRV8825
+					\item Dynamické nastavování proudu
 					\item Firmware v Rustu
 				\end{itemize}
 				\begin{figure}%
 					\centering
 					\vspace{0.1cm}	              % horizontální mezera
 					\includegraphics[width=0.4\columnwidth]{../Thesis/obrazky/km3}
-					\caption{Kontroler KM2}
+					\caption{Kontrolér KM3}
 					\label{fig:km3}
 				\end{figure}
 		\end{column}
@@ -186,10 +187,11 @@
 		\begin{column}{0.4\textwidth}
 			\begin{itemize}
 				\item Dvě revize
-				\item STM32F405
+				\item STM32F405 - 168~MHz, 1MB~FLASH, 192~KB RAM
 				\item TMC2100/TMC2226
+				\item CAN bus, I\textsuperscript{2}C, USB
 				\item Podpora pro enkodéry
-				\item 4-vrstva DPS
+				\item 4-vrstvá DPS
 				\item Návrh v KiCAD
 			\end{itemize}
 		\end{column}
@@ -199,7 +201,7 @@
 				\centering              % horizontální mezera
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/sm4_block_diagram}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Blokove schema menice}%
+				\caption{Blokové schéma měniče}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -214,7 +216,7 @@
 				\centering	              % horizontální mezera
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/pcb_rev2}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Blokove schema menice}%
+				\caption{Render kontroléru - druhá revize}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -224,7 +226,7 @@
 				\centering
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/rev2}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Blokove schema menice}%
+				\caption{Výsledná druhá revize kontroléru}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -249,7 +251,7 @@
 				\centering
 				\includegraphics[width=0.7\columnwidth]{../Thesis/obrazky/firmware_arch}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{Blokove schema menice}%
+				\caption{Architektura firmware}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -284,7 +286,7 @@
 				\centering
 				\includegraphics[width=0.8\columnwidth]{../Thesis/obrazky/tui}
 				%lze vložit popisek, ale povetšinou je to v prezentaci zbytečné
-				\caption{TUI ridici aplikace}%
+				\caption{TUI řídicí aplikace}%
 				\label{fig:sm4_block}
 			\end{figure}
 		\end{column}
@@ -319,7 +321,7 @@
 \begin{frame}
 	% nadpis snímku
 	\frametitle{Demonstrace 1 - lineární posuv}
-	\movie[width=14cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{sample-mp4-file.mp4}
+	\movie[width=12cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{rail.mp4}
 \end{frame}
 
 \begin{frame}
@@ -350,7 +352,7 @@
 \begin{frame}
 	% nadpis snímku
 	\frametitle{Demonstrace 2 - mapovací robot}
-	\movie[width=14cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{sample_640x360.avi}
+	\movie[width=12cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{mapbot.mp4}
 \end{frame}
 
 \begin{frame}
@@ -371,6 +373,7 @@
 		\item Lepší podpora konfigurace měniče.
 		\item Větší test coverage, integrační testy běžící v rámci CI.
 		\item Doprogramování plné podpory druhé revize DPS.
+		\item Třetí revize elektroniky.
 	\end{itemize}
 \end{frame}
 
@@ -468,14 +471,46 @@
 \frametitle{Otázky oponenta}
 	\emph{Jak jste navrhl implementované regulátory?}\\[2ex]
 
-	\movie[width=14cm,height=7cm,poster,autostart,repeat,showcontrols=true]{}{beer.avi}
+	\begin{itemize}
+		\item Rychlostní regulátor přemostěn kvůli absenci zpětné vazby. Rychlost je možné měřit podobně jako polohu, ale s nepoužitelně nízkým rozlišením.
+		\item Poziční regulátor byl navržen metodou pokus omyl.
+	\end{itemize}
+
+	\emph{Postup návrhu regulátoru?}\\[2ex]
+	\begin{itemize}
+		\item Identifikace soustavy - v tomto případě generátoru ramp, dynamika motoru je vůči této zanedbatelná.
+		\item Návrh pomocí klasických metod - kořenový hodograf, optimalizace pomocí kriteriálních funkcí.
+	\end{itemize}
 }
 
 \frame{
 	\frametitle{Otázky oponenta}
 	\emph{Jaké rychlostní profily jste mohl implementovat?}\\[2ex]
-	%
-	Již staří Římané\,\dots
+	\begin{columns}[T] 								% prostředí sloupce s umístěním nahoře
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item Trapézoidní,
+				\item S-funkce,
+				\item šestibodové.
+			\end{itemize}
+			\begin{figure}%
+				\centering
+				\includegraphics[width=0.9\columnwidth]{obrazky/trap}
+			\end{figure}
+			Informace převzaty z webu trinamic.com
+		\end{column}
+		%
+		\begin{column}{0.5\textwidth}		% druhý sloupec
+			\begin{figure}%
+				\centering
+				\includegraphics[width=0.7\columnwidth]{obrazky/s_shape}
+			\end{figure}
+			\begin{figure}%
+				\centering
+				\includegraphics[width=0.7\columnwidth]{obrazky/six_pt}
+			\end{figure}
+		\end{column}
+	\end{columns}
 }
 
 \end{document}
